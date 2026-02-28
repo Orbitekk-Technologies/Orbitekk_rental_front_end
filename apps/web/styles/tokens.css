@@ -1,0 +1,10 @@
+:root{
+  --brand: #7C3AED;         /* primary purple */
+  --brand-2: #6D28D9;       /* darker purple */
+  --bg: #ffffff;
+  --fg: #0b0b0b;
+  --muted: #6b7280;
+  --card: #f6f7fb;
+  --border: rgba(15, 23, 42, 0.12);
+  --radius: 18px;
+}

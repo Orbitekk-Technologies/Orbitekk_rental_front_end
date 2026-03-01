@@ -1,3 +1,5 @@
+import "./globals.css";
+
 export const metadata = {
   title: "ProNest",
   description: "Property rentals and leasing platform",
@@ -5,7 +7,7 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );

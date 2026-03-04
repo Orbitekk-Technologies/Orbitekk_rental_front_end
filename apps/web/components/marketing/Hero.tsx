@@ -1,87 +1,64 @@
+// apps/web/components/marketing/Hero.tsx
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { fadeUp, stagger } from "@/lib/motion/variants";
 
 export default function Hero() {
   return (
-    <section className="mx-auto max-w-6xl px-6 pt-12 pb-16">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-        {/* Left */}
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate="show"
-          className="max-w-xl"
-        >
+    <section id="home" className="pt-[110px] md:pt-[130px] pb-10 scroll-mt-28">
+      <div className="mx-auto max-w-6xl px-4">
+        {/* Text */}
+        <div className="text-center">
           <motion.h1
-            variants={fadeUp}
-            className="text-4xl md:text-5xl font-semibold leading-tight tracking-tight"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+            className="text-[28px] sm:text-[40px] md:text-[56px] font-extrabold tracking-[-0.02em] text-[var(--fg)]"
           >
-            THE PREMIER CHOICE <br />
-            IN REAL ESTATE <br />
-            SERVICES.
+            Crafting New Housing Vision
           </motion.h1>
 
           <motion.p
-            variants={fadeUp}
-            className="mt-4 text-[color:var(--muted)] leading-relaxed"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: "easeOut", delay: 0.08 }}
+            className="mt-3 text-sm sm:text-base text-[var(--muted)] max-w-2xl mx-auto"
           >
-            Managing leasing. Selling. Our experience and real estate management
-            app is designed to meet all your property needs.
+            Managing. Leasing. Selling. Our comprehensive living space management app is designed to meet all your
+            property needs.
           </motion.p>
+        </div>
 
-          {/* Search bar */}
-          <motion.div variants={fadeUp} className="mt-7">
-            <div className="flex flex-col md:flex-row gap-3 rounded-full border border-[color:var(--border)] bg-white p-2 shadow-sm">
-              {/* chip */}
-              <button className="px-4 py-2 rounded-full bg-[color:var(--brand)] text-white text-sm">
-                Buy
-              </button>
-
-              <button className="px-4 py-2 rounded-full border border-[color:var(--border)] text-sm text-[color:var(--muted)] hover:border-black hover:text-black transition">
-                Property Type
-              </button>
-
+        {/* Hero image + overlapping search */}
+        <div className="relative mt-10">
+          {/* Search bar (overlapping) */}
+          <div className="absolute left-1/2 -translate-x-1/2 -top-6 sm:-top-7 w-[92%] sm:w-[680px] z-10">
+            <div className="bg-white rounded-[18px] border border-[var(--border)] shadow-sm px-4 py-3 flex items-center gap-3">
               <input
-                className="flex-1 px-4 py-2 text-sm outline-none rounded-full"
-                placeholder="Search your dream destination"
+                type="text"
+                placeholder="Enter Your Address......"
+                className="w-full outline-none bg-transparent text-sm text-[var(--fg)] placeholder:text-[var(--muted)]"
               />
-
-              <button className="px-5 py-2 rounded-full bg-[color:var(--brand)] text-white text-sm hover:opacity-95 transition">
+              <button className="h-10 px-6 rounded-[14px] bg-[var(--brand)] text-white text-sm font-medium hover:opacity-90 transition">
                 Search
               </button>
             </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Right Hero Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 14, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ type: "spring", stiffness: 160, damping: 18, delay: 0.05 }}
-          className="relative"
-        >
-          <div className="rounded-[28px] border border-[color:var(--border)] bg-[color:var(--card)] p-4 shadow-sm">
-            <div className="rounded-[22px] overflow-hidden bg-white border border-[color:var(--border)]">
-              {/* Placeholder visual block (we’ll replace with actual image later) */}
-              <div className="h-[360px] md:h-[420px] bg-gradient-to-b from-gray-100 to-gray-200 flex items-center justify-center text-[color:var(--muted)] text-sm">
-                Hero Image / App Preview
-              </div>
-            </div>
-
-            {/* Floating badge */}
-            <motion.div
-              whileHover={{ y: -2 }}
-              className="absolute -bottom-4 left-6 rounded-2xl bg-white border border-[color:var(--border)] px-4 py-3 shadow-sm"
-            >
-              <div className="text-sm font-semibold">1.5k+</div>
-              <div className="text-xs text-[color:var(--muted)]">
-                Happy clients and transactions
-              </div>
-            </motion.div>
           </div>
-        </motion.div>
+
+          {/* Image card */}
+          <div className="rounded-[36px] overflow-hidden border border-[var(--border)] bg-white shadow-sm">
+            <div className="relative w-full h-[190px] sm:h-[260px] md:h-[320px]">
+              <Image
+                src="/images/hero.jpg"
+                alt="Hero"
+                fill
+                priority
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -1,53 +1,88 @@
+// apps/web/components/marketing/Navbar.tsx
 "use client";
 
-import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { motion, useMotionValueEvent, useScroll } from "framer-motion";
+
+type NavItem = { label: string; href: string };
 
 export default function Navbar() {
-  return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-[color:var(--border)]">
-      <div className="mx-auto max-w-6xl px-6 h-16 flex items-center">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="text-xl font-semibold tracking-tight text-[color:var(--brand)]">
-            ProNest
-          </div>
-        </div>
+  const items: NavItem[] = useMemo(
+    () => [
+      { label: "About Us", href: "#about" },
+      { label: "Properties", href: "#properties" },
+      { label: "Services", href: "#services" },
+      { label: "Contact Us", href: "#contact" },
+    ],
+    []
+  );
 
-        {/* Links */}
-        <nav className="ml-auto hidden md:flex items-center gap-7 text-sm text-[color:var(--muted)]">
-          {["About Us", "Properties", "Services", "Contact Us"].map((item) => (
-            <motion.a
-              key={item}
-              href="#"
-              whileHover={{ y: -1 }}
-              className="hover:text-black transition-colors"
-            >
-              {item}
-            </motion.a>
+  const { scrollY } = useScroll();
+  const [hidden, setHidden] = useState(false);
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const prev = scrollY.getPrevious() ?? 0;
+
+    // Always show near top
+    if (latest < 20) {
+      setHidden(false);
+      return;
+    }
+
+    // Hide on scroll down, show on scroll up
+    if (latest > prev && latest > 80) setHidden(true);
+    if (latest < prev) setHidden(false);
+  });
+
+  return (
+    <motion.header
+      initial={false}
+      animate={{ y: hidden ? -88 : 0 }}
+      transition={{ type: "spring", stiffness: 260, damping: 30 }}
+      className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur border-b border-[var(--border)] shadow-sm"
+    >
+      <div className="mx-auto max-w-6xl px-4 h-[72px] flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/images/logo.svg" alt="ProNest" width={120} height={28} priority />
+        </Link>
+
+        {/* Desktop links */}
+        <nav className="hidden md:flex items-center gap-8 text-sm text-[var(--muted)]">
+          {items.map((it) => (
+            <a key={it.href} href={it.href} className="hover:text-[var(--fg)] transition-colors">
+              {it.label}
+            </a>
           ))}
         </nav>
 
-        {/* Auth buttons */}
-        <div className="ml-auto md:ml-6 flex items-center gap-3">
-          <motion.a
+        {/* Desktop actions */}
+        <div className="hidden md:flex items-center gap-2">
+          <Link
             href="/auth/login"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-4 py-2 text-sm rounded-full border border-[color:var(--border)] hover:border-black transition"
+            className="h-10 px-4 rounded-full border border-[var(--border)] text-sm hover:bg-black/5 transition"
           >
             Login
-          </motion.a>
-
-          <motion.a
+          </Link>
+          <Link
             href="/auth/register"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-4 py-2 text-sm rounded-full bg-[color:var(--brand)] text-white hover:opacity-95 transition"
+            className="h-10 px-4 rounded-full bg-[var(--brand)] text-white text-sm hover:opacity-90 transition"
           >
             Register
-          </motion.a>
+          </Link>
         </div>
+
+        {/* Mobile menu */}
+        <button
+          type="button"
+          aria-label="Open menu"
+          className="md:hidden h-10 w-10 grid place-items-center rounded-full border border-[var(--border)] hover:bg-black/5 transition"
+        >
+          <span className="material-symbols-outlined text-[22px]">menu</span>
+        </button>
       </div>
-    </header>
+    </motion.header>
   );
 }

@@ -19,4 +19,7 @@
 
   --radius-xl: 24px;
   --radius-2xl: 32px;
+
+  --container-max: 1280px;
+  --header-height: 80px;
 }

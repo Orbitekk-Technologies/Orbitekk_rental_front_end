@@ -44,7 +44,7 @@ export default function AboutServices() {
     <section className="rounded-[28px] bg-white/35 p-4 shadow-[var(--shadow-card)] sm:p-5 lg:p-6">
       <div className="mx-auto max-w-[380px] text-center">
         <h2 className="text-[32px] font-semibold leading-[1.08] tracking-[-0.03em] text-[var(--fg)] sm:text-[40px] lg:text-[46px]">
-          Pronest Management Services
+          Our Services
         </h2>
       </div>
 

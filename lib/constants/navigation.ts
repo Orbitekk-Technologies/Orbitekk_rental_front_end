@@ -7,7 +7,6 @@ export type NavItem = {
 export const marketingNavItems: NavItem[] = [
   { label: "About Us", href: "/about" },
   { label: "Contact Us", href: "/contact" },
-  { label: "Favourites", href: "/favourites" },
   { label: "Listings", href: "/listings" },
 ];
 

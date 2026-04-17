@@ -21,3 +21,4 @@ pnpm-debug.log*
 
 # coverage
 coverage/
+.early.coverage

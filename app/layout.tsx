@@ -13,7 +13,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "ProNest",
+  title: "ShaGrih",
   description: "Crafting New Housing Vision",
 };
 

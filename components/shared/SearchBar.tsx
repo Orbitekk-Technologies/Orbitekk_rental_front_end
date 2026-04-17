@@ -24,7 +24,7 @@ export default function SearchBar({
   return (
     <div
       className={cn(
-        "w-full rounded-[28px] bg-white p-3 shadow-[var(--shadow-soft)]",
+        "w-full rounded-[40px] bg-white p-3 shadow-[var(--shadow-soft)]",
         compact && "rounded-full p-2",
         className
       )}

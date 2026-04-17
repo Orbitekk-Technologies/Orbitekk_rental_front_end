@@ -1,6 +1,6 @@
 // lib/constants/site.ts
 export const siteConfig = {
-  name: "ProNest",
+  name: "ShaGrih",
   tagline: "Crafting New Housing Vision",
   description:
     "A modern rental property platform for tenants, agents, and dynamic listings.",

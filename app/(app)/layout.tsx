@@ -2,7 +2,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       <header className="h-16 border-b border-[color:var(--border)] flex items-center px-6 bg-black text-white">
-        <div className="font-semibold">ProNest</div>
+        <div className="font-semibold">ShaGrih</div>
         <nav className="ml-auto flex gap-5 text-sm text-white/70">
           <a href="/dashboard" className="hover:text-white">Dashboard</a>
           <a href="/listings" className="hover:text-white">Listings</a>

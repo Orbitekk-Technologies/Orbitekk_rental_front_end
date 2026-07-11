@@ -7,6 +7,7 @@ import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import AppContainer from "@/components/shared/AppContainer";
 import MobileDrawer from "@/components/navbar/MobileDrawer";
 import BrandLogo from "@/components/shared/BrandLogo";
+import { isAuthEnabled } from "@/lib/constants/navigation";
 
 type MobileNavbarProps = {
   hidden?: boolean;
@@ -35,12 +36,21 @@ export default function MobileNavbar({ hidden = false }: MobileNavbarProps) {
               <BrandLogo variant="badge" priority />
             </div>
 
-            <Link
-              href="/login"
-              className="text-[15px] font-medium text-[var(--brand)] transition-colors hover:text-[var(--brand-strong)]"
-            >
-              Login
-            </Link>
+            {isAuthEnabled ? (
+              <Link
+                href="/login"
+                className="text-[15px] font-medium text-[var(--brand)] transition-colors hover:text-[var(--brand-strong)]"
+              >
+                Login
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="text-[15px] font-medium text-[var(--brand)] transition-colors hover:text-[var(--brand-strong)]"
+              >
+                Login
+              </button>
+            )}
           </div>
         </AppContainer>
       </header>

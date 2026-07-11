@@ -2,6 +2,7 @@
 export const contactConfig = {
   officeName: "ProNest Office",
   addressLine1: "17350 TX-249 #220",
+  addressLine2: "",
   city: "Houston",
   state: "TX",
   zipCode: "77064",

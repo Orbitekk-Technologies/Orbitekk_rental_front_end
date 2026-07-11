@@ -11,7 +11,7 @@ export default function AboutPage() {
         {/* Heading */}
         <section className="mx-auto max-w-[900px] text-center">
           <h1 className="text-[34px] font-semibold tracking-[-0.04em] text-[var(--fg)] sm:text-[46px] lg:text-[54px]">
-            About ProNest
+            About ShaGriha
           </h1>
 
           <p className="mx-auto mt-3 max-w-[60ch] text-sm leading-6 text-[var(--muted)] sm:text-[15px]">

@@ -13,7 +13,7 @@ export default function HeroSection() {
             Find your living space without a hustle.
           </h1>
           <div className="mt-6 w-full max-w-[920px] sm:mt-8 lg:mt-10">
-            <SearchBar placeholder="Enter Your Address......" />
+            <SearchBar />
           </div>
         </div>
 

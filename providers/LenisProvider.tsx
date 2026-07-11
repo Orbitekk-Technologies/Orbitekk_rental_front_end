@@ -1,4 +1,3 @@
-// apps/web/providers/LenisProvider.tsx
 "use client";
 
 import { ReactLenis } from "lenis/react";

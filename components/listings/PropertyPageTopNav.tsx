@@ -5,7 +5,7 @@ import ChatBubbleOutlineRoundedIcon from "@mui/icons-material/ChatBubbleOutlineR
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
 import AppContainer from "@/components/shared/AppContainer";
 import BrandLogo from "@/components/shared/BrandLogo";
-import { marketingNavItems } from "@/lib/constants/navigation";
+import { isAuthEnabled, marketingNavItems } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils/cn";
 import { usePathname } from "next/navigation";
 
@@ -29,6 +29,18 @@ export default function PropertyPageTopNav({
           <nav className="hidden items-center gap-10 lg:flex">
             {marketingNavItems.map((item) => {
               const active = pathname === item.href;
+
+              if (item.disabled) {
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    className="text-[14px] font-medium text-[var(--fg)] transition-colors hover:text-[var(--brand)]"
+                  >
+                    {item.label}
+                  </button>
+                );
+              }
 
               return (
                 <Link
@@ -70,13 +82,20 @@ export default function PropertyPageTopNav({
                 </span>
               </div>
             </div>
-          ) : (
+          ) : isAuthEnabled ? (
             <Link
               href="/login"
               className="text-[14px] font-medium text-[var(--brand)] transition-colors hover:text-[var(--brand-strong)]"
             >
               Login
             </Link>
+          ) : (
+            <button
+              type="button"
+              className="text-[14px] font-medium text-[var(--brand)] transition-colors hover:text-[var(--brand-strong)]"
+            >
+              Login
+            </button>
           )}
         </div>
       </AppContainer>

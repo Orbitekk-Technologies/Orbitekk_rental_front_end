@@ -46,7 +46,7 @@ export default function ContactFormCard() {
       </div>
 
       <div className="mt-7 lg:mt-8">
-        <PrimaryButton className="h-14 rounded-full border border-[var(--brand)] bg-transparent px-10 text-[32px] font-semibold text-[var(--brand)] shadow-none hover:bg-[var(--brand-soft)] hover:text-[var(--brand-strong)] sm:text-[18px] lg:min-w-[250px]">
+        <PrimaryButton className="h-14 rounded-full border border-[var(--brand)] bg-transparent px-10 text-black text-[32px] font-semibold text-[var(--brand)] shadow-none hover:bg-[var(--brand-soft)] hover:text-[var(--white)] sm:text-[18px] lg:min-w-[250px]">
           Send Message
         </PrimaryButton>
       </div>

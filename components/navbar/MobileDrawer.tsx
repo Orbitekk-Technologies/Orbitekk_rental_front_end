@@ -59,16 +59,26 @@ export default function MobileDrawer({
                 </p>
 
                 <nav className="flex flex-col gap-6">
-                  {marketingNavItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      onClick={onClose}
-                      className="text-[17px] font-medium text-[var(--fg)] transition-colors hover:text-[var(--brand)]"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
+                  {marketingNavItems.map((item) =>
+                    item.disabled ? (
+                      <button
+                        key={item.label}
+                        type="button"
+                        className="w-fit text-[17px] font-medium text-[var(--fg)] transition-colors hover:text-[var(--brand)]"
+                      >
+                        {item.label}
+                      </button>
+                    ) : (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        onClick={onClose}
+                        className="text-[17px] font-medium text-[var(--fg)] transition-colors hover:text-[var(--brand)]"
+                      >
+                        {item.label}
+                      </Link>
+                    )
+                  )}
                 </nav>
               </div>
 

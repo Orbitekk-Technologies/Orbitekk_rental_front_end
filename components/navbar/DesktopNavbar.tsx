@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import AppContainer from "@/components/shared/AppContainer";
 import PrimaryButton from "@/components/shared/PrimaryButton";
 import BrandLogo from "@/components/shared/BrandLogo";
-import { marketingNavItems } from "@/lib/constants/navigation";
+import { isAuthEnabled, marketingNavItems } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils/cn";
 
 export default function DesktopNavbar() {
@@ -20,6 +20,19 @@ export default function DesktopNavbar() {
           <nav className="flex items-center gap-10">
             {marketingNavItems.map((item) => {
               const active = pathname === item.href;
+
+              if (item.disabled) {
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    className="text-base font-medium text-[var(--fg)] transition-colors hover:text-[var(--brand)]"
+                  >
+                    {item.label}
+                  </button>
+                );
+              }
+
               return (
                 <Link
                   key={item.label}
@@ -36,21 +49,40 @@ export default function DesktopNavbar() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className={cn(
-                "text-base font-medium transition-colors hover:text-[var(--brand-strong)]",
-                pathname === "/login" ? "text-[var(--brand)]" : "text-[var(--fg)]"
-              )}
-            >
-              Login
-            </Link>
+            {isAuthEnabled ? (
+              <>
+                <Link
+                  href="/login"
+                  className={cn(
+                    "text-base font-medium transition-colors hover:text-[var(--brand-strong)]",
+                    pathname === "/login" ? "text-[var(--brand)]" : "text-[var(--fg)]"
+                  )}
+                >
+                  Login
+                </Link>
 
-            <Link href="/register">
-              <PrimaryButton className="h-12 min-w-[132px] px-7">
-                Signup
-              </PrimaryButton>
-            </Link>
+                <Link href="/register">
+                  <PrimaryButton className="h-12 min-w-[132px] px-7">
+                    Signup
+                  </PrimaryButton>
+                </Link>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="text-base font-medium text-[var(--fg)] transition-colors hover:text-[var(--brand-strong)]"
+                >
+                  Login
+                </button>
+                <button
+                  type="button"
+                  className="h-12 min-w-[132px] rounded-full bg-[var(--brand)] px-7 text-base font-semibold text-white transition-colors hover:bg-[var(--brand-strong)]"
+                >
+                  Signup
+                </button>
+              </>
+            )}
           </div>
         </div>
       </AppContainer>

@@ -2,8 +2,9 @@
 "use client";
 
 import Link from "next/link";
-import SearchBar from "@/components/shared/SearchBar";
 import AppContainer from "@/components/shared/AppContainer";
+import SearchBar from "@/components/shared/SearchBar";
+import { isAuthEnabled } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils/cn";
 
 type MobileScrollHeaderProps = {
@@ -24,19 +25,24 @@ export default function MobileScrollHeader({
         <AppContainer>
           <div className="pointer-events-auto flex items-center gap-3">
             <div className="min-w-0 flex-1">
-              <SearchBar
-                compact
-                placeholder="Enter Your Address......"
-                buttonLabel="Search"
-              />
+              <SearchBar compact />
             </div>
 
-            <Link
-              href="/login"
-              className="shrink-0 text-[15px] font-medium text-[var(--brand)]"
-            >
-              Login
-            </Link>
+            {isAuthEnabled ? (
+              <Link
+                href="/login"
+                className="shrink-0 text-[15px] font-medium text-[var(--brand)]"
+              >
+                Login
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="shrink-0 text-[15px] font-medium text-[var(--brand)]"
+              >
+                Login
+              </button>
+            )}
           </div>
         </AppContainer>
       </div>

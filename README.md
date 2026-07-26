@@ -1,44 +1,36 @@
-# 🏡 Orbitekk - ProNest – Rental Property Platform (MVP)
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-ProNest is a full-stack rental property platform that allows users to search, list, and interact with rental properties seamlessly.
+## Getting Started
 
-This project is part of the Orbitekk ecosystem and is designed as a scalable MVP with real-world architecture and future AI integration in mind.
+First, run the development server:
 
----
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-## 🚀 Overview
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-ProNest enables:
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-- 🔍 Property search and browsing
-- 🏠 Dynamic rental listings
-- 👤 User authentication (Tenant / Agent roles)
-- 🧑‍💼 Agent dashboard for property creation
-- 🖼️ Property image uploads
-- 💬 Real-time messaging between tenants and agents
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-The MVP is designed to be **budget-friendly**, **scalable**, and **production-ready**.
+## Learn More
 
----
+To learn more about Next.js, take a look at the following resources:
 
-## 🛠️ Tech Stack
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-### Frontend
-- Next.js (React Framework)
-- TypeScript
-- Tailwind CSS / Material UI
-- React Query
-- Axios
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-### Backend
-- Spring Boot
-- REST APIs
-- Spring Security (JWT Authentication)
-- WebSockets (Real-time chat)
+## Deploy on Vercel
 
-### Database
-- PostgreSQL  
-- *(Future: PostGIS for geo-based queries)*
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-### Storage (MVP)
-- Local server filesystem  
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

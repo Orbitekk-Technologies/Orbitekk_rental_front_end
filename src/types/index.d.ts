@@ -1,5 +1,4 @@
 import { LucideIcon } from "lucide-react";
-import { AuthUser } from "aws-amplify/auth";
 import { Manager, Tenant, Property, Application } from "./prismaTypes";
 import { MotionProps as OriginalMotionProps } from "framer-motion";
 
@@ -24,6 +23,7 @@ declare global {
     Parking = "Parking",
     PetsAllowed = "PetsAllowed",
     WiFi = "WiFi",
+    SmokeFree = "SmokeFree",
   }
 
   enum HighlightEnum {
@@ -45,12 +45,9 @@ declare global {
   }
 
   enum PropertyTypeEnum {
-    Rooms = "Rooms",
-    Tinyhouse = "Tinyhouse",
     Apartment = "Apartment",
-    Villa = "Villa",
     Townhouse = "Townhouse",
-    Cottage = "Cottage",
+    SingleFamilyHome = "SingleFamilyHome",
   }
 
   interface SidebarLinkProps {
@@ -131,9 +128,12 @@ declare global {
   }
 
   interface User {
-    cognitoInfo: AuthUser;
+    authInfo: {
+      userId: string;
+      username?: string;
+    };
     userInfo: Tenant | Manager;
-    userRole: JsonObject | JsonPrimitive | JsonArray;
+    userRole: "manager" | "tenant";
   }
 }
 

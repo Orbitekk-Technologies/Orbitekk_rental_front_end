@@ -1,47 +1,137 @@
-import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
 import {
-  Building2,
-  ClipboardList,
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "./ui/sidebar";
+import {
+  Building,
+  FileText,
   Heart,
   Home,
-  Plus,
+  Menu,
   Settings,
+  X,
 } from "lucide-react";
+import { NAVBAR_HEIGHT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
-const managerLinks = [
-  { href: "/managers/properties", icon: Building2, label: "Properties" },
-  { href: "/managers/applications", icon: ClipboardList, label: "Applications" },
-  { href: "/managers/newproperty", icon: Plus, label: "New Property" },
-  { href: "/managers/settings", icon: Settings, label: "Settings" },
-];
+const AppSidebar = ({ userType }: AppSidebarProps) => {
+  const pathname = usePathname();
+  const { toggleSidebar, open } = useSidebar();
 
-const tenantLinks = [
-  { href: "/tenants/residences", icon: Home, label: "Residences" },
-  { href: "/tenants/favourites", icon: Heart, label: "Favorites" },
-  { href: "/tenants/applications", icon: ClipboardList, label: "Applications" },
-  { href: "/tenants/settings", icon: Settings, label: "Settings" },
-];
-
-export default function AppSidebar({ userType }: AppSidebarProps) {
-  const links = userType === "manager" ? managerLinks : tenantLinks;
+  const navLinks =
+    userType === "manager"
+      ? [
+          { icon: Building, label: "Properties", href: "/managers/properties" },
+          {
+            icon: FileText,
+            label: "Applications",
+            href: "/managers/applications",
+          },
+          { icon: Settings, label: "Settings", href: "/managers/settings" },
+        ]
+      : [
+          { icon: Heart, label: "Favorites", href: "/tenants/favorites" },
+          {
+            icon: FileText,
+            label: "Applications",
+            href: "/tenants/applications",
+          },
+          { icon: Home, label: "Residences", href: "/tenants/residences" },
+          { icon: Settings, label: "Settings", href: "/tenants/settings" },
+        ];
 
   return (
-    <aside className="min-h-[calc(100vh-50px)] w-64 border-r border-primary-200 bg-white p-4">
-      <nav className="space-y-1">
-        {links.map(({ href, icon: Icon, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm text-primary-600 hover:bg-primary-100 hover:text-primary-900"
-            )}
-          >
-            <Icon className="h-4 w-4" />
-            {label}
-          </Link>
-        ))}
-      </nav>
-    </aside>
+    <Sidebar
+      collapsible="icon"
+      className="fixed left-0 bg-white shadow-lg"
+      style={{
+        top: `${NAVBAR_HEIGHT}px`,
+        height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+      }}
+    >
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <div
+              className={cn(
+                "flex min-h-[56px] w-full items-center pt-3 mb-3",
+                open ? "justify-between px-6" : "justify-center"
+              )}
+            >
+              {open ? (
+                <>
+                  <h1 className="text-xl font-bold text-gray-800">
+                    {userType === "manager" ? "Manager View" : "Renter View"}
+                  </h1>
+                  <button
+                    className="hover:bg-gray-100 p-2 rounded-md"
+                    onClick={() => toggleSidebar()}
+                  >
+                    <X className="h-6 w-6 text-gray-600" />
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="hover:bg-gray-100 p-2 rounded-md"
+                  onClick={() => toggleSidebar()}
+                >
+                  <Menu className="h-6 w-6 text-gray-600" />
+                </button>
+              )}
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarMenu>
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+
+            return (
+              <SidebarMenuItem key={link.href}>
+                <SidebarMenuButton
+                  asChild
+                  className={cn(
+                    "flex items-center px-7 py-7",
+                    isActive
+                      ? "bg-gray-100"
+                      : "text-gray-600 hover:bg-gray-100",
+                    open ? "text-blue-600" : "ml-[5px]"
+                  )}
+                >
+                  <Link href={link.href} className="w-full" scroll={false}>
+                    <div className="flex items-center gap-3">
+                      <link.icon
+                        className={`h-5 w-5 ${
+                          isActive ? "text-blue-600" : "text-gray-600"
+                        }`}
+                      />
+                      <span
+                        className={`font-medium ${
+                          isActive ? "text-blue-600" : "text-gray-600"
+                        }`}
+                      >
+                        {link.label}
+                      </span>
+                    </div>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarContent>
+    </Sidebar>
   );
-}
+};
+
+export default AppSidebar;

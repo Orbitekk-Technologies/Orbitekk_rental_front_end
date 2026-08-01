@@ -17,10 +17,7 @@ import {
   Mountain,
   VolumeX,
   Home,
-  Warehouse,
   Building,
-  Castle,
-  Trees,
   LucideIcon,
 } from "lucide-react";
 
@@ -38,6 +35,7 @@ export enum AmenityEnum {
   Parking = "Parking",
   PetsAllowed = "PetsAllowed",
   WiFi = "WiFi",
+  SmokeFree = "SmokeFree",
 }
 
 export const AmenityIcons: Record<AmenityEnum, LucideIcon> = {
@@ -54,6 +52,7 @@ export const AmenityIcons: Record<AmenityEnum, LucideIcon> = {
   Parking: Car,
   PetsAllowed: PawPrint,
   WiFi: Wifi,
+  SmokeFree: Cigarette,
 };
 
 export enum HighlightEnum {
@@ -93,21 +92,16 @@ export const HighlightIcons: Record<HighlightEnum, LucideIcon> = {
 };
 
 export enum PropertyTypeEnum {
-  Rooms = "Rooms",
-  Tinyhouse = "Tinyhouse",
   Apartment = "Apartment",
-  Villa = "Villa",
   Townhouse = "Townhouse",
-  Cottage = "Cottage",
+  SingleFamilyHome = "SingleFamilyHome",
+  // Temporarily hidden: Rooms, Tinyhouse, Villa, and Cottage.
 }
 
 export const PropertyTypeIcons: Record<PropertyTypeEnum, LucideIcon> = {
-  Rooms: Home,
-  Tinyhouse: Warehouse,
   Apartment: Building,
-  Villa: Castle,
   Townhouse: Home,
-  Cottage: Trees,
+  SingleFamilyHome: Home,
 };
 
 // Add this constant at the end of the file

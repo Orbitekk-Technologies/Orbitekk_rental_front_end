@@ -1,4 +1,9 @@
-import { cleanParams, createNewUserInDatabase, withToast } from "@/lib/utils";
+import { cleanParams, withToast } from "@/lib/utils";
+import { getAccessToken } from "@/lib/authToken";
+import {
+  FRONTEND_DEMO_MODE,
+  getDemoApiData,
+} from "@/lib/demoData";
 import {
   Application,
   Lease,
@@ -7,22 +12,43 @@ import {
   Property,
   Tenant,
 } from "@/types/prismaTypes";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
+import {
+  type BaseQueryFn,
+  type FetchArgs,
+  type FetchBaseQueryError,
+  createApi,
+  fetchBaseQuery,
+} from "@reduxjs/toolkit/query/react";
 import { FiltersState } from ".";
 
-export const api = createApi({
-  baseQuery: fetchBaseQuery({
+const springBootBaseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-    prepareHeaders: async (headers) => {
-      const session = await fetchAuthSession();
-      const { idToken } = session.tokens ?? {};
-      if (idToken) {
-        headers.set("Authorization", `Bearer ${idToken}`);
+    prepareHeaders: (headers) => {
+      const accessToken = getAccessToken();
+      if (accessToken) {
+        headers.set("Authorization", `Bearer ${accessToken}`);
       }
       return headers;
     },
-  }),
+  });
+
+const baseQuery: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, apiContext, extraOptions) => {
+  if (FRONTEND_DEMO_MODE) {
+    const request = typeof args === "string" ? { url: args } : args;
+    return {
+      data: getDemoApiData(request.url, request.method?.toUpperCase()),
+    };
+  }
+
+  return springBootBaseQuery(args, apiContext, extraOptions);
+};
+
+export const api = createApi({
+  baseQuery,
   reducerPath: "api",
   tagTypes: [
     "Managers",
@@ -35,48 +61,7 @@ export const api = createApi({
   ],
   endpoints: (build) => ({
     getAuthUser: build.query<User, void>({
-      queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
-        try {
-          const session = await fetchAuthSession();
-          const { idToken } = session.tokens ?? {};
-          const user = await getCurrentUser();
-          const userRole = idToken?.payload["custom:role"] as string;
-
-          if (userRole !== "manager" && userRole !== "tenant") {
-            throw new Error("Your Cognito account is missing a valid custom:role");
-          }
-
-          const endpoint =
-            userRole === "manager"
-              ? `/managers/${user.userId}`
-              : `/tenants/${user.userId}`;
-
-          let userDetailsResponse = await fetchWithBQ(endpoint);
-
-          // if user doesn't exist, create new user
-          if (
-            userDetailsResponse.error &&
-            userDetailsResponse.error.status === 404
-          ) {
-            userDetailsResponse = await createNewUserInDatabase(
-              user,
-              idToken,
-              userRole,
-              fetchWithBQ
-            );
-          }
-
-          return {
-            data: {
-              cognitoInfo: { ...user },
-              userInfo: userDetailsResponse.data as Tenant | Manager,
-              userRole,
-            },
-          };
-        } catch (error: any) {
-          return { error: error.message || "Could not fetch user data" };
-        }
-      },
+      query: () => "auth/me",
     }),
 
     // property related endpoints
@@ -129,7 +114,7 @@ export const api = createApi({
 
     // tenant related endpoints
     getTenant: build.query<Tenant, string>({
-      query: (cognitoId) => `tenants/${cognitoId}`,
+      query: (userId) => `tenants/${userId}`,
       providesTags: (result) => [{ type: "Tenants", id: result?.id }],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {
@@ -139,7 +124,7 @@ export const api = createApi({
     }),
 
     getCurrentResidences: build.query<Property[], string>({
-      query: (cognitoId) => `tenants/${cognitoId}/current-residences`,
+      query: (userId) => `tenants/${userId}/current-residences`,
       providesTags: (result) =>
         result
           ? [
@@ -156,10 +141,10 @@ export const api = createApi({
 
     updateTenantSettings: build.mutation<
       Tenant,
-      { cognitoId: string } & Partial<Tenant>
+      { userId: string } & Partial<Tenant>
     >({
-      query: ({ cognitoId, ...updatedTenant }) => ({
-        url: `tenants/${cognitoId}`,
+      query: ({ userId, ...updatedTenant }) => ({
+        url: `tenants/${userId}`,
         method: "PUT",
         body: updatedTenant,
       }),
@@ -174,10 +159,10 @@ export const api = createApi({
 
     addFavoriteProperty: build.mutation<
       Tenant,
-      { cognitoId: string; propertyId: number }
+      { userId: string; propertyId: number }
     >({
-      query: ({ cognitoId, propertyId }) => ({
-        url: `tenants/${cognitoId}/favorites/${propertyId}`,
+      query: ({ userId, propertyId }) => ({
+        url: `tenants/${userId}/favorites/${propertyId}`,
         method: "POST",
       }),
       invalidatesTags: (result) => [
@@ -194,10 +179,10 @@ export const api = createApi({
 
     removeFavoriteProperty: build.mutation<
       Tenant,
-      { cognitoId: string; propertyId: number }
+      { userId: string; propertyId: number }
     >({
-      query: ({ cognitoId, propertyId }) => ({
-        url: `tenants/${cognitoId}/favorites/${propertyId}`,
+      query: ({ userId, propertyId }) => ({
+        url: `tenants/${userId}/favorites/${propertyId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result) => [
@@ -214,7 +199,7 @@ export const api = createApi({
 
     // manager related endpoints
     getManagerProperties: build.query<Property[], string>({
-      query: (cognitoId) => `managers/${cognitoId}/properties`,
+      query: (userId) => `managers/${userId}/properties`,
       providesTags: (result) =>
         result
           ? [
@@ -231,10 +216,10 @@ export const api = createApi({
 
     updateManagerSettings: build.mutation<
       Manager,
-      { cognitoId: string } & Partial<Manager>
+      { userId: string } & Partial<Manager>
     >({
-      query: ({ cognitoId, ...updatedManager }) => ({
-        url: `managers/${cognitoId}`,
+      query: ({ userId, ...updatedManager }) => ({
+        url: `managers/${userId}`,
         method: "PUT",
         body: updatedManager,
       }),
@@ -261,6 +246,28 @@ export const api = createApi({
         await withToast(queryFulfilled, {
           success: "Property created successfully!",
           error: "Failed to create property.",
+        });
+      },
+    }),
+
+    updateProperty: build.mutation<
+      Property,
+      { id: number; property: FormData }
+    >({
+      query: ({ id, property }) => ({
+        url: `properties/${id}`,
+        method: "PUT",
+        body: property,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Properties", id: "LIST" },
+        { type: "Properties", id },
+        { type: "PropertyDetails", id },
+      ],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Property updated successfully!",
+          error: "Failed to update property.",
         });
       },
     }),
@@ -351,6 +358,7 @@ export const {
   useGetCurrentResidencesQuery,
   useGetManagerPropertiesQuery,
   useCreatePropertyMutation,
+  useUpdatePropertyMutation,
   useGetTenantQuery,
   useAddFavoritePropertyMutation,
   useRemoveFavoritePropertyMutation,

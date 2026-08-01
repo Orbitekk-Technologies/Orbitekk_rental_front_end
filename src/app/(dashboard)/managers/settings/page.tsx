@@ -22,7 +22,7 @@ const ManagerSettings = () => {
 
   const handleSubmit = async (data: typeof initialData) => {
     await updateManager({
-      cognitoId: authUser.cognitoInfo.userId,
+      userId: authUser.authInfo.userId,
       ...data,
     });
   };

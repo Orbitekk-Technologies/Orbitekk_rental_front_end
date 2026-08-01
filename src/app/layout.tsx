@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import "@aws-amplify/ui-react/styles.css";
 import "./globals.css";
 import Providers from "./providers";
 import { Toaster } from "@/components/ui/sonner";

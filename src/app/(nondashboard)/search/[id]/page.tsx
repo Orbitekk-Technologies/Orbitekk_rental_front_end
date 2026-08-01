@@ -9,13 +9,13 @@ import PropertyDetails from "./PropertyDetails";
 import PropertyLocation from "./PropertyLocation";
 import ContactWidget from "./ContactWidget";
 import ApplicationModal from "./ApplicationModal";
-import { useAuthenticator } from "@aws-amplify/ui-react";
+import { useAuth } from "@/app/(auth)/authProvider";
 
 const SingleListing = () => {
   const { id } = useParams();
   const propertyId = Number(id);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { user } = useAuth();
   const { data: authUser } = useGetAuthUserQuery(undefined, { skip: !user });
 
   return (

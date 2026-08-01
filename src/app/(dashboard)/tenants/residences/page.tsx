@@ -13,9 +13,9 @@ import React from "react";
 const Residences = () => {
   const { data: authUser } = useGetAuthUserQuery();
   const { data: tenant } = useGetTenantQuery(
-    authUser?.cognitoInfo?.userId || "",
+    authUser?.authInfo?.userId || "",
     {
-      skip: !authUser?.cognitoInfo?.userId,
+      skip: !authUser?.authInfo?.userId,
     }
   );
 
@@ -23,8 +23,8 @@ const Residences = () => {
     data: currentResidences,
     isLoading,
     error,
-  } = useGetCurrentResidencesQuery(authUser?.cognitoInfo?.userId || "", {
-    skip: !authUser?.cognitoInfo?.userId,
+  } = useGetCurrentResidencesQuery(authUser?.authInfo?.userId || "", {
+    skip: !authUser?.authInfo?.userId,
   });
 
   if (isLoading) return <Loading />;

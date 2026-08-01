@@ -24,7 +24,7 @@ const Applications = () => {
   } = useGetApplicationsQuery(
     undefined,
     {
-      skip: !authUser?.cognitoInfo?.userId,
+      skip: !authUser?.authInfo?.userId,
     }
   );
   const [updateApplicationStatus] = useUpdateApplicationStatusMutation();
@@ -42,24 +42,39 @@ const Applications = () => {
   });
 
   return (
-    <div className="dashboard-container">
-      <Header
-        title="Applications"
-        subtitle="View and manage applications for your properties"
-      />
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full my-5"
-      >
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="approved">Approved</TabsTrigger>
-          <TabsTrigger value="denied">Denied</TabsTrigger>
-        </TabsList>
-        {["all", "pending", "approved", "denied"].map((tab) => (
-          <TabsContent key={tab} value={tab} className="mt-5 w-full">
+    <div className="dashboard-container min-w-0">
+      <div className="mx-auto w-full max-w-6xl">
+        <Header
+          title="Applications"
+          subtitle="View and manage applications for your properties"
+        />
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="my-5 w-full min-w-0"
+        >
+          <div className="w-full">
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
+              <TabsTrigger className="min-h-9" value="all">
+                All
+              </TabsTrigger>
+              <TabsTrigger className="min-h-9" value="pending">
+                Pending
+              </TabsTrigger>
+              <TabsTrigger className="min-h-9" value="approved">
+                Approved
+              </TabsTrigger>
+              <TabsTrigger className="min-h-9" value="denied">
+                Denied
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          {["all", "pending", "approved", "denied"].map((tab) => (
+            <TabsContent
+              key={tab}
+              value={tab}
+              className="mt-5 w-full space-y-4"
+            >
             {filteredApplications
               .filter(
                 (application) =>
@@ -71,27 +86,27 @@ const Applications = () => {
                   application={application}
                   userType="manager"
                 >
-                  <div className="flex justify-between gap-5 w-full pb-4 px-4">
+                  <div className="flex w-full min-w-0 flex-col gap-4 sm:px-4 sm:pb-4 lg:flex-row lg:items-stretch lg:justify-between lg:gap-5">
                     {/* Colored Section Status */}
                     <div
-                      className={`p-4 text-green-700 grow ${
+                      className={`min-w-0 grow rounded-md p-4 ${
                         application.status === "Approved"
-                          ? "bg-green-100"
+                          ? "bg-green-100 text-green-700"
                           : application.status === "Denied"
-                          ? "bg-red-100"
-                          : "bg-yellow-100"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
                       }`}
                     >
-                      <div className="flex flex-wrap items-center">
-                        <File className="w-5 h-5 mr-2 flex-shrink-0" />
-                        <span className="mr-2">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <File className="h-5 w-5 shrink-0" />
+                        <span>
                           Application submitted on{" "}
                           {new Date(
                             application.applicationDate
                           ).toLocaleDateString()}
                           .
                         </span>
-                        <CircleCheckBig className="w-5 h-5 mr-2 flex-shrink-0" />
+                        <CircleCheckBig className="h-5 w-5 shrink-0" />
                         <span
                           className={`font-semibold ${
                             application.status === "Approved"
@@ -112,29 +127,27 @@ const Applications = () => {
                     </div>
 
                     {/* Right Buttons */}
-                    <div className="flex gap-2">
+                    <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center lg:justify-end">
                       <Link
                         href={`/managers/properties/${application.property.id}`}
-                        className={`bg-white border border-gray-300 text-gray-700 py-2 px-4 
-                          rounded-md flex items-center justify-center hover:bg-primary-700 hover:text-primary-50`}
+                        className="flex min-h-10 items-center justify-center whitespace-nowrap rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-primary-700 hover:text-primary-50"
                         scroll={false}
                       >
-                        <Hospital className="w-5 h-5 mr-2" />
+                        <Hospital className="mr-2 h-5 w-5" />
                         Property Details
                       </Link>
                       {application.status === "Approved" && (
                         <button
-                          className={`bg-white border border-gray-300 text-gray-700 py-2 px-4
-                          rounded-md flex items-center justify-center hover:bg-primary-700 hover:text-primary-50`}
+                          className="flex min-h-10 items-center justify-center whitespace-nowrap rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-primary-700 hover:text-primary-50"
                         >
-                          <Download className="w-5 h-5 mr-2" />
+                          <Download className="mr-2 h-5 w-5" />
                           Download Agreement
                         </button>
                       )}
                       {application.status === "Pending" && (
                         <>
                           <button
-                            className="px-4 py-2 text-sm text-white bg-green-600 rounded hover:bg-green-500"
+                            className="min-h-10 rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-500"
                             onClick={() =>
                               handleStatusChange(application.id, "Approved")
                             }
@@ -142,7 +155,7 @@ const Applications = () => {
                             Approve
                           </button>
                           <button
-                            className="px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-500"
+                            className="min-h-10 rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-500"
                             onClick={() =>
                               handleStatusChange(application.id, "Denied")
                             }
@@ -153,8 +166,7 @@ const Applications = () => {
                       )}
                       {application.status === "Denied" && (
                         <button
-                          className={`bg-gray-800 text-white py-2 px-4 rounded-md flex items-center
-                          justify-center hover:bg-secondary-500 hover:text-primary-50`}
+                          className="flex min-h-10 items-center justify-center whitespace-nowrap rounded-md bg-gray-800 px-4 py-2 text-white hover:bg-secondary-500 hover:text-primary-50"
                         >
                           Contact User
                         </button>
@@ -163,9 +175,10 @@ const Applications = () => {
                   </div>
                 </ApplicationCard>
               ))}
-          </TabsContent>
-        ))}
-      </Tabs>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
     </div>
   );
 };

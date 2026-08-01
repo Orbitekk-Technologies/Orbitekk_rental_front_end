@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { useGetAuthUserQuery } from "@/state/api";
 import { Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAuthenticator } from "@aws-amplify/ui-react";
+import { useAuth } from "@/app/(auth)/authProvider";
 
 const ContactWidget = ({ onOpenModal }: ContactWidgetProps) => {
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { user } = useAuth();
   const { data: authUser } = useGetAuthUserQuery(undefined, { skip: !user });
   const router = useRouter();
 

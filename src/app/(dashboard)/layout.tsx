@@ -4,46 +4,20 @@ import Navbar from "@/components/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Sidebar from "@/components/AppSidebar";
 import { NAVBAR_HEIGHT } from "@/lib/constants";
-import React, { useEffect, useState } from "react";
-import { useGetAuthUserQuery } from "@/state/api";
-import { usePathname, useRouter } from "next/navigation";
+import { FRONTEND_DEMO_MODE } from "@/lib/demoData";
+import React from "react";
+import { usePathname } from "next/navigation";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const {
-    data: authUser,
-    isLoading: authLoading,
-    isError: authError,
-  } = useGetAuthUserQuery(undefined, { refetchOnMountOrArgChange: true });
-  const router = useRouter();
   const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(true);
+  const demoRole = pathname.startsWith("/tenants") ? "tenant" : "manager";
 
-  useEffect(() => {
-    if (authError) {
-      router.replace("/signin");
-      return;
-    }
-
-    if (authUser) {
-      const userRole = authUser.userRole?.toLowerCase();
-      if (
-        (userRole === "manager" && pathname.startsWith("/tenants")) ||
-        (userRole === "tenant" && pathname.startsWith("/managers"))
-      ) {
-        router.push(
-          userRole === "manager"
-            ? "/managers/properties"
-            : "/tenants/residences",
-          { scroll: false }
-        );
-      } else {
-        setIsLoading(false);
-      }
-    }
-  }, [authUser, authError, router, pathname]);
-
-  if (authLoading || isLoading || authError) return <>Loading...</>;
-  if (!authUser?.userRole) return null;
+  // TODO(spring-auth): When FRONTEND_DEMO_MODE is disabled, restore the
+  // authenticated-user query, unauthenticated redirect, and role-based guard
+  // here using the Spring Boot JWT response from GET /auth/me.
+  if (!FRONTEND_DEMO_MODE) {
+    return null;
+  }
 
   return (
     <SidebarProvider>
@@ -51,7 +25,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <Navbar />
         <div style={{ marginTop: `${NAVBAR_HEIGHT}px` }}>
           <main className="flex">
-            <Sidebar userType={authUser.userRole.toLowerCase()} />
+            <Sidebar userType={demoRole} />
             <div className="flex-grow transition-all duration-300">
               {children}
             </div>

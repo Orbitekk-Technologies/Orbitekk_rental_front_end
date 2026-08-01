@@ -10,15 +10,15 @@ import { Property } from "@/types/prismaTypes";
 import Card from "@/components/Card";
 import React from "react";
 import CardCompact from "@/components/CardCompact";
-import { useAuthenticator } from "@aws-amplify/ui-react";
+import { useAuth } from "@/app/(auth)/authProvider";
 
 const Listings = () => {
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { user } = useAuth();
   const { data: authUser } = useGetAuthUserQuery(undefined, { skip: !user });
   const { data: tenant } = useGetTenantQuery(
-    authUser?.cognitoInfo?.userId || "",
+    authUser?.authInfo?.userId || "",
     {
-      skip: !authUser?.cognitoInfo?.userId,
+      skip: !authUser?.authInfo?.userId,
     }
   );
   const [addFavorite] = useAddFavoritePropertyMutation();
@@ -41,12 +41,12 @@ const Listings = () => {
 
     if (isFavorite) {
       await removeFavorite({
-        cognitoId: authUser.cognitoInfo.userId,
+        userId: authUser.authInfo.userId,
         propertyId,
       });
     } else {
       await addFavorite({
-        cognitoId: authUser.cognitoInfo.userId,
+        userId: authUser.authInfo.userId,
         propertyId,
       });
     }

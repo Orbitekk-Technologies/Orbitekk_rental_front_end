@@ -5,10 +5,10 @@ import { NAVBAR_HEIGHT } from "@/lib/constants";
 import { useGetAuthUserQuery } from "@/state/api";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { useAuthenticator } from "@aws-amplify/ui-react";
+import { useAuth } from "@/app/(auth)/authProvider";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { user } = useAuth();
   const { data: authUser, isLoading: authLoading } = useGetAuthUserQuery(
     undefined,
     { skip: !user }

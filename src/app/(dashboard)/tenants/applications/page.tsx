@@ -14,7 +14,7 @@ const Applications = () => {
     isLoading,
     isError,
   } = useGetApplicationsQuery(undefined, {
-    skip: !authUser?.cognitoInfo?.userId,
+    skip: !authUser?.authInfo?.userId,
   });
 
   if (isLoading) return <Loading />;

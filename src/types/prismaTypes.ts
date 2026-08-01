@@ -1,3 +1,5 @@
+import type { AmenityEnum, HighlightEnum } from "@/lib/constants";
+
 // Browser-safe API response types. Do not copy Prisma's generated server client
 // into the Next.js application: it contains server runtime declarations.
 export type Amenity =
@@ -12,7 +14,13 @@ export type Highlight =
   | "CloseToTransit" | "GreatView" | "QuietNeighborhood";
 
 export type PropertyType =
-  | "Rooms" | "Tinyhouse" | "Apartment" | "Villa" | "Townhouse" | "Cottage";
+  | "Rooms"
+  | "Tinyhouse"
+  | "Apartment"
+  | "Villa"
+  | "Townhouse"
+  | "SingleFamilyHome"
+  | "Cottage";
 export type ApplicationStatus = "Pending" | "Denied" | "Approved";
 export type PaymentStatus = "Pending" | "Paid" | "PartiallyPaid" | "Overdue";
 
@@ -51,14 +59,14 @@ export interface Property {
   averageRating: number;
   numberOfReviews: number;
   locationId: number;
-  managerCognitoId: string;
+  managerUserId: string;
   location: Location;
   manager?: Manager;
 }
 
 export interface Manager {
   id: number;
-  cognitoId: string;
+  userId: string;
   name: string;
   email: string;
   phoneNumber: string;
@@ -67,7 +75,7 @@ export interface Manager {
 
 export interface Tenant {
   id: number;
-  cognitoId: string;
+  userId: string;
   name: string;
   email: string;
   phoneNumber: string;
@@ -82,7 +90,7 @@ export interface Application {
   applicationDate: string | Date;
   status: ApplicationStatus;
   propertyId: number;
-  tenantCognitoId: string;
+  tenantUserId: string;
   name: string;
   email: string;
   phoneNumber: string;
@@ -90,7 +98,7 @@ export interface Application {
   leaseId: number | null;
   property: Property;
   tenant: Tenant;
-  lease: Lease;
+  lease: Lease | null;
 }
 
 export interface Lease {
@@ -100,7 +108,7 @@ export interface Lease {
   rent: number;
   deposit: number;
   propertyId: number;
-  tenantCognitoId: string;
+  tenantUserId: string;
   property?: Property;
   tenant: Tenant;
   payments?: Payment[];
@@ -111,7 +119,7 @@ export interface Payment {
   amountDue: number;
   amountPaid: number;
   dueDate: string | Date;
-  paymentDate: string | Date;
+  paymentDate: string | Date | null;
   paymentStatus: PaymentStatus;
   leaseId: number;
 }

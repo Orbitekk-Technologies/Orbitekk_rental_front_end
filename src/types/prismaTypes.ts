@@ -70,6 +70,7 @@ export interface Manager {
   name: string;
   email: string;
   phoneNumber: string;
+  image?: string;
   managedProperties?: Property[];
 }
 
@@ -79,6 +80,7 @@ export interface Tenant {
   name: string;
   email: string;
   phoneNumber: string;
+  image?: string;
   properties?: Property[];
   favorites: Property[];
   applications?: Application[];
@@ -122,4 +124,32 @@ export interface Payment {
   paymentDate: string | Date | null;
   paymentStatus: PaymentStatus;
   leaseId: number;
+}
+
+export interface PaymentMethod {
+  id: number;
+  cardholderName: string;
+  brand: string;
+  last4: string;
+  expiryMonth: string;
+  expiryYear: string;
+  isDefault: boolean;
+  billingAddress: string;
+  country: string;
+  city: string;
+  state: string;
+  postalCode: string;
+}
+
+export interface SavePaymentMethodRequest {
+  cardholderName: string;
+  cardNumber?: string;
+  expiryDate: string;
+  securityCode?: string;
+  isDefault: boolean;
+  billingAddress: string;
+  country: string;
+  city: string;
+  state: string;
+  postalCode: string;
 }

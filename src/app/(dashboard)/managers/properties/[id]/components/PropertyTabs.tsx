@@ -67,17 +67,29 @@ const PropertyTabs = ({
       onValueChange={handleTabChange}
       className="w-full min-w-0"
     >
-      <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-md bg-white p-1 shadow-sm sm:grid-cols-4">
-        <TabsTrigger className="min-h-10" value="tenants">
+      <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-none border-b border-gray-200 bg-white p-0 sm:grid-cols-4">
+        <TabsTrigger
+          className="min-h-11 rounded-none border-b-[3px] border-transparent data-[state=active]:border-secondary-500 data-[state=active]:bg-transparent data-[state=active]:text-gray-950 data-[state=active]:shadow-none"
+          value="tenants"
+        >
           Tenants Overview
         </TabsTrigger>
-        <TabsTrigger className="min-h-10" value="details">
+        <TabsTrigger
+          className="min-h-11 rounded-none border-b-[3px] border-transparent data-[state=active]:border-secondary-500 data-[state=active]:bg-transparent data-[state=active]:text-gray-950 data-[state=active]:shadow-none"
+          value="details"
+        >
           Property Details
         </TabsTrigger>
-        <TabsTrigger className="min-h-10" value="applications">
+        <TabsTrigger
+          className="min-h-11 rounded-none border-b-[3px] border-transparent data-[state=active]:border-secondary-500 data-[state=active]:bg-transparent data-[state=active]:text-gray-950 data-[state=active]:shadow-none"
+          value="applications"
+        >
           Applications
         </TabsTrigger>
-        <TabsTrigger className="min-h-10" value="lease">
+        <TabsTrigger
+          className="min-h-11 rounded-none border-b-[3px] border-transparent data-[state=active]:border-secondary-500 data-[state=active]:bg-transparent data-[state=active]:text-gray-950 data-[state=active]:shadow-none"
+          value="lease"
+        >
           Lease
         </TabsTrigger>
       </TabsList>

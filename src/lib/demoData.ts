@@ -1,4 +1,11 @@
-import type { Application, Lease, Payment, Property } from "@/types/prismaTypes";
+import type {
+  Application,
+  Lease,
+  Payment,
+  PaymentMethod,
+  Property,
+  SavePaymentMethodRequest,
+} from "@/types/prismaTypes";
 import { AmenityEnum, HighlightEnum } from "@/lib/constants";
 import {
   getDemoPublishedProperties,
@@ -131,6 +138,21 @@ export const demoPayments: Payment[] = [
   },
 ];
 
+let demoPaymentMethod: PaymentMethod | null = {
+  id: 1,
+  cardholderName: "Jordan Lee",
+  brand: "Visa",
+  last4: "2024",
+  expiryMonth: "06",
+  expiryYear: "28",
+  isDefault: true,
+  billingAddress: "1200 Lake Shore Drive",
+  country: "United States",
+  city: "Chicago",
+  state: "Illinois",
+  postalCode: "60601",
+};
+
 export const demoAuthUser: User = {
   authInfo: { userId: "demo-manager", username: "demo.manager" },
   userInfo: {
@@ -154,7 +176,18 @@ function getMergedDemoProperties(): Property[] {
   ];
 }
 
-export function getDemoApiData(url: string, method = "GET") {
+const getCardBrand = (cardNumber: string) => {
+  if (/^4/.test(cardNumber)) return "Visa";
+  if (/^(5[1-5]|2[2-7])/.test(cardNumber)) return "Mastercard";
+  if (/^3[47]/.test(cardNumber)) return "American Express";
+  return "Card";
+};
+
+export function getDemoApiData(
+  url: string,
+  method = "GET",
+  body?: unknown
+) {
   if (url === "auth/me") return demoAuthUser;
   if (url === "properties" && method === "POST") return demoProperty;
   if (url === "properties") return getMergedDemoProperties();
@@ -181,6 +214,35 @@ export function getDemoApiData(url: string, method = "GET") {
   if (/^applications\/\d+\/status$/.test(url)) return demoApplications[0];
   if (url === "leases") return [demoLease];
   if (/^leases\/\d+\/payments$/.test(url)) return demoPayments;
+
+  if (/^tenants\/[^/]+\/payment-method$/.test(url)) {
+    if (method === "GET") return demoPaymentMethod;
+    if (method === "DELETE") {
+      demoPaymentMethod = null;
+      return null;
+    }
+
+    const data = body as SavePaymentMethodRequest;
+    const [expiryMonth, expiryYear] = data.expiryDate.split("/");
+    const cardNumber = data.cardNumber?.replace(/\s/g, "");
+    demoPaymentMethod = {
+      id: demoPaymentMethod?.id ?? 1,
+      cardholderName: data.cardholderName,
+      brand: cardNumber
+        ? getCardBrand(cardNumber)
+        : demoPaymentMethod?.brand ?? "Card",
+      last4: cardNumber?.slice(-4) ?? demoPaymentMethod?.last4 ?? "0000",
+      expiryMonth,
+      expiryYear,
+      isDefault: data.isDefault,
+      billingAddress: data.billingAddress,
+      country: data.country,
+      city: data.city,
+      state: data.state,
+      postalCode: data.postalCode,
+    };
+    return demoPaymentMethod;
+  }
 
   return [];
 }

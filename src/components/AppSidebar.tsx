@@ -30,15 +30,10 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
     userType === "manager"
       ? [
           { icon: Building, label: "Properties", href: "/managers/properties" },
-          {
-            icon: FileText,
-            label: "Applications",
-            href: "/managers/applications",
-          },
           { icon: Settings, label: "Settings", href: "/managers/settings" },
         ]
       : [
-          { icon: Heart, label: "Favorites", href: "/tenants/favorites" },
+          { icon: Heart, label: "Favourites", href: "/tenants/favourites" },
           {
             icon: FileText,
             label: "Applications",

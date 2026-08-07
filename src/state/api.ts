@@ -9,7 +9,9 @@ import {
   Lease,
   Manager,
   Payment,
+  PaymentMethod,
   Property,
+  SavePaymentMethodRequest,
   Tenant,
 } from "@/types/prismaTypes";
 import {
@@ -40,7 +42,11 @@ const baseQuery: BaseQueryFn<
   if (FRONTEND_DEMO_MODE) {
     const request = typeof args === "string" ? { url: args } : args;
     return {
-      data: getDemoApiData(request.url, request.method?.toUpperCase()),
+      data: getDemoApiData(
+        request.url,
+        request.method?.toUpperCase(),
+        request.body
+      ),
     };
   }
 
@@ -57,6 +63,7 @@ export const api = createApi({
     "PropertyDetails",
     "Leases",
     "Payments",
+    "PaymentMethods",
     "Applications",
   ],
   endpoints: (build) => ({
@@ -303,6 +310,61 @@ export const api = createApi({
       },
     }),
 
+    getPaymentMethod: build.query<PaymentMethod | null, string>({
+      query: (userId) => `tenants/${userId}/payment-method`,
+      providesTags: ["PaymentMethods"],
+    }),
+
+    createPaymentMethod: build.mutation<
+      PaymentMethod,
+      { userId: string; data: SavePaymentMethodRequest }
+    >({
+      query: ({ userId, data }) => ({
+        url: `tenants/${userId}/payment-method`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["PaymentMethods"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Payment method added successfully!",
+          error: "Failed to add payment method.",
+        });
+      },
+    }),
+
+    updatePaymentMethod: build.mutation<
+      PaymentMethod,
+      { userId: string; data: SavePaymentMethodRequest }
+    >({
+      query: ({ userId, data }) => ({
+        url: `tenants/${userId}/payment-method`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["PaymentMethods"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Payment method updated successfully!",
+          error: "Failed to update payment method.",
+        });
+      },
+    }),
+
+    removePaymentMethod: build.mutation<void, string>({
+      query: (userId) => ({
+        url: `tenants/${userId}/payment-method`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["PaymentMethods"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Payment method removed successfully!",
+          error: "Failed to remove payment method.",
+        });
+      },
+    }),
+
     // application related endpoints
     getApplications: build.query<Application[], void>({
       query: () => "applications",
@@ -365,6 +427,10 @@ export const {
   useGetLeasesQuery,
   useGetPropertyLeasesQuery,
   useGetPaymentsQuery,
+  useGetPaymentMethodQuery,
+  useCreatePaymentMethodMutation,
+  useUpdatePaymentMethodMutation,
+  useRemovePaymentMethodMutation,
   useGetApplicationsQuery,
   useUpdateApplicationStatusMutation,
   useCreateApplicationMutation,

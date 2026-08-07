@@ -2,6 +2,13 @@
 
 import ApplicationCard from "@/components/ApplicationCard";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FRONTEND_DEMO_MODE } from "@/lib/demoData";
 import { useUpdateApplicationStatusMutation } from "@/state/api";
 import type { Application, ApplicationStatus } from "@/types/prismaTypes";
@@ -11,6 +18,7 @@ import {
   File,
   Hospital,
   Link2,
+  ListFilter,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -20,6 +28,8 @@ interface PropertyApplicationsTabProps {
   applications: Application[];
   onOpenPropertyDetails: () => void;
 }
+
+type StatusFilter = "All" | ApplicationStatus;
 
 const statusPanelClasses: Record<ApplicationStatus, string> = {
   Approved: "bg-green-100 text-green-700",
@@ -54,6 +64,17 @@ const PropertyApplicationsTab = ({
 
   const [visibleApplications, setVisibleApplications] =
     useState<Application[]>(filteredApplications);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
+
+  const displayedApplications = useMemo(
+    () =>
+      statusFilter === "All"
+        ? visibleApplications
+        : visibleApplications.filter(
+            (application) => application.status === statusFilter
+          ),
+    [statusFilter, visibleApplications]
+  );
 
   useEffect(() => {
     setVisibleApplications(filteredApplications);
@@ -103,24 +124,49 @@ const PropertyApplicationsTab = ({
           </p>
         </div>
 
-        <Button
-          type="button"
-          variant="ghost"
-          className="w-full text-violet-600 hover:text-violet-700 sm:w-auto"
-          onClick={handleShareListing}
-        >
-          <Link2 className="h-4 w-4" />
-          Share Link
-        </Button>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => setStatusFilter(value as StatusFilter)}
+          >
+            <SelectTrigger
+              className="w-full bg-white sm:w-[150px]"
+              aria-label="Filter applications by status"
+            >
+              <span className="flex items-center gap-2">
+                <ListFilter className="h-4 w-4" />
+                <SelectValue />
+              </span>
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              <SelectItem value="All">All</SelectItem>
+              <SelectItem value="Approved">Approved</SelectItem>
+              <SelectItem value="Pending">Pending</SelectItem>
+              <SelectItem value="Denied">Denied</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full text-violet-600 hover:text-violet-700 sm:w-auto"
+            onClick={handleShareListing}
+          >
+            <Link2 className="h-4 w-4" />
+            Share Link
+          </Button>
+        </div>
       </div>
 
-      {visibleApplications.length === 0 ? (
+      {displayedApplications.length === 0 ? (
         <div className="rounded-lg border border-dashed px-6 py-16 text-center text-sm text-gray-500">
-          No applications have been submitted for this property yet.
+          {visibleApplications.length === 0
+            ? "No applications have been submitted for this property yet."
+            : `No ${statusFilter.toLowerCase()} applications for this property.`}
         </div>
       ) : (
         <div className="space-y-4">
-          {visibleApplications.map((application) => (
+          {displayedApplications.map((application) => (
             <ApplicationCard
               key={application.id}
               application={application}

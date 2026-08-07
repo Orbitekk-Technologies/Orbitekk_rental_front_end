@@ -32,13 +32,13 @@ const NewPropertyTabs = ({
       }
       className="w-full"
     >
-      <TabsList className="grid h-auto w-full grid-cols-1 gap-1 rounded-lg bg-white p-1 sm:grid-cols-3">
+      <TabsList className="grid h-auto w-full grid-cols-1 gap-1 rounded-none border-b border-gray-200 bg-white p-0 sm:grid-cols-3">
         {STEPS.map((step, index) => (
           <TabsTrigger
             key={step.value}
             value={step.value}
             disabled={index > highestAccessibleStep}
-            className="min-h-10 justify-start px-4 text-left text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-950 data-[state=active]:shadow-md sm:justify-center"
+            className="min-h-11 justify-start rounded-none border-b-[3px] border-transparent px-4 text-left text-sm font-medium text-gray-700 data-[state=active]:border-secondary-500 data-[state=active]:bg-transparent data-[state=active]:text-gray-950 data-[state=active]:shadow-none sm:justify-center"
           >
             {step.label}
           </TabsTrigger>

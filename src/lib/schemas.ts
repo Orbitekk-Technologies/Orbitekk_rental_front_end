@@ -99,3 +99,72 @@ export const settingsSchema = z.object({
 });
 
 export type SettingsFormData = z.infer<typeof settingsSchema>;
+
+const isValidExpiryDate = (value: string) => {
+  const match = /^(0[1-9]|1[0-2])\/(\d{2})$/.exec(value);
+  if (!match) return false;
+
+  const month = Number(match[1]);
+  const year = 2000 + Number(match[2]);
+  const now = new Date();
+  return year > now.getFullYear() ||
+    (year === now.getFullYear() && month >= now.getMonth() + 1);
+};
+
+const paymentMethodFields = {
+  cardholderName: z.string().trim().min(2, "Name on card is required"),
+  cardNumber: z.string(),
+  expiryDate: z
+    .string()
+    .trim()
+    .refine(isValidExpiryDate, "Enter a valid future date in MM/YY format"),
+  securityCode: z.string(),
+  isDefault: z.boolean().default(true),
+  billingAddress: z.string().trim().min(5, "Billing address is required"),
+  country: z.string().trim().min(2, "Country is required"),
+  city: z.string().trim().min(2, "City is required"),
+  state: z.string().trim().min(2, "State is required"),
+  postalCode: z.string().trim().min(3, "Pincode is required").max(12),
+};
+
+export const addPaymentMethodSchema = z.object(paymentMethodFields).superRefine(
+  (data, context) => {
+    const cardNumber = data.cardNumber.replace(/\s/g, "");
+    if (!/^\d{13,19}$/.test(cardNumber)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["cardNumber"],
+        message: "Enter a valid card number",
+      });
+    }
+    if (!/^\d{3,4}$/.test(data.securityCode)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["securityCode"],
+        message: "Enter a valid 3 or 4 digit secure code",
+      });
+    }
+  }
+);
+
+export const editPaymentMethodSchema = z.object(paymentMethodFields).superRefine(
+  (data, context) => {
+    const cardNumber = data.cardNumber.replace(/\s/g, "");
+    if (cardNumber && !/^\d{13,19}$/.test(cardNumber)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["cardNumber"],
+        message: "Enter a valid card number or leave it blank",
+      });
+    }
+    if (data.securityCode && !/^\d{3,4}$/.test(data.securityCode)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["securityCode"],
+        message: "Enter a valid 3 or 4 digit secure code",
+      });
+    }
+  }
+);
+
+export type PaymentMethodFormData = z.infer<typeof addPaymentMethodSchema>;

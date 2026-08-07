@@ -1,6 +1,7 @@
 "use client";
 
 import Loading from "@/components/Loading";
+import PaymentMethodSection from "./PaymentMethodSection";
 import {
   Table,
   TableBody,
@@ -19,61 +20,13 @@ import { Lease, Payment, Property } from "@/types/prismaTypes";
 import {
   ArrowDownToLineIcon,
   Check,
-  CreditCard,
   Download,
-  Edit,
   FileText,
-  Mail,
   MapPin,
   User,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import React from "react";
-
-const PaymentMethod = () => {
-  return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden p-6 mt-10 md:mt-0 flex-1">
-      <h2 className="text-2xl font-bold mb-4">Payment method</h2>
-      <p className="mb-4">Change how you pay for your plan.</p>
-      <div className="border rounded-lg p-6">
-        <div>
-          {/* Card Info */}
-          <div className="flex gap-10">
-            <div className="w-36 h-20 bg-blue-600 flex items-center justify-center rounded-md">
-              <span className="text-white text-2xl font-bold">VISA</span>
-            </div>
-            <div className="flex flex-col justify-between">
-              <div>
-                <div className="flex items-start gap-5">
-                  <h3 className="text-lg font-semibold">Visa ending in 2024</h3>
-                  <span className="text-sm font-medium border border-primary-700 text-primary-700 px-3 py-1 rounded-full">
-                    Default
-                  </span>
-                </div>
-                <div className="text-sm text-gray-500 flex items-center">
-                  <CreditCard className="w-4 h-4 mr-1" />
-                  <span>Expiry • 26/06/2024</span>
-                </div>
-              </div>
-              <div className="text-sm text-gray-500 flex items-center">
-                <Mail className="w-4 h-4 mr-1" />
-                <span>billing@baseclub.com</span>
-              </div>
-            </div>
-          </div>
-
-          <hr className="my-4" />
-          <div className="flex justify-end">
-            <button className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md flex items-center justify-center hover:bg-primary-700 hover:text-primary-50">
-              <Edit className="w-5 h-5 mr-2" />
-              <span>Edit</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const ResidenceCard = ({
   property,
@@ -187,10 +140,12 @@ const BillingHistory = ({ payments }: { payments: Payment[] }) => {
                   <div className="flex items-center">
                     <FileText className="w-4 h-4 mr-2" />
                     Invoice #{payment.id} -{" "}
-                    {new Date(payment.paymentDate).toLocaleString("default", {
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    {payment.paymentDate
+                      ? new Date(payment.paymentDate).toLocaleString("default", {
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "Pending"}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -208,7 +163,9 @@ const BillingHistory = ({ payments }: { payments: Payment[] }) => {
                   </span>
                 </TableCell>
                 <TableCell>
-                  {new Date(payment.paymentDate).toLocaleDateString()}
+                  {payment.paymentDate
+                    ? new Date(payment.paymentDate).toLocaleDateString()
+                    : "—"}
                 </TableCell>
                 <TableCell>${payment.amountPaid.toFixed(2)}</TableCell>
                 <TableCell>
@@ -258,7 +215,9 @@ const Residence = () => {
           {currentLease && (
             <ResidenceCard property={property} currentLease={currentLease} />
           )}
-          <PaymentMethod />
+          {authUser?.authInfo.userId && (
+            <PaymentMethodSection userId={authUser.authInfo.userId} />
+          )}
         </div>
         <BillingHistory payments={payments || []} />
       </div>

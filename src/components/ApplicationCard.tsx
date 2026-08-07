@@ -148,10 +148,12 @@ const ApplicationCard = ({
             />
             <div className="min-w-0 space-y-2">
               <div className="font-semibold text-gray-900">{contactName}</div>
-              <div className="flex items-center text-sm text-gray-600">
-                <PhoneCall className="mr-2 h-5 w-5 shrink-0" />
-                <span className="truncate">{contactPhone}</span>
-              </div>
+              {userType === "manager" && (
+                <div className="flex items-center text-sm text-gray-600">
+                  <PhoneCall className="mr-2 h-5 w-5 shrink-0" />
+                  <span className="truncate">{contactPhone}</span>
+                </div>
+              )}
               <div className="flex items-center text-sm text-gray-600">
                 <Mail className="mr-2 h-5 w-5 shrink-0" />
                 <span className="truncate">{contactEmail}</span>

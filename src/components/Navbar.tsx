@@ -6,8 +6,8 @@ import Link from "next/link";
 import React from "react";
 import { Button } from "./ui/button";
 import { useGetAuthUserQuery } from "@/state/api";
+import { useAuth } from "@/app/(auth)/authProvider";
 import { usePathname, useRouter } from "next/navigation";
-import { signOut } from "aws-amplify/auth";
 import { Bell, MessageCircle, Plus, Search } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,13 +23,14 @@ const Navbar = () => {
   const { data: authUser } = useGetAuthUserQuery();
   const router = useRouter();
   const pathname = usePathname();
+  const { signOut } = useAuth();
 
   const isDashboardPage =
     pathname.includes("/managers") || pathname.includes("/tenants");
 
-  const handleSignOut = async () => {
-    await signOut();
-    window.location.href = "/";
+  const handleSignOut = () => {
+    signOut();
+    router.replace("/");
   };
 
   return (

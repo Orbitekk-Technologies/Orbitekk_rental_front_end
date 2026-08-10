@@ -8,10 +8,10 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/app/(auth)/authProvider";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
   const { data: authUser, isLoading: authLoading } = useGetAuthUserQuery(
     undefined,
-    { skip: !user }
+    { skip: !isAuthReady || !user }
   );
   const router = useRouter();
   const pathname = usePathname();

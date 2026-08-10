@@ -5,8 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { api } from "@/state/api";
+import { useLoginMutation, useSignupMutation } from "@/state/api";
 import { useAppDispatch } from "@/state/redux";
-import { usePathname } from "next/navigation";
+import {
+  getStoredAuthIdentity,
+  setAccessToken,
+  setStoredAuthIdentity,
+} from "@/lib/authToken";
+import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
   type FormEvent,
@@ -15,6 +21,7 @@ import {
   useContext,
   useMemo,
   useState,
+  useEffect,
 } from "react";
 import { toast } from "sonner";
 
@@ -25,6 +32,7 @@ export type AuthIdentity = {
 
 type AuthContextValue = {
   user: AuthIdentity | null;
+  isAuthReady: boolean;
   setUser: (user: AuthIdentity | null) => void;
   signOut: () => void;
 };
@@ -43,10 +51,36 @@ export function useAuth() {
 
 function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const isSignUp = mode === "signup";
+  const { setUser } = useAuth();
+  const router = useRouter();
+  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
+  const [signup, { isLoading: isSignupLoading }] = useSignupMutation();
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    toast.info("Spring Boot authentication will be connected in a later phase.");
+    const form = new FormData(event.currentTarget);
+
+    try {
+      const response = isSignUp
+        ? await signup({
+            username: String(form.get("username")),
+            email: String(form.get("email")),
+            password: String(form.get("password")),
+            confirmPassword: String(form.get("confirmPassword")),
+            role: String(form.get("role")).toUpperCase() as "TENANT" | "MANAGER",
+          }).unwrap()
+        : await login({
+            login: String(form.get("username")),
+            password: String(form.get("password")),
+          }).unwrap();
+
+      setAccessToken(response.token.accessToken);
+      setUser({ userId: response.userId, username: response.username });
+      toast.success(isSignUp ? "Account created." : "Signed in.");
+      router.replace(response.role === "MANAGER" ? "/managers/properties" : "/search");
+    } catch {
+      toast.error(isSignUp ? "Could not create account." : "Invalid username or password.");
+    }
   };
 
   const handleGoogle = () => {
@@ -135,8 +169,10 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             </>
           )}
 
-          <Button type="submit" className="mt-2 w-full">
-            {isSignUp ? "Create account" : "Sign in"}
+          <Button type="submit" className="mt-2 w-full" disabled={isLoginLoading || isSignupLoading}>
+            {isLoginLoading || isSignupLoading
+              ? "Please wait..."
+              : isSignUp ? "Create account" : "Sign in"}
           </Button>
         </form>
 
@@ -165,17 +201,28 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const [user, setUserState] = useState<AuthIdentity | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  useEffect(() => {
+    setUserState(getStoredAuthIdentity());
+    setIsAuthReady(true);
+  }, []);
 
   const setUser = useCallback(
     (nextUser: AuthIdentity | null) => {
       setUserState(nextUser);
+      setStoredAuthIdentity(nextUser);
+      if (!nextUser) setAccessToken(null);
       dispatch(api.util.resetApiState());
     },
     [dispatch]
   );
 
   const signOut = useCallback(() => setUser(null), [setUser]);
-  const value = useMemo(() => ({ user, setUser, signOut }), [user, setUser, signOut]);
+  const value = useMemo(
+    () => ({ user, isAuthReady, setUser, signOut }),
+    [user, isAuthReady, setUser, signOut]
+  );
 
   return (
     <AuthContext.Provider value={value}>

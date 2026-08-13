@@ -190,6 +190,15 @@ export function getDemoApiData(
   body?: unknown
 ) {
   if (url === "auth/me") return demoAuthUser;
+  if (url === "auth/enable-manager" && method === "POST") {
+    demoAuthUser.userRole = "manager";
+    return {
+      token: { accessToken: "demo-manager-token", tokenType: "Bearer", expiresIn: 3600 },
+      userId: demoAuthUser.authInfo.userId,
+      username: demoAuthUser.authInfo.username,
+      role: "MANAGER",
+    };
+  }
   if (url === "properties" && method === "POST") return demoProperty;
   if (url === "properties") return getMergedDemoProperties();
 

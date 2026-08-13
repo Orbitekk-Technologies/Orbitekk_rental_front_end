@@ -9,6 +9,30 @@ declare module "framer-motion" {
 }
 
 declare global {
+  interface LoginRequest {
+    login: string;
+    password: string;
+  }
+
+  interface SignupRequest {
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    role: "TENANT" | "MANAGER";
+  }
+
+  interface AuthResponse {
+    token: {
+      accessToken: string;
+      tokenType: string;
+      expiresIn: number;
+    };
+    userId: string;
+    username: string;
+    role: "TENANT" | "MANAGER";
+  }
+
   enum AmenityEnum {
     WasherDryer = "WasherDryer",
     AirConditioning = "AirConditioning",

@@ -24,7 +24,8 @@ import {
 import { FiltersState } from ".";
 
 const springBootBaseQuery = fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+    baseUrl:
+      process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1/",
     prepareHeaders: (headers) => {
       const accessToken = getAccessToken();
       if (accessToken) {
@@ -67,6 +68,14 @@ export const api = createApi({
     "Applications",
   ],
   endpoints: (build) => ({
+    login: build.mutation<AuthResponse, LoginRequest>({
+      query: (body) => ({ url: "auth/login", method: "POST", body }),
+    }),
+
+    signup: build.mutation<AuthResponse, SignupRequest>({
+      query: (body) => ({ url: "auth/signup", method: "POST", body }),
+    }),
+
     getAuthUser: build.query<User, void>({
       query: () => "auth/me",
     }),
@@ -412,6 +421,8 @@ export const api = createApi({
 });
 
 export const {
+  useLoginMutation,
+  useSignupMutation,
   useGetAuthUserQuery,
   useUpdateTenantSettingsMutation,
   useUpdateManagerSettingsMutation,

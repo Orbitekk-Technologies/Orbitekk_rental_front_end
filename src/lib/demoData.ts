@@ -12,9 +12,10 @@ import {
   getDemoPublishedProperty,
 } from "@/lib/propertyDraftStorage";
 
-// Temporary frontend-only mode. Set this to false when Spring Boot authentication
-// and REST endpoints are ready to become the source of truth.
-export const FRONTEND_DEMO_MODE = true;
+// Demo data remains available for UI-only work, while local integration uses the
+// Spring Boot API by default.
+export const FRONTEND_DEMO_MODE =
+  process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 export const demoProperty: Property = {
   id: 1,

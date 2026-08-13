@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 import { useGetAuthUserQuery } from "@/state/api";
 import { useAuth } from "@/app/(auth)/authProvider";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, MessageCircle, Plus, Search } from "lucide-react";
+import { Bell, MessageCircle, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +32,12 @@ const Navbar = () => {
     signOut();
     router.replace("/");
   };
+
+  const addPropertyHref = authUser
+    ? authUser.userRole === "manager"
+      ? "/managers/newproperty"
+      : "/manager/onboarding"
+    : "/signin?returnTo=%2Fmanager%2Fonboarding";
 
   return (
     <div
@@ -74,7 +80,7 @@ const Navbar = () => {
                 router.push(
                   authUser.userRole?.toLowerCase() === "manager"
                     ? "/managers/newproperty"
-                    : "/search"
+                    : "/manager/onboarding"
                 )
               }
             >
@@ -85,9 +91,9 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Search className="h-4 w-4" />
+                  <Plus className="h-4 w-4" />
                   <span className="hidden md:block ml-2">
-                    Search Properties
+                    Add Property
                   </span>
                 </>
               )}
@@ -100,6 +106,16 @@ const Navbar = () => {
           </p>
         )}
         <div className="flex items-center gap-5">
+          {!isDashboardPage && (
+            <Button
+              variant="ghost"
+              className="hidden text-white hover:bg-primary-600 hover:text-white md:inline-flex"
+              onClick={() => router.push(addPropertyHref)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Property
+            </Button>
+          )}
           {authUser ? (
             <>
               <div className="relative hidden md:block">

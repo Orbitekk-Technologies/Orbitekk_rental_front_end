@@ -76,6 +76,11 @@ export const api = createApi({
       query: (body) => ({ url: "auth/signup", method: "POST", body }),
     }),
 
+    enableManager: build.mutation<AuthResponse, { authorizedToList: boolean }>({
+      query: (body) => ({ url: "auth/enable-manager", method: "POST", body }),
+      invalidatesTags: ["Managers", "Tenants"],
+    }),
+
     getAuthUser: build.query<User, void>({
       query: () => "auth/me",
     }),
@@ -423,6 +428,7 @@ export const api = createApi({
 export const {
   useLoginMutation,
   useSignupMutation,
+  useEnableManagerMutation,
   useGetAuthUserQuery,
   useUpdateTenantSettingsMutation,
   useUpdateManagerSettingsMutation,

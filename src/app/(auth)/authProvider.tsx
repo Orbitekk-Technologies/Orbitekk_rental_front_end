@@ -77,7 +77,13 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       setAccessToken(response.token.accessToken);
       setUser({ userId: response.userId, username: response.username });
       toast.success(isSignUp ? "Account created." : "Signed in.");
-      router.replace(response.role === "MANAGER" ? "/managers/properties" : "/search");
+      const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+      const safeReturnTo = returnTo?.startsWith("/") && !returnTo.startsWith("//")
+        ? returnTo
+        : null;
+      router.replace(
+        safeReturnTo ?? (response.role === "MANAGER" ? "/managers/properties" : "/search")
+      );
     } catch {
       toast.error(isSignUp ? "Could not create account." : "Invalid username or password.");
     }

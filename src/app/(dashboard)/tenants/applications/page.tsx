@@ -13,7 +13,7 @@ const Applications = () => {
     data: applications,
     isLoading,
     isError,
-  } = useGetApplicationsQuery(undefined, {
+  } = useGetApplicationsQuery("tenant", {
     skip: !authUser?.authInfo?.userId,
   });
 

@@ -22,7 +22,7 @@ const Applications = () => {
     isLoading,
     isError,
   } = useGetApplicationsQuery(
-    undefined,
+    "manager",
     {
       skip: !authUser?.authInfo?.userId,
     }

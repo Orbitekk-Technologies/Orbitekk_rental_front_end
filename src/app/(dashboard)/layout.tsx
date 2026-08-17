@@ -25,12 +25,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       signOut();
       router.replace("/signin");
     }
-    if (authUser && authUser.userRole !== routeRole) {
+    if (authUser && authUser.userRole !== routeRole && !(authUser.userRole === "manager" && routeRole === "tenant")) {
       router.replace(authUser.userRole === "manager" ? "/managers/properties" : "/tenants/residences");
     }
   }, [authUser, isAuthReady, isError, routeRole, router, signOut, user]);
 
-  if (!isAuthReady || !user || isLoading || !authUser || authUser.userRole !== routeRole) {
+  const canAccessRoute = authUser?.userRole === routeRole ||
+    (authUser?.userRole === "manager" && routeRole === "tenant");
+
+  if (!isAuthReady || !user || isLoading || !authUser || !canAccessRoute) {
     return <>Loading...</>;
   }
 

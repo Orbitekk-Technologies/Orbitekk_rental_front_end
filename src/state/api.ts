@@ -294,8 +294,8 @@ export const api = createApi({
     }),
 
     // lease related enpoints
-    getLeases: build.query<Lease[], number>({
-      query: () => "leases",
+    getLeases: build.query<Lease[], "tenant" | "manager" | void>({
+      query: (view) => view ? `leases?view=${view}` : "leases",
       providesTags: ["Leases"],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {
@@ -314,8 +314,8 @@ export const api = createApi({
       },
     }),
 
-    getPayments: build.query<Payment[], number>({
-      query: (leaseId) => `leases/${leaseId}/payments`,
+    getPayments: build.query<Payment[], { leaseId: number; view?: "tenant" | "manager" }>({
+      query: ({ leaseId, view }) => `leases/${leaseId}/payments${view ? `?view=${view}` : ""}`,
       providesTags: ["Payments"],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {
@@ -380,8 +380,8 @@ export const api = createApi({
     }),
 
     // application related endpoints
-    getApplications: build.query<Application[], void>({
-      query: () => "applications",
+    getApplications: build.query<Application[], "tenant" | "manager" | void>({
+      query: (view) => view ? `applications?view=${view}` : "applications",
       providesTags: ["Applications"],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {

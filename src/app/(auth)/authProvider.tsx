@@ -12,6 +12,7 @@ import {
   setAccessToken,
   setStoredAuthIdentity,
 } from "@/lib/authToken";
+import { getApiErrorMessage } from "@/lib/apiError";
 import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
@@ -55,6 +56,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const router = useRouter();
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
   const [signup, { isLoading: isSignupLoading }] = useSignupMutation();
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -84,8 +86,13 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       router.replace(
         safeReturnTo ?? (response.role === "MANAGER" ? "/managers/properties" : "/search")
       );
-    } catch {
-      toast.error(isSignUp ? "Could not create account." : "Invalid username or password.");
+    } catch (error) {
+      toast.error(
+        getApiErrorMessage(
+          error,
+          isSignUp ? "Could not create account." : "Invalid username or password."
+        )
+      );
     }
   };
 
@@ -115,8 +122,16 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
               name="username"
               placeholder={isSignUp ? "Choose a username" : "Enter your username"}
               autoComplete="username"
+              maxLength={80}
+              onFocus={() => setFocusedField("username")}
+              onBlur={() => setFocusedField(null)}
               required
             />
+            {isSignUp && focusedField === "username" && (
+              <p className="text-xs text-muted-foreground">
+                Choose a unique username up to 80 characters.
+              </p>
+            )}
           </div>
 
           {isSignUp && (
@@ -128,8 +143,15 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
                 type="email"
                 placeholder="Enter your email address"
                 autoComplete="email"
+                onFocus={() => setFocusedField("email")}
+                onBlur={() => setFocusedField(null)}
                 required
               />
+              {focusedField === "email" && (
+                <p className="text-xs text-muted-foreground">
+                  Enter a valid email address that is not already registered.
+                </p>
+              )}
             </div>
           )}
 
@@ -141,8 +163,17 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
               type="password"
               placeholder={isSignUp ? "Create a password" : "Enter your password"}
               autoComplete={isSignUp ? "new-password" : "current-password"}
+              minLength={isSignUp ? 10 : undefined}
+              maxLength={100}
+              onFocus={() => setFocusedField("password")}
+              onBlur={() => setFocusedField(null)}
               required
             />
+            {isSignUp && focusedField === "password" && (
+              <p className="text-xs text-muted-foreground">
+                Password must contain between 10 and 100 characters.
+              </p>
+            )}
           </div>
 
           {isSignUp && (
@@ -155,8 +186,17 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
                   type="password"
                   placeholder="Confirm your password"
                   autoComplete="new-password"
+                  minLength={10}
+                  maxLength={100}
+                  onFocus={() => setFocusedField("confirmPassword")}
+                  onBlur={() => setFocusedField(null)}
                   required
                 />
+                {focusedField === "confirmPassword" && (
+                  <p className="text-xs text-muted-foreground">
+                    Enter the same password again.
+                  </p>
+                )}
               </div>
 
               <fieldset className="space-y-2">

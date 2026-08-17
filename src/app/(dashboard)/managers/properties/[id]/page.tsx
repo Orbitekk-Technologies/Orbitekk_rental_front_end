@@ -36,7 +36,7 @@ const ManagerPropertyPage = () => {
     data: applications = [],
     isLoading: applicationsLoading,
     isError: applicationsError,
-  } = useGetApplicationsQuery();
+  } = useGetApplicationsQuery("manager");
 
   if (propertyLoading || leasesLoading || applicationsLoading) {
     return <Loading />;

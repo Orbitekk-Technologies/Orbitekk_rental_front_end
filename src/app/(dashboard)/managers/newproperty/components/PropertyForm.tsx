@@ -22,6 +22,7 @@ import {
   type StoredPropertyFormValues,
 } from "@/lib/propertyDraftStorage";
 import { FRONTEND_DEMO_MODE } from "@/lib/demoData";
+import { getApiErrorMessage } from "@/lib/apiError";
 import { propertySchema, type PropertyFormData } from "@/lib/schemas";
 import {
   api,
@@ -255,11 +256,14 @@ const PropertyForm = ({
           ? "/managers/properties"
           : `/managers/properties/${savedProperty.id}`
       );
-    } catch {
+    } catch (error) {
       toast.error(
-        mode === "edit"
-          ? "Unable to save the property changes."
-          : "Unable to create the property."
+        getApiErrorMessage(
+          error,
+          mode === "edit"
+            ? "Unable to save the property changes."
+            : "Unable to create the property."
+        )
       );
     } finally {
       setIsSavingLocally(false);

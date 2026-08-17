@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 import { useGetAuthUserQuery } from "@/state/api";
 import { useAuth } from "@/app/(auth)/authProvider";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, MessageCircle, Plus } from "lucide-react";
+import { Bell, Menu, MessageCircle, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +18,21 @@ import {
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { SidebarTrigger } from "./ui/sidebar";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
+
+const marketingLinks = [
+  { label: "Home", href: "/" },
+  { label: "Contact", href: "/contact" },
+  { label: "Listings", href: "/search" },
+];
 
 const Navbar = () => {
   const { data: authUser } = useGetAuthUserQuery();
@@ -38,6 +53,9 @@ const Navbar = () => {
       ? "/managers/newproperty"
       : "/manager/onboarding"
     : "/signin?returnTo=%2Fmanager%2Fonboarding";
+
+  const isActiveLink = (href: string) =>
+    href === "/" ? pathname === href : pathname.startsWith(href);
 
   return (
     <div
@@ -101,15 +119,26 @@ const Navbar = () => {
           )}
         </div>
         {!isDashboardPage && (
-          <p className="text-primary-200 hidden md:block">
-            Discover your perfect rental apartment with our advanced search
-          </p>
+          <nav aria-label="Primary navigation" className="hidden items-center gap-10 lg:flex">
+            {marketingLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActiveLink(item.href) ? "page" : undefined}
+                className={`font-medium transition-colors hover:text-secondary-400 ${
+                  isActiveLink(item.href) ? "text-secondary-400" : "text-primary-100"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         )}
         <div className="flex items-center gap-5">
           {!isDashboardPage && (
             <Button
               variant="ghost"
-              className="hidden text-white hover:bg-primary-600 hover:text-white md:inline-flex"
+              className="hidden text-white hover:bg-primary-600 hover:text-white lg:inline-flex"
               onClick={() => router.push(addPropertyHref)}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -175,7 +204,7 @@ const Navbar = () => {
               </DropdownMenu>
             </>
           ) : (
-            <>
+            <div className="hidden items-center gap-3 sm:flex">
               <Link href="/signin">
                 <Button
                   variant="outline"
@@ -192,7 +221,76 @@ const Navbar = () => {
                   Sign Up
                 </Button>
               </Link>
-            </>
+            </div>
+          )}
+          {!isDashboardPage && (
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-primary-600 hover:text-white lg:hidden"
+                  aria-label="Open navigation menu"
+                >
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="flex flex-col bg-primary-700 text-white">
+                <SheetHeader className="text-left">
+                  <SheetTitle className="text-white">
+                    SHA<span className="font-light text-secondary-500">GRIHA</span>
+                  </SheetTitle>
+                  <SheetDescription className="text-primary-200">
+                    Find and manage your next rental home.
+                  </SheetDescription>
+                </SheetHeader>
+                <nav aria-label="Mobile navigation" className="mt-8 flex flex-col gap-2">
+                  {marketingLinks.map((item) => (
+                    <SheetClose key={item.href} asChild>
+                      <Link
+                        href={item.href}
+                        aria-current={isActiveLink(item.href) ? "page" : undefined}
+                        className={`rounded-md px-3 py-3 text-base font-medium transition-colors hover:bg-primary-600 ${
+                          isActiveLink(item.href) ? "bg-primary-600 text-secondary-400" : "text-white"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    </SheetClose>
+                  ))}
+                </nav>
+                <div className="mt-auto space-y-3">
+                  <SheetClose asChild>
+                    <Button
+                      className="w-full bg-secondary-600 text-white hover:bg-secondary-700"
+                      onClick={() => router.push(addPropertyHref)}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Property
+                    </Button>
+                  </SheetClose>
+                  {!authUser && (
+                    <div className="grid grid-cols-2 gap-3 sm:hidden">
+                      <SheetClose asChild>
+                        <Link href="/signin">
+                          <Button variant="outline" className="w-full border-white bg-transparent text-white hover:bg-white hover:text-primary-700">
+                            Sign In
+                          </Button>
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link href="/signup">
+                          <Button className="w-full bg-secondary-600 text-white hover:bg-secondary-700">
+                            Sign Up
+                          </Button>
+                        </Link>
+                      </SheetClose>
+                    </div>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
           )}
         </div>
       </div>

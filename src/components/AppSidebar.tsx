@@ -15,6 +15,7 @@ import {
   Heart,
   Home,
   Menu,
+  Search,
   Settings,
   X,
 } from "lucide-react";
@@ -29,8 +30,13 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
   const navLinks =
     userType === "manager"
       ? [
+          { icon: Search, label: "Search Listings", href: "/search" },
+          { icon: Heart, label: "Saved Properties", href: "/tenants/favourites" },
+          { icon: FileText, label: "My Applications", href: "/tenants/applications" },
+          { icon: Home, label: "My Residences", href: "/tenants/residences" },
           { icon: Building, label: "Properties", href: "/managers/properties" },
-          { icon: Settings, label: "Settings", href: "/managers/settings" },
+          { icon: FileText, label: "Listing Applications", href: "/managers/applications" },
+          { icon: Settings, label: "Manager Settings", href: "/managers/settings" },
         ]
       : [
           { icon: Heart, label: "Favourites", href: "/tenants/favourites" },
@@ -64,7 +70,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
               {open ? (
                 <>
                   <h1 className="text-xl font-bold text-gray-800">
-                    {userType === "manager" ? "Manager View" : "Renter View"}
+                    {userType === "manager" ? "My Account" : "Renter View"}
                   </h1>
                   <button
                     className="hover:bg-gray-100 p-2 rounded-md"

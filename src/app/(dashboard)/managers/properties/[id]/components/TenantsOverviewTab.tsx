@@ -37,7 +37,10 @@ const TenantRow = ({ lease }: { lease: Lease }) => {
   // Existing API expects a lease ID, not a property ID.
   // TODO(spring): Replace the per-row requests with a property-level payment
   // endpoint when Spring Boot exposes GET /properties/{id}/payments.
-  const { data: payments = [], isFetching } = useGetPaymentsQuery(lease.id);
+  const { data: payments = [], isFetching } = useGetPaymentsQuery({
+    leaseId: lease.id,
+    view: "manager",
+  });
 
   const now = new Date();
   const currentMonthPayment = payments.find((payment) => {

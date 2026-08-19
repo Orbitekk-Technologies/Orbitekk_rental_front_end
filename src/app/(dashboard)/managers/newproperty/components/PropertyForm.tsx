@@ -47,11 +47,14 @@ const STEP_FIELDS: Record<PropertyFormStep, FieldPath<PropertyFormData>[]> = {
     "name",
     "description",
     "stayType",
-    "address",
+    "addressLine1",
+    "addressLine2",
     "city",
-    "state",
+    "stateName",
     "postalCode",
-    "country",
+    "countryName",
+    "latitude",
+    "longitude",
   ],
   details: [
     "pricePerMonth",
@@ -177,10 +180,13 @@ const PropertyForm = ({
 
     setIsSavingLocally(true);
     try {
+      const userId = authUser?.authInfo?.userId;
+      if (!userId) throw new Error("Sign in before saving a draft");
       const values = await prepareValuesForPersistence(form.getValues());
       const { photoUrls: _photoUrls, ...storedValues } = values;
 
       savePropertyDraft({
+        userId,
         id: draftId ?? undefined,
         values: storedValues as StoredPropertyFormValues,
         lastCompletedStep: activeStep,
@@ -221,7 +227,7 @@ const PropertyForm = ({
         });
 
         upsertDemoPublishedProperty(property);
-        deletePropertyDraft(draftId);
+        deletePropertyDraft(managerUserId, draftId);
         dispatch(
           api.util.invalidateTags([
             { type: "Properties", id: "LIST" },
@@ -250,7 +256,7 @@ const PropertyForm = ({
           ? await updateProperty({ id: propertyId, property: payload }).unwrap()
           : await createProperty(payload).unwrap();
 
-      deletePropertyDraft(draftId);
+      deletePropertyDraft(managerUserId, draftId);
       router.push(
         exitAfterSave
           ? "/managers/properties"

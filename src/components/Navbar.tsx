@@ -49,10 +49,8 @@ const Navbar = () => {
   };
 
   const addPropertyHref = authUser
-    ? authUser.userRole === "manager"
-      ? "/managers/newproperty"
-      : "/manager/onboarding"
-    : "/signin?returnTo=%2Fmanager%2Fonboarding";
+    ? "/managers/newproperty"
+    : "/signin?returnTo=%2Fmanagers%2Fnewproperty";
 
   const isActiveLink = (href: string) =>
     href === "/" ? pathname === href : pathname.startsWith(href);
@@ -94,27 +92,10 @@ const Navbar = () => {
             <Button
               variant="secondary"
               className="md:ml-4 bg-primary-50 text-primary-700 hover:bg-secondary-500 hover:text-primary-50"
-              onClick={() =>
-                router.push(
-                  authUser.userRole?.toLowerCase() === "manager"
-                    ? "/managers/newproperty"
-                    : "/manager/onboarding"
-                )
-              }
+              onClick={() => router.push("/managers/newproperty")}
             >
-              {authUser.userRole?.toLowerCase() === "manager" ? (
-                <>
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden md:block ml-2">Add New Property</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden md:block ml-2">
-                    Add Property
-                  </span>
-                </>
-              )}
+              <Plus className="h-4 w-4" />
+              <span className="hidden md:block ml-2">Add New Property</span>
             </Button>
           )}
         </div>
@@ -125,8 +106,8 @@ const Navbar = () => {
                 key={item.href}
                 href={item.href}
                 aria-current={isActiveLink(item.href) ? "page" : undefined}
-                className={`font-medium transition-colors hover:text-secondary-400 ${
-                  isActiveLink(item.href) ? "text-secondary-400" : "text-primary-100"
+                className={`font-medium transition-colors hover:text-secondary-500 ${
+                  isActiveLink(item.href) ? "text-secondary-500" : "text-primary-100"
                 }`}
               >
                 {item.label}
@@ -213,14 +194,6 @@ const Navbar = () => {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/signup">
-                <Button
-                  variant="secondary"
-                  className="text-white bg-secondary-600 hover:bg-white hover:text-primary-700 rounded-lg"
-                >
-                  Sign Up
-                </Button>
-              </Link>
             </div>
           )}
           {!isDashboardPage && (
@@ -251,8 +224,8 @@ const Navbar = () => {
                       <Link
                         href={item.href}
                         aria-current={isActiveLink(item.href) ? "page" : undefined}
-                        className={`rounded-md px-3 py-3 text-base font-medium transition-colors hover:bg-primary-600 ${
-                          isActiveLink(item.href) ? "bg-primary-600 text-secondary-400" : "text-white"
+                        className={`px-3 py-3 text-base font-medium transition-colors hover:text-secondary-500 ${
+                          isActiveLink(item.href) ? "text-secondary-500" : "text-white"
                         }`}
                       >
                         {item.label}
@@ -271,18 +244,11 @@ const Navbar = () => {
                     </Button>
                   </SheetClose>
                   {!authUser && (
-                    <div className="grid grid-cols-2 gap-3 sm:hidden">
+                    <div className="sm:hidden">
                       <SheetClose asChild>
                         <Link href="/signin">
                           <Button variant="outline" className="w-full border-white bg-transparent text-white hover:bg-white hover:text-primary-700">
                             Sign In
-                          </Button>
-                        </Link>
-                      </SheetClose>
-                      <SheetClose asChild>
-                        <Link href="/signup">
-                          <Button className="w-full bg-secondary-600 text-white hover:bg-secondary-700">
-                            Sign Up
                           </Button>
                         </Link>
                       </SheetClose>

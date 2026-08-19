@@ -4,6 +4,7 @@ import { formatEnumString } from "@/lib/utils";
 import { useGetPropertyQuery } from "@/state/api";
 import { HelpCircle } from "lucide-react";
 import React from "react";
+import NearbyPlaces from "./NearbyPlaces";
 
 const PropertyDetails = ({ propertyId }: PropertyDetailsProps) => {
   const {
@@ -63,6 +64,8 @@ const PropertyDetails = ({ propertyId }: PropertyDetailsProps) => {
           })}
         </div>
       </div>
+
+      <NearbyPlaces propertyId={propertyId} />
 
       {/* Tabs Section */}
       <div>

@@ -3,8 +3,8 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import LocationAutocomplete, { type SelectedLocation } from "@/components/LocationAutocomplete";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { setFilters } from "@/state";
@@ -12,12 +12,25 @@ import { setFilters } from "@/state";
 const HeroSection = () => {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
+  const [dismissSuggestions, setDismissSuggestions] = useState(0);
   const router = useRouter();
 
   const handleLocationSearch = async () => {
+    setDismissSuggestions((signal) => signal + 1);
     try {
       const trimmedQuery = searchQuery.trim();
       if (!trimmedQuery) return;
+
+      if (selectedLocation?.label === trimmedQuery) {
+        dispatch(setFilters({ location: selectedLocation.label, coordinates: selectedLocation.coordinates }));
+        const params = new URLSearchParams({
+          location: selectedLocation.label,
+          coordinates: selectedLocation.coordinates.join(","),
+        });
+        router.push(`/search?${params.toString()}`);
+        return;
+      }
 
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
@@ -71,20 +84,21 @@ const HeroSection = () => {
             lifestyle and needs!
           </p>
 
-          <div className="flex justify-center">
-            <Input
-              type="text"
+          <div className="mx-auto flex w-full max-w-lg justify-center">
+            <LocationAutocomplete
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleLocationSearch();
+              onChange={(value) => {
+                setSearchQuery(value);
+                if (value !== selectedLocation?.label) setSelectedLocation(null);
               }}
+              onSelect={setSelectedLocation}
+              dismissSignal={dismissSuggestions}
               placeholder="Search by city, neighborhood or address"
-              className="w-full max-w-lg rounded-none rounded-l-xl border-none bg-white h-12"
+              className="h-12 w-full rounded-l-xl rounded-r-none border-r-0 bg-white text-left"
             />
             <Button
               onClick={handleLocationSearch}
-              className="bg-secondary-500 text-white rounded-none rounded-r-xl border-none hover:bg-secondary-600 h-12"
+              className="h-12 shrink-0 rounded-none rounded-r-xl border-none bg-secondary-500 text-white hover:bg-secondary-600"
             >
               Search
             </Button>

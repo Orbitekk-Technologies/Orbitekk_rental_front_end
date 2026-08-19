@@ -7,10 +7,10 @@ import {
 } from "@/state/api";
 import { useAppSelector } from "@/state/redux";
 import { Property } from "@/types/prismaTypes";
-import Card from "@/components/Card";
 import React from "react";
 import CardCompact from "@/components/CardCompact";
 import { useAuth } from "@/app/(auth)/authProvider";
+import EmptyState from "@/components/EmptyState";
 
 const Listings = () => {
   const { user } = useAuth();
@@ -23,7 +23,6 @@ const Listings = () => {
   );
   const [addFavorite] = useAddFavoritePropertyMutation();
   const [removeFavorite] = useRemoveFavoritePropertyMutation();
-  const viewMode = useAppSelector((state) => state.global.viewMode);
   const filters = useAppSelector((state) => state.global.filters);
 
   const {
@@ -53,7 +52,15 @@ const Listings = () => {
   };
 
   if (isLoading) return <>Loading...</>;
-  if (isError || !properties) return <div>Failed to fetch properties</div>;
+
+  if (isError || !properties || properties.length === 0) {
+    return (
+      <EmptyState
+        message={`No published properties are currently available in ${filters.location}. Try another location or check back soon.`}
+        className="min-h-full"
+      />
+    );
+  }
 
   return (
     <div className="w-full">
@@ -65,9 +72,8 @@ const Listings = () => {
       </h3>
       <div className="flex">
         <div className="p-4 w-full">
-          {properties?.map((property) =>
-            viewMode === "grid" ? (
-              <Card
+          {properties?.map((property) => (
+            <CardCompact
                 key={property.id}
                 property={property}
                 isFavorite={
@@ -78,22 +84,8 @@ const Listings = () => {
                 onFavoriteToggle={() => handleFavoriteToggle(property.id)}
                 showFavoriteButton={!!authUser}
                 propertyLink={`/search/${property.id}`}
-              />
-            ) : (
-              <CardCompact
-                key={property.id}
-                property={property}
-                isFavorite={
-                  tenant?.favorites?.some(
-                    (fav: Property) => fav.id === property.id
-                  ) || false
-                }
-                onFavoriteToggle={() => handleFavoriteToggle(property.id)}
-                showFavoriteButton={!!authUser}
-                propertyLink={`/search/${property.id}`}
-              />
-            )
-          )}
+            />
+          ))}
         </div>
       </div>
     </div>

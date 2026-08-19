@@ -76,6 +76,56 @@ const AmenitiesPreferencesStep = () => {
           Upload up to 5 images. Each image must be smaller than 10 MB.
         </p>
       </section>
+
+      <div className="border-t border-gray-200" />
+
+      <section className="space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">Pricing</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Choose a publishing plan for this property.
+          </p>
+        </div>
+
+        <div
+          className="grid gap-3 sm:grid-cols-3"
+          role="radiogroup"
+          aria-label="Property pricing plan"
+        >
+          <button
+            type="button"
+            role="radio"
+            aria-checked="true"
+            className="min-h-28 rounded-xl border border-secondary-500 bg-secondary-500 p-4 text-left text-white shadow-sm"
+          >
+            <span className="block font-semibold">Starter</span>
+            <span className="mt-2 block text-sm">$0, free</span>
+            <span className="mt-3 block text-xs font-medium uppercase tracking-wide">
+              Selected
+            </span>
+          </button>
+
+          {[
+            { name: "Basic", price: "$X/month" },
+            { name: "Premium", price: "$XX/month" },
+          ].map((plan) => (
+            <button
+              key={plan.name}
+              type="button"
+              role="radio"
+              aria-checked="false"
+              disabled
+              className="min-h-28 cursor-not-allowed rounded-xl border border-gray-200 bg-gray-50 p-4 text-left text-gray-400 opacity-75"
+            >
+              <span className="block font-semibold">{plan.name}</span>
+              <span className="mt-2 block text-sm">{plan.price}</span>
+              <span className="mt-3 block text-xs font-medium uppercase tracking-wide">
+                Coming soon
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import Loading from "@/components/Loading";
 import { useGetApplicationsQuery, useGetAuthUserQuery } from "@/state/api";
 import { MessageCircle } from "lucide-react";
 import React from "react";
+import EmptyState from "@/components/EmptyState";
 
 const Applications = () => {
   const { data: authUser } = useGetAuthUserQuery();
@@ -27,7 +28,9 @@ const Applications = () => {
         subtitle="Track and manage your property rental applications"
       />
       <div className="w-full">
-        {applications?.map((application) => (
+        {applications.length === 0 ? (
+          <EmptyState message="No Applications to review as of now" />
+        ) : applications.map((application) => (
           <ApplicationCard
             key={application.id}
             application={application}

@@ -11,6 +11,7 @@ import {
 } from "@/state/api";
 import React from "react";
 import Link from "next/link";
+import EmptyState from "@/components/EmptyState";
 
 const Favorites = () => {
   const { data: authUser } = useGetAuthUserQuery();
@@ -53,14 +54,14 @@ const Favorites = () => {
           ))}
         </div>
       ) : (
-        <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
-          <p className="text-lg font-medium text-gray-700">
-            No listings have been added to favourites
-          </p>
+        <EmptyState
+          message="No listings have been added to favourites"
+          action={
           <Button asChild className="mt-4 bg-primary-700 text-white hover:bg-primary-600">
             <Link href="/search">Search properties</Link>
           </Button>
-        </div>
+          }
+        />
       )}
     </div>
   );

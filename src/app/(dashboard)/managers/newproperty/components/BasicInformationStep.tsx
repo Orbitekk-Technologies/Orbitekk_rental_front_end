@@ -1,6 +1,7 @@
 "use client";
 
 import { CustomFormField } from "@/components/FormField";
+import PropertyAddressFields from "./PropertyAddressFields";
 
 const BasicInformationStep = () => {
   return (
@@ -35,25 +36,7 @@ const BasicInformationStep = () => {
             { value: "WholeUnit", label: "Whole Unit" },
           ]}
         />
-        <CustomFormField
-          name="address"
-          label="Address"
-          placeholder="Street address"
-        />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <CustomFormField name="city" label="City" placeholder="City" />
-          <CustomFormField name="state" label="State" placeholder="State" />
-          <CustomFormField
-            name="postalCode"
-            label="Postal Code"
-            placeholder="Postal code"
-          />
-        </div>
-        <CustomFormField
-          name="country"
-          label="Country"
-          placeholder="Country"
-        />
+        <PropertyAddressFields />
       </section>
     </div>
   );

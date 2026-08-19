@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { debounce } from "lodash";
 import { cleanParams, cn, formatEnumString } from "@/lib/utils";
+import LocationAutocomplete, { type SelectedLocation } from "@/components/LocationAutocomplete";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -25,6 +26,8 @@ const FiltersFull = () => {
   const pathname = usePathname();
   const filters = useAppSelector((state) => state.global.filters);
   const [localFilters, setLocalFilters] = useState(initialState.filters);
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
+  const [dismissSuggestions, setDismissSuggestions] = useState(0);
   const isFiltersFullOpen = useAppSelector(
     (state) => state.global.isFiltersFullOpen
   );
@@ -64,7 +67,17 @@ const FiltersFull = () => {
   };
 
   const handleLocationSearch = async () => {
+    setDismissSuggestions((signal) => signal + 1);
     try {
+      if (selectedLocation?.label === localFilters.location.trim()) {
+        setLocalFilters((prev) => ({
+          ...prev,
+          location: selectedLocation.label,
+          coordinates: selectedLocation.coordinates,
+        }));
+        return;
+      }
+
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
           localFilters.location
@@ -94,16 +107,19 @@ const FiltersFull = () => {
         <div>
           <h4 className="font-bold mb-2">Location</h4>
           <div className="flex items-center">
-            <Input
+            <LocationAutocomplete
               placeholder="Enter location"
-              value={filters.location}
-              onChange={(e) =>
+              value={localFilters.location}
+              onChange={(value) => {
                 setLocalFilters((prev) => ({
                   ...prev,
-                  location: e.target.value,
-                }))
-              }
-              className="rounded-l-xl rounded-r-none border-r-0"
+                  location: value,
+                }));
+                if (value !== selectedLocation?.label) setSelectedLocation(null);
+              }}
+              onSelect={setSelectedLocation}
+              dismissSignal={dismissSuggestions}
+              className="rounded-l-xl border border-r-0 border-black"
             />
             <Button
               onClick={handleLocationSearch}
@@ -257,7 +273,8 @@ const FiltersFull = () => {
           </div>
         </div>
 
-        {/* Available From */}
+        {/* Available-date filtering is intentionally hidden. Filter state and
+            API/backend support remain in place for easy re-enablement.
         <div>
           <h4 className="font-bold mb-2">Available From</h4>
           <Input
@@ -276,6 +293,7 @@ const FiltersFull = () => {
             className="rounded-xl"
           />
         </div>
+        */}
 
         {/* Apply and Reset buttons */}
         <div className="flex gap-4 mt-6">

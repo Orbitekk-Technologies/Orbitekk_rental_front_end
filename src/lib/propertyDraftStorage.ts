@@ -15,7 +15,7 @@ export interface PropertyDraft {
   values: Partial<StoredPropertyFormValues>;
 }
 
-const DRAFTS_KEY = "shagriha-property-drafts-v1";
+const DRAFTS_KEY_PREFIX = "shagriha-property-drafts-v2";
 const DEMO_PROPERTIES_KEY = "shagriha-demo-properties-v1";
 
 export const PROPERTY_STORAGE_UPDATED_EVENT =
@@ -42,23 +42,29 @@ function writeJson<T>(key: string, value: T) {
   window.dispatchEvent(new Event(PROPERTY_STORAGE_UPDATED_EVENT));
 }
 
-export function getPropertyDrafts(): PropertyDraft[] {
-  return readJson<PropertyDraft[]>(DRAFTS_KEY, []).sort(
+function draftsKey(userId: string) {
+  if (!userId) throw new Error("A user is required to access property drafts");
+  return `${DRAFTS_KEY_PREFIX}:${userId}`;
+}
+
+export function getPropertyDrafts(userId: string): PropertyDraft[] {
+  return readJson<PropertyDraft[]>(draftsKey(userId), []).sort(
     (a, b) =>
       new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   );
 }
 
-export function getPropertyDraft(id: string): PropertyDraft | undefined {
-  return getPropertyDrafts().find((draft) => draft.id === id);
+export function getPropertyDraft(userId: string, id: string): PropertyDraft | undefined {
+  return getPropertyDrafts(userId).find((draft) => draft.id === id);
 }
 
 export function savePropertyDraft(input: {
+  userId: string;
   id?: string;
   values: Partial<StoredPropertyFormValues>;
   lastCompletedStep: PropertyFormStep;
 }): PropertyDraft {
-  const drafts = getPropertyDrafts();
+  const drafts = getPropertyDrafts(input.userId);
   const draft: PropertyDraft = {
     id: input.id ?? crypto.randomUUID(),
     status: "DRAFT",
@@ -68,15 +74,15 @@ export function savePropertyDraft(input: {
   };
 
   const nextDrafts = [draft, ...drafts.filter((item) => item.id !== draft.id)];
-  writeJson(DRAFTS_KEY, nextDrafts);
+  writeJson(draftsKey(input.userId), nextDrafts);
   return draft;
 }
 
-export function deletePropertyDraft(id?: string | null) {
+export function deletePropertyDraft(userId: string, id?: string | null) {
   if (!id) return;
   writeJson(
-    DRAFTS_KEY,
-    getPropertyDrafts().filter((draft) => draft.id !== id)
+    draftsKey(userId),
+    getPropertyDrafts(userId).filter((draft) => draft.id !== id)
   );
 }
 

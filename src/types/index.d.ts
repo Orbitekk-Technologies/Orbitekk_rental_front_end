@@ -15,11 +15,9 @@ declare global {
   }
 
   interface SignupRequest {
-    username: string;
     email: string;
     password: string;
     confirmPassword: string;
-    role: "TENANT" | "MANAGER";
   }
 
   interface AuthResponse {

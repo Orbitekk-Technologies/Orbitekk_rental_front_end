@@ -31,11 +31,22 @@ export interface Coordinates {
 
 export interface Location {
   id: number;
+  /** @deprecated use addressLine1 */
   address: string;
+  addressLine1?: string;
+  addressLine2?: string;
   city: string;
+  /** @deprecated use stateName */
   state: string;
+  stateName?: string;
+  stateCode?: string;
+  /** @deprecated use countryName */
   country: string;
+  countryName?: string;
+  countryCode?: string;
   postalCode: string;
+  formattedAddress?: string;
+  mapboxFeatureId?: string;
   coordinates: Coordinates;
 }
 
@@ -62,6 +73,22 @@ export interface Property {
   managerUserId: string;
   location: Location;
   manager?: Manager;
+}
+
+export interface NearbyPlace {
+  name: string;
+  category: "GROCERY" | "RESTAURANT" | "PHARMACY" | "GAS_STATION" | "TRANSIT";
+  latitude: number;
+  longitude: number;
+  distanceMeters: number;
+}
+
+export interface NearbyPlacesResponse {
+  groceries: NearbyPlace[];
+  restaurants: NearbyPlace[];
+  pharmacies: NearbyPlace[];
+  gasStations: NearbyPlace[];
+  transit: NearbyPlace[];
 }
 
 export interface Manager {

@@ -31,7 +31,7 @@ export const initialState: InitialStateTypes = {
     coordinates: [-118.25, 34.05],
   },
   isFiltersFullOpen: false,
-  viewMode: "grid",
+  viewMode: "list",
 };
 
 export const globalSlice = createSlice({

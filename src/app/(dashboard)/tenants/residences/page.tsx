@@ -9,6 +9,9 @@ import {
   useGetTenantQuery,
 } from "@/state/api";
 import React from "react";
+import Link from "next/link";
+import EmptyState from "@/components/EmptyState";
+import { Button } from "@/components/ui/button";
 
 const Residences = () => {
   const { data: authUser } = useGetAuthUserQuery();
@@ -49,7 +52,17 @@ const Residences = () => {
         ))}
       </div>
       {(!currentResidences || currentResidences.length === 0) && (
-        <p>You don&lsquo;t have any current residences</p>
+        <EmptyState
+          message="You didn’t have any residences to Join or Enroll"
+          action={
+            <Button
+              asChild
+              className="mt-4 bg-primary-700 text-white hover:bg-primary-600"
+            >
+              <Link href="/search">Search properties</Link>
+            </Button>
+          }
+        />
       )}
     </div>
   );

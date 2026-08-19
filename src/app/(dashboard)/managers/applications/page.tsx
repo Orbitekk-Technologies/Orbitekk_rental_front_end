@@ -12,6 +12,7 @@ import {
 import { CircleCheckBig, Download, File, Hospital } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
+import EmptyState from "@/components/EmptyState";
 
 const Applications = () => {
   const { data: authUser } = useGetAuthUserQuery();
@@ -75,7 +76,19 @@ const Applications = () => {
               value={tab}
               className="mt-5 w-full space-y-4"
             >
-            {filteredApplications
+            {filteredApplications.filter(
+                (application) =>
+                  tab === "all" || application.status.toLowerCase() === tab
+              ).length === 0 ? (
+              <EmptyState
+                message={
+                  applications.length === 0
+                    ? "No Applications to review as of now"
+                    : "No " + tab + " applications to review as of now"
+                }
+                className="min-h-[40vh]"
+              />
+            ) : filteredApplications
               .filter(
                 (application) =>
                   tab === "all" || application.status.toLowerCase() === tab

@@ -11,6 +11,7 @@ import {
   type PropertyDraft,
 } from "@/lib/propertyDraftStorage";
 import { useGetAuthUserQuery, useGetManagerPropertiesQuery } from "@/state/api";
+import EmptyState from "@/components/EmptyState";
 
 const Properties = () => {
   const { data: authUser } = useGetAuthUserQuery();
@@ -24,8 +25,10 @@ const Properties = () => {
   });
 
   const refreshDrafts = useCallback(() => {
-    setDrafts(getPropertyDrafts());
-  }, []);
+    if (authUser?.authInfo?.userId) {
+      setDrafts(getPropertyDrafts(authUser.authInfo.userId));
+    }
+  }, [authUser?.authInfo?.userId]);
 
   useEffect(() => {
     refreshDrafts();
@@ -69,9 +72,7 @@ const Properties = () => {
       </div>
 
       {!hasProperties && !hasDrafts && (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-gray-600">
-          You don&apos;t manage any properties yet.
-        </div>
+        <EmptyState message="No listings added to your profile" />
       )}
     </div>
   );

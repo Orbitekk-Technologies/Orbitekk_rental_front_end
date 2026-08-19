@@ -1,7 +1,6 @@
 import {
   FiltersState,
   setFilters,
-  setViewMode,
   toggleFiltersFullOpen,
 } from "@/state";
 import { useAppSelector } from "@/state/redux";
@@ -11,8 +10,8 @@ import { useDispatch } from "react-redux";
 import { debounce } from "lodash";
 import { cleanParams, cn, formatPriceValue } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Filter, Grid, List, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Filter, Search } from "lucide-react";
+import LocationAutocomplete, { type SelectedLocation } from "@/components/LocationAutocomplete";
 import {
   Select,
   SelectContent,
@@ -30,8 +29,9 @@ const FiltersBar = () => {
   const isFiltersFullOpen = useAppSelector(
     (state) => state.global.isFiltersFullOpen
   );
-  const viewMode = useAppSelector((state) => state.global.viewMode);
   const [searchInput, setSearchInput] = useState(filters.location);
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
+  const [dismissSuggestions, setDismissSuggestions] = useState(0);
 
   const updateURL = debounce((newFilters: FiltersState) => {
     const cleanFilters = cleanParams(newFilters);
@@ -73,7 +73,19 @@ const FiltersBar = () => {
   };
 
   const handleLocationSearch = async () => {
+    setDismissSuggestions((signal) => signal + 1);
     try {
+      if (selectedLocation?.label === searchInput.trim()) {
+        const newFilters = {
+          ...filters,
+          location: selectedLocation.label,
+          coordinates: selectedLocation.coordinates,
+        };
+        dispatch(setFilters(newFilters));
+        updateURL(newFilters);
+        return;
+      }
+
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
           searchInput
@@ -116,14 +128,16 @@ const FiltersBar = () => {
 
         {/* Search Location */}
         <div className="flex items-center">
-          <Input
+          <LocationAutocomplete
             placeholder="Search location"
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleLocationSearch();
+            onChange={(value) => {
+              setSearchInput(value);
+              if (value !== selectedLocation?.label) setSelectedLocation(null);
             }}
-            className="w-40 rounded-l-xl rounded-r-none border-primary-400 border-r-0"
+            onSelect={setSelectedLocation}
+            dismissSignal={dismissSuggestions}
+            className="w-56 rounded-l-xl border border-r-0 border-primary-400"
           />
           <Button
             onClick={handleLocationSearch}
@@ -241,31 +255,6 @@ const FiltersBar = () => {
         </Select>
       </div>
 
-      {/* View Mode */}
-      <div className="flex justify-between items-center gap-4 p-2">
-        <div className="flex border rounded-xl">
-          <Button
-            variant="ghost"
-            className={cn(
-              "px-3 py-1 rounded-none rounded-l-xl hover:bg-primary-600 hover:text-primary-50",
-              viewMode === "list" ? "bg-primary-700 text-primary-50" : ""
-            )}
-            onClick={() => dispatch(setViewMode("list"))}
-          >
-            <List className="w-5 h-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn(
-              "px-3 py-1 rounded-none rounded-r-xl hover:bg-primary-600 hover:text-primary-50",
-              viewMode === "grid" ? "bg-primary-700 text-primary-50" : ""
-            )}
-            onClick={() => dispatch(setViewMode("grid"))}
-          >
-            <Grid className="w-5 h-5" />
-          </Button>
-        </div>
-      </div>
     </div>
   );
 };

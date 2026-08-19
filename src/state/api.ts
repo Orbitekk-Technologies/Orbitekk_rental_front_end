@@ -10,6 +10,7 @@ import {
   Manager,
   Payment,
   PaymentMethod,
+  NearbyPlacesResponse,
   Property,
   SavePaymentMethodRequest,
   Tenant,
@@ -131,6 +132,10 @@ export const api = createApi({
           error: "Failed to load property details.",
         });
       },
+    }),
+
+    getNearbyPlaces: build.query<NearbyPlacesResponse, number>({
+      query: (id) => `properties/${id}/nearby`,
     }),
 
     // tenant related endpoints
@@ -434,6 +439,7 @@ export const {
   useUpdateManagerSettingsMutation,
   useGetPropertiesQuery,
   useGetPropertyQuery,
+  useGetNearbyPlacesQuery,
   useGetCurrentResidencesQuery,
   useGetManagerPropertiesQuery,
   useCreatePropertyMutation,

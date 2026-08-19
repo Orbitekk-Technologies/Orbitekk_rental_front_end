@@ -43,13 +43,28 @@ export const propertySchema = z
       .positive("Square feet must be greater than zero")
       .int(),
     propertyType: z.nativeEnum(PropertyTypeEnum),
-    address: z.string().trim().min(1, "Address is required"),
+    addressLine1: z.string().trim().min(1, "Property address is required"),
+    addressLine2: z.string().trim().optional(),
     city: z.string().trim().min(1, "City is required"),
-    state: z.string().trim().min(1, "State is required"),
-    country: z.string().trim().min(1, "Country is required"),
+    stateName: z.string().trim().min(1, "State / Province is required"),
+    stateCode: z.string().trim().optional(),
+    countryName: z.string().trim().min(1, "Country is required"),
+    countryCode: z.string().trim().length(2, "Select a valid country"),
     postalCode: z.string().trim().min(1, "Postal code is required"),
+    formattedAddress: z.string().trim().optional(),
+    latitude: z.number().finite("Select an address from the suggestions"),
+    longitude: z.number().finite("Select an address from the suggestions"),
+    mapboxFeatureId: z.string().trim().optional(),
+    addressConfirmed: z.boolean(),
   })
   .superRefine((data, context) => {
+    if (!data.addressConfirmed) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["addressLine1"],
+        message: "Please select an address from the suggestions.",
+      });
+    }
     if (data.photoUrls.length === 0 && data.existingPhotoUrls.length === 0) {
       context.addIssue({
         code: z.ZodIssueCode.custom,

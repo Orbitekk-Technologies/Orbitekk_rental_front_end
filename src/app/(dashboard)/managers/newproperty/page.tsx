@@ -13,6 +13,7 @@ import {
 } from "@/lib/propertyDraftStorage";
 import type { PropertyFormData } from "@/lib/schemas";
 import PropertyForm from "./components/PropertyForm";
+import { useGetAuthUserQuery } from "@/state/api";
 
 const STEP_INDEX = {
   basic: 0,
@@ -22,19 +23,21 @@ const STEP_INDEX = {
 
 const NewPropertyContent = () => {
   const searchParams = useSearchParams();
+  const { data: authUser } = useGetAuthUserQuery();
   const draftId = searchParams.get("draftId");
   const [draft, setDraft] = useState<PropertyDraft | null>(null);
   const [isLoadingDraft, setIsLoadingDraft] = useState(Boolean(draftId));
 
   useEffect(() => {
-    if (!draftId) {
+    const userId = authUser?.authInfo?.userId;
+    if (!draftId || !userId) {
       setIsLoadingDraft(false);
       return;
     }
 
-    setDraft(getPropertyDraft(draftId) ?? null);
+    setDraft(getPropertyDraft(userId, draftId) ?? null);
     setIsLoadingDraft(false);
-  }, [draftId]);
+  }, [authUser?.authInfo?.userId, draftId]);
 
   const initialValues = useMemo<PropertyFormData>(() => {
     if (!draft) return DEFAULT_PROPERTY_FORM_VALUES;

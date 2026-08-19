@@ -11,9 +11,9 @@ interface ManagerDraftPropertyCardProps {
 const ManagerDraftPropertyCard = ({ draft }: ManagerDraftPropertyCardProps) => {
   const propertyName = draft.values.name?.trim() || "Untitled Property";
   const address = [
-    draft.values.address,
+    draft.values.addressLine1,
     draft.values.city,
-    draft.values.state,
+    draft.values.stateName,
   ]
     .filter(Boolean)
     .join(", ");

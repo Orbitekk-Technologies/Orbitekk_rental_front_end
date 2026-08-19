@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import PasswordInput from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { api } from "@/state/api";
 import { useLoginMutation, useSignupMutation } from "@/state/api";
 import { useAppDispatch } from "@/state/redux";
@@ -14,6 +14,7 @@ import {
 } from "@/lib/authToken";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   createContext,
   type FormEvent,
@@ -65,14 +66,12 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     try {
       const response = isSignUp
         ? await signup({
-            username: String(form.get("username")),
             email: String(form.get("email")),
             password: String(form.get("password")),
             confirmPassword: String(form.get("confirmPassword")),
-            role: String(form.get("role")).toUpperCase() as "TENANT" | "MANAGER",
           }).unwrap()
         : await login({
-            login: String(form.get("username")),
+            login: String(form.get("email")),
             password: String(form.get("password")),
           }).unwrap();
 
@@ -84,30 +83,35 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         ? returnTo
         : null;
       router.replace(
-        safeReturnTo ?? (response.role === "MANAGER" ? "/managers/properties" : "/search")
+        safeReturnTo ?? "/search"
       );
     } catch (error) {
       toast.error(
         getApiErrorMessage(
           error,
-          isSignUp ? "Could not create account." : "Invalid username or password."
+          isSignUp ? "Could not create account." : "Invalid email or password."
         )
       );
     }
   };
 
   const handleGoogle = () => {
-    toast.info("Google sign-in will be connected in a later phase.");
+    const apiBase =
+      process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1/";
+    window.location.assign(`${apiBase.replace(/\/$/, "")}/oauth2/authorization/google`);
   };
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <section className="w-full max-w-md rounded-lg border border-border bg-background p-8">
         <header className="mb-7">
-          <h1 className="text-2xl font-bold">
-            SHA
-            <span className="font-light text-secondary-500">GRIHA</span>
-          </h1>
+          <Link
+            href="/"
+            aria-label="SHAGRIHA home"
+            className="inline-block rounded-sm text-2xl font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2"
+          >
+            SHA<span className="font-light text-secondary-500">GRIHA</span>
+          </Link>
           <p className="mt-2 text-muted-foreground">
             <span className="font-bold">Welcome!</span>{" "}
             {isSignUp ? "Create an account to continue" : "Please sign in to continue"}
@@ -116,51 +120,29 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="username"
-              name="username"
-              placeholder={isSignUp ? "Choose a username" : "Enter your username"}
-              autoComplete="username"
-              maxLength={80}
-              onFocus={() => setFocusedField("username")}
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Enter your email address"
+              autoComplete="email"
+              onFocus={() => setFocusedField("email")}
               onBlur={() => setFocusedField(null)}
               required
             />
-            {isSignUp && focusedField === "username" && (
+            {isSignUp && focusedField === "email" && (
               <p className="text-xs text-muted-foreground">
-                Choose a unique username up to 80 characters.
+                Your email will also be used as your account username.
               </p>
             )}
           </div>
 
-          {isSignUp && (
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Enter your email address"
-                autoComplete="email"
-                onFocus={() => setFocusedField("email")}
-                onBlur={() => setFocusedField(null)}
-                required
-              />
-              {focusedField === "email" && (
-                <p className="text-xs text-muted-foreground">
-                  Enter a valid email address that is not already registered.
-                </p>
-              )}
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               placeholder={isSignUp ? "Create a password" : "Enter your password"}
               autoComplete={isSignUp ? "new-password" : "current-password"}
               minLength={isSignUp ? 10 : undefined}
@@ -180,10 +162,9 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             <>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">Confirm Password</Label>
-                <Input
+                <PasswordInput
                   id="confirm-password"
                   name="confirmPassword"
-                  type="password"
                   placeholder="Confirm your password"
                   autoComplete="new-password"
                   minLength={10}
@@ -199,19 +180,6 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
                 )}
               </div>
 
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-medium">Role</legend>
-                <RadioGroup name="role" defaultValue="tenant" className="flex gap-6">
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="tenant" id="tenant" />
-                    <Label htmlFor="tenant">Tenant</Label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="manager" id="manager" />
-                    <Label htmlFor="manager">Manager</Label>
-                  </div>
-                </RadioGroup>
-              </fieldset>
             </>
           )}
 

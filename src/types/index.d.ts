@@ -20,6 +20,12 @@ declare global {
     confirmPassword: string;
   }
 
+  interface ResetPasswordRequest {
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }
+
   interface AuthResponse {
     token: {
       accessToken: string;

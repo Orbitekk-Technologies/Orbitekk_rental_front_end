@@ -80,6 +80,9 @@ const FiltersBar = () => {
           ...filters,
           location: selectedLocation.label,
           coordinates: selectedLocation.coordinates,
+          city: selectedLocation.city,
+          state: selectedLocation.state,
+          page: 0,
         };
         dispatch(setFilters(newFilters));
         updateURL(newFilters);
@@ -96,10 +99,16 @@ const FiltersBar = () => {
       const data = await response.json();
       if (data.features && data.features.length > 0) {
         const [lng, lat] = data.features[0].center;
+        const contexts = [data.features[0], ...(data.features[0].context ?? [])];
+        const cityFeature = contexts.find((item: { id?: string }) => item.id?.startsWith("place."));
+        const stateFeature = contexts.find((item: { id?: string }) => item.id?.startsWith("region."));
         const newFilters = {
           ...filters,
           location: searchInput.trim(),
           coordinates: [lng, lat] as [number, number],
+          city: cityFeature?.text,
+          state: stateFeature?.short_code?.replace(/^US-/i, "") ?? stateFeature?.text,
+          page: 0,
         };
         dispatch(setFilters(newFilters));
         updateURL(newFilters);

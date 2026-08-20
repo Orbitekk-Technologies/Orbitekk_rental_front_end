@@ -19,7 +19,7 @@ export default function ContactPage() {
       [`Full name: ${fullName}`, `Phone: ${phone}`, `Email: ${email}`, "", "Message:", description || "No description provided."].join("\n")
     );
 
-    window.location.href = `mailto:shashanksub76@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:support@shagriha.com?subject=${subject}&body=${body}`;
   };
 
   return (

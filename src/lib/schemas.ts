@@ -21,6 +21,7 @@ export const propertySchema = z
     isParkingIncluded: z.boolean(),
     photoUrls: z.array(browserFileSchema).default([]),
     existingPhotoUrls: z.array(z.string()).default([]),
+    photoOrder: z.array(z.string()).default([]),
     amenities: z
       .array(z.nativeEnum(AmenityEnum))
       .min(1, "Select at least one amenity"),

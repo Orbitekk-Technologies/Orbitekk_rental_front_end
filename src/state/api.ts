@@ -12,6 +12,7 @@ import {
   PaymentMethod,
   NearbyPlacesResponse,
   Property,
+  PropertySearchResult,
   SavePaymentMethodRequest,
   Tenant,
 } from "@/types/prismaTypes";
@@ -77,6 +78,10 @@ export const api = createApi({
       query: (body) => ({ url: "auth/signup", method: "POST", body }),
     }),
 
+    resetPassword: build.mutation<AuthResponse, ResetPasswordRequest>({
+      query: (body) => ({ url: "auth/reset-password", method: "POST", body }),
+    }),
+
     enableManager: build.mutation<AuthResponse, { authorizedToList: boolean }>({
       query: (body) => ({ url: "auth/enable-manager", method: "POST", body }),
       invalidatesTags: ["Managers", "Tenants"],
@@ -91,6 +96,20 @@ export const api = createApi({
       Property[],
       Partial<FiltersState> & { favoriteIds?: number[] }
     >({
+      query: (filters) => ({
+        url: "properties",
+        params: cleanParams({ favoriteIds: filters.favoriteIds?.join(",") }),
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: "Properties" as const, id })),
+              { type: "Properties", id: "LIST" },
+            ]
+          : [{ type: "Properties", id: "LIST" }],
+    }),
+
+    searchProperties: build.query<PropertySearchResult, Partial<FiltersState>>({
       query: (filters) => {
         const params = cleanParams({
           location: filters.location,
@@ -103,17 +122,25 @@ export const api = createApi({
           squareFeetMax: filters.squareFeet?.[1],
           amenities: filters.amenities?.join(","),
           availableFrom: filters.availableFrom,
-          favoriteIds: filters.favoriteIds?.join(","),
           latitude: filters.coordinates?.[1],
           longitude: filters.coordinates?.[0],
+          city: filters.city,
+          state: filters.state,
+          page: filters.page,
+          size: filters.size,
+          sort: filters.sort,
         });
 
-        return { url: "properties", params };
+        if (!filters.coordinates?.some((coordinate) => coordinate !== 0)) {
+          delete params.latitude;
+          delete params.longitude;
+        }
+        return { url: "properties/search", params };
       },
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Properties" as const, id })),
+              ...result.properties.map(({ id }) => ({ type: "Properties" as const, id })),
               { type: "Properties", id: "LIST" },
             ]
           : [{ type: "Properties", id: "LIST" }],
@@ -433,11 +460,13 @@ export const api = createApi({
 export const {
   useLoginMutation,
   useSignupMutation,
+  useResetPasswordMutation,
   useEnableManagerMutation,
   useGetAuthUserQuery,
   useUpdateTenantSettingsMutation,
   useUpdateManagerSettingsMutation,
   useGetPropertiesQuery,
+  useSearchPropertiesQuery,
   useGetPropertyQuery,
   useGetNearbyPlacesQuery,
   useGetCurrentResidencesQuery,

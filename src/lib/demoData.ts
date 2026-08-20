@@ -201,6 +201,17 @@ export function getDemoApiData(
   }
   if (url === "properties" && method === "POST") return demoProperty;
   if (url === "properties") return getMergedDemoProperties();
+  if (url === "properties/search") {
+    const properties = getMergedDemoProperties();
+    return {
+      properties,
+      matchType: "ALL",
+      totalResults: properties.length,
+      page: 0,
+      size: 20,
+      totalPages: properties.length ? 1 : 0,
+    };
+  }
 
   if (/^properties\/\d+$/.test(url)) {
     const propertyId = Number(url.split("/")[1]);

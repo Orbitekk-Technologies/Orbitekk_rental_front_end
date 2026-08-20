@@ -12,6 +12,7 @@ export const DEFAULT_PROPERTY_FORM_VALUES: PropertyFormData = {
   isParkingIncluded: false,
   photoUrls: [],
   existingPhotoUrls: [],
+  photoOrder: [],
   amenities: [],
   bathType: "Private",
   genderPreference: ["NoPreference"],
@@ -45,6 +46,7 @@ export function propertyToFormValues(property: Property): PropertyFormData {
     isParkingIncluded: property.isParkingIncluded ?? false,
     photoUrls: [],
     existingPhotoUrls: property.photoUrls ?? [],
+    photoOrder: (property.photoUrls ?? []).map((_, index) => `existing:${index}`),
     amenities: property.amenities ?? [],
     propertyType:
       property.propertyType === PropertyTypeEnum.Townhouse
@@ -103,6 +105,20 @@ export async function filesToDataUrls(files: File[]): Promise<string[]> {
         })
     )
   );
+}
+
+export function orderPropertyPhotos(
+  order: string[],
+  existing: string[],
+  uploaded: string[]
+) {
+  const resolved = order.map((item) => {
+    const [kind, rawIndex] = item.split(":");
+    const index = Number(rawIndex);
+    return kind === "existing" ? existing[index] : uploaded[index];
+  }).filter((photo): photo is string => Boolean(photo));
+
+  return resolved.length > 0 ? resolved : [...existing, ...uploaded];
 }
 
 export function buildDemoProperty(

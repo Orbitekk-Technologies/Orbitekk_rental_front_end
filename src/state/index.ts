@@ -10,6 +10,11 @@ export interface FiltersState {
   priceRange: [number, number] | [null, null];
   squareFeet: [number, number] | [null, null];
   coordinates: [number, number];
+  city?: string;
+  state?: string;
+  page?: number;
+  size?: number;
+  sort?: "newest" | "price_asc" | "price_desc";
 }
 
 interface InitialStateTypes {
@@ -20,7 +25,7 @@ interface InitialStateTypes {
 
 export const initialState: InitialStateTypes = {
   filters: {
-    location: "Los Angeles",
+    location: "Dallas, Texas",
     beds: "any",
     baths: "any",
     propertyType: "any",
@@ -28,7 +33,10 @@ export const initialState: InitialStateTypes = {
     availableFrom: "any",
     priceRange: [null, null],
     squareFeet: [null, null],
-    coordinates: [-118.25, 34.05],
+    coordinates: [-96.797, 32.7767],
+    page: 0,
+    size: 20,
+    sort: "newest",
   },
   isFiltersFullOpen: false,
   viewMode: "list",

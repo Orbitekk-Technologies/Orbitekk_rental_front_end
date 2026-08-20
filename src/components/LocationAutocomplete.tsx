@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 export type SelectedLocation = {
   label: string;
   coordinates: [number, number];
+  city?: string;
+  state?: string;
 };
 
 type LocationAutocompleteProps = {
@@ -45,6 +47,7 @@ export default function LocationAutocomplete({
     []
   );
   const sessionToken = useRef(new SessionToken());
+  const suggestionRequest = useRef(0);
   const selectedLabel = useRef<string | null>(null);
   const suggestionsId = useId();
   const [suggestions, setSuggestions] = useState<SearchBoxSuggestion[]>([]);
@@ -65,6 +68,7 @@ export default function LocationAutocomplete({
     }
 
     const controller = new AbortController();
+    const requestId = ++suggestionRequest.current;
     const timeout = window.setTimeout(async () => {
       setIsLoading(true);
       try {
@@ -72,6 +76,7 @@ export default function LocationAutocomplete({
           sessionToken: sessionToken.current,
           signal: controller.signal,
         });
+        if (requestId !== suggestionRequest.current) return;
         setSuggestions(response.suggestions);
         setIsOpen(response.suggestions.length > 0);
         setActiveIndex(-1);
@@ -92,6 +97,8 @@ export default function LocationAutocomplete({
   }, [search, value]);
 
   useEffect(() => {
+    suggestionRequest.current += 1;
+    setSuggestions([]);
     setIsOpen(false);
     setActiveIndex(-1);
   }, [dismissSignal]);
@@ -108,9 +115,12 @@ export default function LocationAutocomplete({
 
       const label = suggestionLabel(suggestion);
       const { longitude, latitude } = feature.properties.coordinates;
+      const context = feature.properties.context;
+      const city = context?.place?.name ?? context?.locality?.name;
+      const state = context?.region?.region_code ?? context?.region?.name;
       selectedLabel.current = label;
       onChange(label);
-      onSelect({ label, coordinates: [longitude, latitude] });
+      onSelect({ label, coordinates: [longitude, latitude], city, state });
       setSuggestions([]);
       setIsOpen(false);
       sessionToken.current = new SessionToken();

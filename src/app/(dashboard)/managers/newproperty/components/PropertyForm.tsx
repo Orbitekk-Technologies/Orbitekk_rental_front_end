@@ -13,6 +13,7 @@ import {
   buildDemoProperty,
   buildPropertyFormData,
   filesToDataUrls,
+  orderPropertyPhotos,
 } from "@/lib/propertyForm";
 import {
   deletePropertyDraft,
@@ -155,22 +156,29 @@ const PropertyForm = ({
 
   const prepareValuesForPersistence = async (values: PropertyFormData) => {
     const uploadedPhotoUrls = await filesToDataUrls(values.photoUrls as File[]);
-    const existingPhotoUrls = [
-      ...(values.existingPhotoUrls ?? []),
-      ...uploadedPhotoUrls,
-    ];
+    const existingPhotoUrls = orderPropertyPhotos(
+      values.photoOrder ?? [],
+      values.existingPhotoUrls ?? [],
+      uploadedPhotoUrls
+    );
 
     if (uploadedPhotoUrls.length > 0) {
       form.setValue("existingPhotoUrls", existingPhotoUrls, {
         shouldDirty: true,
       });
       form.setValue("photoUrls", [], { shouldDirty: true });
+      form.setValue(
+        "photoOrder",
+        existingPhotoUrls.map((_, index) => `existing:${index}`),
+        { shouldDirty: true }
+      );
     }
 
     return {
       ...values,
       photoUrls: [],
       existingPhotoUrls,
+      photoOrder: existingPhotoUrls.map((_, index) => `existing:${index}`),
     } satisfies PropertyFormData;
   };
 

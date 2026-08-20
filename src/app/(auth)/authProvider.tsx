@@ -5,7 +5,11 @@ import { Input } from "@/components/ui/input";
 import PasswordInput from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { api } from "@/state/api";
-import { useLoginMutation, useSignupMutation } from "@/state/api";
+import {
+  useLoginMutation,
+  useResetPasswordMutation,
+  useSignupMutation,
+} from "@/state/api";
 import { useAppDispatch } from "@/state/redux";
 import {
   getStoredAuthIdentity,
@@ -51,12 +55,14 @@ export function useAuth() {
   return context;
 }
 
-function AuthForm({ mode }: { mode: "signin" | "signup" }) {
+function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
   const isSignUp = mode === "signup";
+  const isReset = mode === "forgot-password";
   const { setUser } = useAuth();
   const router = useRouter();
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
   const [signup, { isLoading: isSignupLoading }] = useSignupMutation();
+  const [resetPassword, { isLoading: isResetLoading }] = useResetPasswordMutation();
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -64,7 +70,13 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     const form = new FormData(event.currentTarget);
 
     try {
-      const response = isSignUp
+      const response = isReset
+        ? await resetPassword({
+            email: String(form.get("email")),
+            password: String(form.get("password")),
+            confirmPassword: String(form.get("confirmPassword")),
+          }).unwrap()
+        : isSignUp
         ? await signup({
             email: String(form.get("email")),
             password: String(form.get("password")),
@@ -77,7 +89,9 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
 
       setAccessToken(response.token.accessToken);
       setUser({ userId: response.userId, username: response.username });
-      toast.success(isSignUp ? "Account created." : "Signed in.");
+      toast.success(
+        isReset ? "Password updated." : isSignUp ? "Account created." : "Signed in."
+      );
       const returnTo = new URLSearchParams(window.location.search).get("returnTo");
       const safeReturnTo = returnTo?.startsWith("/") && !returnTo.startsWith("//")
         ? returnTo
@@ -89,7 +103,11 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       toast.error(
         getApiErrorMessage(
           error,
-          isSignUp ? "Could not create account." : "Invalid email or password."
+          isReset
+            ? "Could not update your password."
+            : isSignUp
+              ? "Could not create account."
+              : "Invalid email or password."
         )
       );
     }
@@ -114,7 +132,11 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           </Link>
           <p className="mt-2 text-muted-foreground">
             <span className="font-bold">Welcome!</span>{" "}
-            {isSignUp ? "Create an account to continue" : "Please sign in to continue"}
+            {isReset
+              ? "Update your password to continue"
+              : isSignUp
+                ? "Create an account to continue"
+                : "Please sign in to continue"}
           </p>
         </header>
 
@@ -143,22 +165,22 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             <PasswordInput
               id="password"
               name="password"
-              placeholder={isSignUp ? "Create a password" : "Enter your password"}
-              autoComplete={isSignUp ? "new-password" : "current-password"}
-              minLength={isSignUp ? 10 : undefined}
+              placeholder={isSignUp || isReset ? "Create a password" : "Enter your password"}
+              autoComplete={isSignUp || isReset ? "new-password" : "current-password"}
+              minLength={isSignUp || isReset ? 10 : undefined}
               maxLength={100}
               onFocus={() => setFocusedField("password")}
               onBlur={() => setFocusedField(null)}
               required
             />
-            {isSignUp && focusedField === "password" && (
+            {(isSignUp || isReset) && focusedField === "password" && (
               <p className="text-xs text-muted-foreground">
                 Password must contain between 10 and 100 characters.
               </p>
             )}
           </div>
 
-          {isSignUp && (
+          {(isSignUp || isReset) && (
             <>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">Confirm Password</Label>
@@ -183,14 +205,28 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             </>
           )}
 
-          <Button type="submit" className="mt-2 w-full" disabled={isLoginLoading || isSignupLoading}>
-            {isLoginLoading || isSignupLoading
+          {!isSignUp && !isReset && (
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+          )}
+
+          <Button type="submit" className="mt-2 w-full" disabled={isLoginLoading || isSignupLoading || isResetLoading}>
+            {isLoginLoading || isSignupLoading || isResetLoading
               ? "Please wait..."
-              : isSignUp ? "Create account" : "Sign in"}
+              : isReset ? "Update password" : isSignUp ? "Create account" : "Sign in"}
           </Button>
         </form>
 
         <div className="mt-5 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          {isReset ? (
+            <Link href="/signin" className="text-primary hover:underline">
+              Back to sign in
+            </Link>
+          ) : (
+            <>
           <span>
             {isSignUp ? "Already have an account?" : "Don’t have an account?"}
           </span>
@@ -205,6 +241,8 @@ function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           >
             Google
           </button>
+            </>
+          )}
         </div>
       </section>
     </main>
@@ -240,8 +278,16 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {pathname === "/signin" || pathname === "/signup" ? (
-        <AuthForm mode={pathname === "/signup" ? "signup" : "signin"} />
+      {pathname === "/signin" || pathname === "/signup" || pathname === "/forgot-password" ? (
+        <AuthForm
+          mode={
+            pathname === "/signup"
+              ? "signup"
+              : pathname === "/forgot-password"
+                ? "forgot-password"
+                : "signin"
+          }
+        />
       ) : (
         children
       )}

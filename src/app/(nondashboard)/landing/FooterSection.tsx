@@ -13,14 +13,14 @@ const FooterSection = () => {
   return (
     <footer className="border-t border-gray-200 py-20">
       <div className="max-w-4xl mx-auto px-6 sm:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
           <div className="mb-4">
             <Link href="/" className="text-xl font-bold" scroll={false}>
               SHAGRIHA
             </Link>
           </div>
-          <nav className="mb-4">
-            <ul className="flex space-x-6">
+          <nav className="mb-4" aria-label="Footer navigation">
+            <ul className="flex flex-wrap justify-center gap-x-6 gap-y-3">
               <li>
                 <Link href="/about">About Us</Link>
               </li>
@@ -68,7 +68,7 @@ const FooterSection = () => {
             </a>
           </div>
         </div>
-        <div className="mt-8 text-center text-sm text-gray-500 flex justify-center space-x-4">
+        <div className="mt-8 flex flex-wrap justify-center gap-x-4 gap-y-2 text-center text-sm text-gray-500">
           <span>© ShaGriha. All rights reserved.</span>
           <Link href="/privacy">Privacy Policy</Link>
           <Link href="/terms">Terms of Service</Link>

@@ -1,7 +1,7 @@
 import {
   useAddFavoritePropertyMutation,
   useGetAuthUserQuery,
-  useGetPropertiesQuery,
+  useSearchPropertiesQuery,
   useGetTenantQuery,
   useRemoveFavoritePropertyMutation,
 } from "@/state/api";
@@ -26,10 +26,10 @@ const Listings = () => {
   const filters = useAppSelector((state) => state.global.filters);
 
   const {
-    data: properties,
+    data: result,
     isLoading,
     isError,
-  } = useGetPropertiesQuery(filters);
+  } = useSearchPropertiesQuery(filters);
 
   const handleFavoriteToggle = async (propertyId: number) => {
     if (!authUser) return;
@@ -53,10 +53,12 @@ const Listings = () => {
 
   if (isLoading) return <>Loading...</>;
 
-  if (isError || !properties || properties.length === 0) {
+  if (isError || !result || result.properties.length === 0) {
     return (
       <EmptyState
-        message={`No published properties are currently available in ${filters.location}. Try another location or check back soon.`}
+        message={filters.location
+          ? `No published properties are currently available near ${filters.location}. Try another location or check back soon.`
+          : "No published properties are currently available. Check back soon."}
         className="min-h-full"
       />
     );
@@ -65,14 +67,14 @@ const Listings = () => {
   return (
     <div className="w-full">
       <h3 className="text-sm px-4 font-bold">
-        {properties.length}{" "}
+        {result.totalResults}{" "}
         <span className="text-gray-700 font-normal">
-          Places in {filters.location}
+          {result.matchType === "ALL" ? "Published places" : matchDescription(result.matchType, filters.location, filters.city, filters.state)}
         </span>
       </h3>
       <div className="flex">
         <div className="p-4 w-full">
-          {properties?.map((property) => (
+          {result.properties.map((property) => (
             <CardCompact
                 key={property.id}
                 property={property}
@@ -90,6 +92,13 @@ const Listings = () => {
       </div>
     </div>
   );
+};
+
+const matchDescription = (matchType: string, location: string, city?: string, state?: string) => {
+  if (matchType === "CITY") return `Places in ${city || location}`;
+  if (matchType === "STATE") return `No nearby matches — showing places in ${state || location}`;
+  if (matchType === "RADIUS_EXPANDED") return `Places in the wider ${location} area`;
+  return `Places near ${location}`;
 };
 
 export default Listings;

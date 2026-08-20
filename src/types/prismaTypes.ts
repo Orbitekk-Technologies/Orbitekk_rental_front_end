@@ -75,6 +75,20 @@ export interface Property {
   manager?: Manager;
 }
 
+export type PropertyMatchType =
+  | "ALL" | "NEARBY" | "CITY" | "RADIUS_EXPANDED" | "STATE" | "NONE";
+
+export interface PropertySearchResult {
+  properties: Property[];
+  matchType: PropertyMatchType;
+  searchedLocation?: string;
+  effectiveRadiusKm?: number;
+  totalResults: number;
+  page: number;
+  size: number;
+  totalPages: number;
+}
+
 export interface NearbyPlace {
   name: string;
   category: "GROCERY" | "RESTAURANT" | "PHARMACY" | "GAS_STATION" | "TRANSIT";

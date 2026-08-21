@@ -27,7 +27,7 @@ export default function ManagerOnboardingPage() {
   useEffect(() => {
     if (isAuthReady && !user) {
       router.replace("/signin?returnTo=%2Fmanager%2Fonboarding");
-    } else if (authUser?.userRole === "manager") {
+    } else if (authUser?.userRole === "user") {
       router.replace("/managers/newproperty");
     }
   }, [authUser, isAuthReady, router, user]);
@@ -49,7 +49,7 @@ export default function ManagerOnboardingPage() {
     }
   };
 
-  if (!isAuthReady || !user || isLoading || !authUser || authUser.userRole === "manager") {
+  if (!isAuthReady || !user || isLoading || !authUser || authUser.userRole === "user") {
     return <main className="flex min-h-screen items-center justify-center">Loading...</main>;
   }
 

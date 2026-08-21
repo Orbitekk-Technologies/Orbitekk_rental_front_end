@@ -25,7 +25,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
     if (authUser) {
       const userRole = authUser.userRole?.toLowerCase();
-      if (userRole === "manager" && pathname === "/") {
+      if ((userRole === "manager" || userRole === "user") && pathname === "/") {
         setIsRedirecting(true);
         router.replace("/managers/properties", { scroll: false });
       } else {

@@ -7,33 +7,24 @@ import { NAVBAR_HEIGHT } from "@/lib/constants";
 import React from "react";
 import { useGetAuthUserQuery } from "@/state/api";
 import { useAuth } from "@/app/(auth)/authProvider";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthReady, signOut } = useAuth();
   const { data: authUser, isLoading, isError } = useGetAuthUserQuery(undefined, {
     skip: !isAuthReady || !user,
   });
-  const routeRole = pathname.startsWith("/tenants") ? "tenant" : "manager";
-
   useEffect(() => {
     if (isAuthReady && !user) router.replace("/signin");
     if (isError) {
       signOut();
       router.replace("/signin");
     }
-    if (authUser && authUser.userRole !== routeRole && !(authUser.userRole === "manager" && routeRole === "tenant")) {
-      router.replace(authUser.userRole === "manager" ? "/managers/properties" : "/tenants/residences");
-    }
-  }, [authUser, isAuthReady, isError, routeRole, router, signOut, user]);
+  }, [isAuthReady, isError, router, signOut, user]);
 
-  const canAccessRoute = authUser?.userRole === routeRole ||
-    (authUser?.userRole === "manager" && routeRole === "tenant");
-
-  if (!isAuthReady || !user || isLoading || !authUser || !canAccessRoute) {
+  if (!isAuthReady || !user || isLoading || !authUser) {
     return <>Loading...</>;
   }
 
@@ -43,7 +34,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <Navbar />
         <div style={{ marginTop: `${NAVBAR_HEIGHT}px` }}>
           <main className="flex">
-            <Sidebar userType={authUser.userRole} />
+            <Sidebar userType="user" />
             <div className="flex-grow transition-all duration-300">
               {children}
             </div>

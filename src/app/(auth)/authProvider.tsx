@@ -65,6 +65,40 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
   const [resetPassword, { isLoading: isResetLoading }] = useResetPasswordMutation();
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("oauthError") === "true") {
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage(
+          { type: "shagriha:oauth-error" },
+          window.location.origin
+        );
+        window.close();
+        return;
+      }
+      toast.error("Google sign-in could not be completed.");
+      router.replace("/signin");
+    }
+
+    const completeGoogleSignIn = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === "shagriha:oauth-error") {
+        toast.error("Google sign-in could not be completed.");
+        return;
+      }
+      if (event.data?.type !== "shagriha:oauth-success") return;
+
+      const { accessToken, userId, username } = event.data;
+      if (typeof accessToken !== "string" || typeof userId !== "string") return;
+      setAccessToken(accessToken);
+      setUser({ userId, username: typeof username === "string" ? username : undefined });
+      toast.success("Signed in with Google.");
+      router.replace("/search");
+    };
+
+    window.addEventListener("message", completeGoogleSignIn);
+    return () => window.removeEventListener("message", completeGoogleSignIn);
+  }, [router, setUser]);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -116,7 +150,20 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
   const handleGoogle = () => {
     const apiBase =
       process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1/";
-    window.location.assign(`${apiBase.replace(/\/$/, "")}/oauth2/authorization/google`);
+    const width = 520;
+    const height = 700;
+    const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+    const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+    const popup = window.open(
+      `${apiBase.replace(/\/$/, "")}/oauth2/authorization/google`,
+      "shagriha-google-oauth",
+      `popup=yes,width=${width},height=${height},left=${left},top=${top}`
+    );
+    if (!popup) {
+      toast.error("Allow popups for this site to continue with Google.");
+      return;
+    }
+    popup.focus();
   };
 
   return (

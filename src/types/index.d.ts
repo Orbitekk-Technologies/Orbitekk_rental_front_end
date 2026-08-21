@@ -34,7 +34,7 @@ declare global {
     };
     userId: string;
     username: string;
-    role: "TENANT" | "MANAGER";
+    role: "USER";
   }
 
   enum AmenityEnum {
@@ -147,7 +147,7 @@ declare global {
   }
 
   interface AppSidebarProps {
-    userType: "manager" | "tenant";
+    userType: "manager" | "tenant" | "user";
   }
 
   interface SettingsFormProps {
@@ -162,7 +162,7 @@ declare global {
       username?: string;
     };
     userInfo: Tenant | Manager;
-    userRole: "manager" | "tenant";
+    userRole: "user" | "manager" | "tenant";
   }
 }
 

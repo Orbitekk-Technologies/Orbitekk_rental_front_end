@@ -28,7 +28,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
   const { toggleSidebar, open } = useSidebar();
 
   const navLinks =
-    userType === "manager"
+    userType === "manager" || userType === "user"
       ? [
           { icon: Search, label: "Search Listings", href: "/search" },
           { icon: Heart, label: "Saved Properties", href: "/tenants/favourites" },
@@ -70,7 +70,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
               {open ? (
                 <>
                   <h1 className="text-xl font-bold text-gray-800">
-                    {userType === "manager" ? "My Account" : "Renter View"}
+                    {userType === "manager" || userType === "user" ? "My Account" : "Renter View"}
                   </h1>
                   <button
                     className="hover:bg-gray-100 p-2 rounded-md"

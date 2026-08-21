@@ -32,10 +32,8 @@ const ApplicationModal = ({
   });
 
   const onSubmit = async (data: ApplicationFormData) => {
-    if (!authUser || authUser.userRole !== "tenant") {
-      console.error(
-        "You must be logged in as a tenant to submit an application"
-      );
+    if (!authUser) {
+      console.error("You must be logged in to submit an application");
       return;
     }
 

@@ -164,7 +164,7 @@ export const demoAuthUser: User = {
     phoneNumber: "(312) 555-0100",
     managedProperties: [demoProperty],
   },
-  userRole: "manager",
+  userRole: "user",
 };
 
 function getMergedDemoProperties(): Property[] {
@@ -191,12 +191,12 @@ export function getDemoApiData(
 ) {
   if (url === "auth/me") return demoAuthUser;
   if (url === "auth/enable-manager" && method === "POST") {
-    demoAuthUser.userRole = "manager";
+    demoAuthUser.userRole = "user";
     return {
       token: { accessToken: "demo-manager-token", tokenType: "Bearer", expiresIn: 3600 },
       userId: demoAuthUser.authInfo.userId,
       username: demoAuthUser.authInfo.username,
-      role: "MANAGER",
+      role: "USER",
     };
   }
   if (url === "properties" && method === "POST") return demoProperty;

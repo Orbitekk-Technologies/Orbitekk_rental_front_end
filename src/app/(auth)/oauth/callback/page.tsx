@@ -17,14 +17,31 @@ export default function OAuthCallbackPage() {
     const username = fragment.get("username") ?? undefined;
 
     if (!accessToken || !userId) {
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage(
+          { type: "shagriha:oauth-error" },
+          window.location.origin
+        );
+        window.close();
+        return;
+      }
       toast.error("Google sign-in could not be completed.");
       router.replace("/signin");
       return;
     }
 
+    window.history.replaceState(null, "", window.location.pathname);
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(
+        { type: "shagriha:oauth-success", accessToken, userId, username },
+        window.location.origin
+      );
+      window.close();
+      return;
+    }
+
     setAccessToken(accessToken);
     setUser({ userId, username });
-    window.history.replaceState(null, "", window.location.pathname);
     toast.success("Signed in with Google.");
     router.replace("/search");
   }, [router, setUser]);

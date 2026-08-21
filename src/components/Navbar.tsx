@@ -154,9 +154,7 @@ const Navbar = () => {
                     className="cursor-pointer hover:!bg-primary-700 hover:!text-primary-100 font-bold"
                     onClick={() =>
                       router.push(
-                        authUser.userRole?.toLowerCase() === "manager"
-                          ? "/managers/properties"
-                          : "/tenants/favourites",
+                        "/managers/properties",
                         { scroll: false }
                       )
                     }
@@ -168,7 +166,7 @@ const Navbar = () => {
                     className="cursor-pointer hover:!bg-primary-700 hover:!text-primary-100"
                     onClick={() =>
                       router.push(
-                        `/${authUser.userRole?.toLowerCase()}s/settings`,
+                        "/managers/settings",
                         { scroll: false }
                       )
                     }

@@ -32,7 +32,7 @@ const BasicInformationStep = () => {
           type="select"
           placeholder="Select a stay type"
           options={[
-            { value: "PayingGuest", label: "Paying Guest" },
+            { value: "PayingGuest", label: "Paying Guest/Private Room" },
             { value: "WholeUnit", label: "Whole Unit" },
           ]}
         />

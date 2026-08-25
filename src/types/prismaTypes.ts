@@ -62,6 +62,13 @@ export interface Property {
   highlights: HighlightEnum[];
   isPetsAllowed: boolean;
   isParkingIncluded: boolean;
+  petCount?: number;
+  petFee?: number;
+  parkingFee?: number;
+  smokingIncluded?: boolean;
+  stayType?: "PayingGuest" | "WholeUnit";
+  bathType?: "Private" | "SharedBath";
+  genderPreference?: "Male" | "Female" | "NoPreference";
   beds: number;
   baths: number;
   squareFeet: number;

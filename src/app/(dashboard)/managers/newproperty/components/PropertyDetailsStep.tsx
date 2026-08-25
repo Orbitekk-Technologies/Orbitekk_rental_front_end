@@ -33,12 +33,21 @@ const PropertyDetailsStep = () => {
         <h3 className="text-sm font-semibold text-gray-900">
           Property Details
         </h3>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {stayType === "PayingGuest" && (
           <CustomFormField
-            name="beds"
-            label="Number of Beds"
-            type="number"
+            name="bathType"
+            label="Bath Type"
+            type="radio"
+            options={[
+              { value: "Private", label: "Private" },
+              { value: "SharedBath", label: "Shared" },
+            ]}
           />
+        )}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {stayType === "WholeUnit" && (
+            <CustomFormField name="beds" label="Number of Beds" type="number" />
+          )}
           <CustomFormField
             name="baths"
             label="Number of Baths"
@@ -51,25 +60,43 @@ const PropertyDetailsStep = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <CustomFormField
-            name="isPetsAllowed"
-            label="Pets Allowed"
-            type="radio"
-            options={[
-              { value: "true", label: "Include" },
-              { value: "false", label: "Not Included" },
-            ]}
-          />
-          <CustomFormField
-            name="isParkingIncluded"
-            label="Parking Included"
-            type="radio"
-            options={[
-              { value: "true", label: "Include" },
-              { value: "false", label: "Not Included" },
-            ]}
-          />
+        <div className="space-y-4">
+          <section className="space-y-4">
+            <CustomFormField
+              name="isPetsAllowed"
+              label="Pets Allowed"
+              type="radio"
+              options={[
+                { value: "true", label: "Include" },
+                { value: "false", label: "Not Included" },
+              ]}
+            />
+            {form.watch("isPetsAllowed") && (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <CustomFormField name="petCount" label="Number of Pets (Optional)" type="number" />
+                <CustomFormField name="petFee" label="Pet Price (Optional)" type="number" />
+              </div>
+            )}
+          </section>
+
+          <div className="border-t border-gray-200" />
+
+          <section className="space-y-4">
+            <CustomFormField
+              name="isParkingIncluded"
+              label="Parking Included"
+              type="radio"
+              options={[
+                { value: "true", label: "Include" },
+                { value: "false", label: "Not Included" },
+              ]}
+            />
+            {form.watch("isParkingIncluded") && (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <CustomFormField name="parkingFee" label="Parking Price (Optional)" type="number" />
+              </div>
+            )}
+          </section>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -86,17 +113,6 @@ const PropertyDetailsStep = () => {
               },
             ]}
           />
-          {stayType === "PayingGuest" && (
-            <CustomFormField
-              name="bathType"
-              label="Bath Type"
-              type="select"
-              options={[
-                { value: "Private", label: "Private" },
-                { value: "SharedBath", label: "Shared Bath" },
-              ]}
-            />
-          )}
         </div>
       </section>
     </div>

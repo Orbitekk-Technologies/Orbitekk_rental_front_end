@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,10 +64,14 @@ const STEP_FIELDS: Record<PropertyFormStep, FieldPath<PropertyFormData>[]> = {
     "baths",
     "squareFeet",
     "isPetsAllowed",
+    "petCount",
+    "petFee",
     "isParkingIncluded",
+    "parkingFee",
     "propertyType",
+    "bathType",
   ],
-  amenities: ["amenities", "genderPreference", "photoUrls"],
+  amenities: ["amenities", "smokingIncluded", "genderPreference", "photoUrls"],
 };
 
 const STEP_COPY: Record<
@@ -118,6 +122,7 @@ const PropertyForm = ({
     mode === "edit" ? 2 : initialHighestAccessibleStep
   );
   const [isSavingLocally, setIsSavingLocally] = useState(false);
+  const allowNavigationRef = useRef(false);
 
   const formDefaults = useMemo(
     () => initialValues ?? DEFAULT_PROPERTY_FORM_VALUES,
@@ -127,13 +132,37 @@ const PropertyForm = ({
   const form = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
     defaultValues: formDefaults,
-    mode: "onBlur",
+    mode: "onChange",
+    reValidateMode: "onChange",
     shouldUnregister: false,
   });
 
   const isBusy = isCreating || isUpdating || isSavingLocally;
   const currentStepIndex = STEP_ORDER.indexOf(activeStep);
   const currentCopy = STEP_COPY[activeStep];
+
+  useEffect(() => {
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!form.formState.isDirty || allowNavigationRef.current) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const confirmInternalNavigation = (event: MouseEvent) => {
+      if (!form.formState.isDirty || allowNavigationRef.current) return;
+      const anchor = (event.target as HTMLElement).closest("a");
+      if (!anchor || anchor.target === "_blank" || anchor.origin !== window.location.origin) return;
+      if (!window.confirm("You have unsaved property changes. Leave without saving?")) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    document.addEventListener("click", confirmInternalNavigation, true);
+    return () => {
+      window.removeEventListener("beforeunload", warnBeforeUnload);
+      document.removeEventListener("click", confirmInternalNavigation, true);
+    };
+  }, [form.formState.isDirty]);
 
   const validateCurrentStep = () =>
     form.trigger(STEP_FIELDS[activeStep], {
@@ -201,6 +230,7 @@ const PropertyForm = ({
       });
 
       toast.success("Property draft saved.");
+      allowNavigationRef.current = true;
       router.push("/managers/properties");
     } catch {
       toast.error("Unable to save this property draft.");
@@ -250,6 +280,7 @@ const PropertyForm = ({
             : "Property created successfully."
         );
 
+        allowNavigationRef.current = true;
         router.push(
           exitAfterSave
             ? "/managers/properties"
@@ -265,6 +296,7 @@ const PropertyForm = ({
           : await createProperty(payload).unwrap();
 
       deletePropertyDraft(managerUserId, draftId);
+      allowNavigationRef.current = true;
       router.push(
         exitAfterSave
           ? "/managers/properties"

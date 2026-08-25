@@ -10,6 +10,8 @@ import PropertyLocation from "./PropertyLocation";
 import ContactWidget from "./ContactWidget";
 import ApplicationModal from "./ApplicationModal";
 import { useAuth } from "@/app/(auth)/authProvider";
+import NearbyPlaces from "./NearbyPlaces";
+import FooterSection from "../../landing/FooterSection";
 
 const SingleListing = () => {
   const { id } = useParams();
@@ -23,12 +25,13 @@ const SingleListing = () => {
 
   return (
     <div>
-      <ImagePreviews images={property?.photoUrls?.length ? property.photoUrls : ["/placeholder.jpg"]} />
+      <ImagePreviews images={property?.photoUrls?.length ? property.photoUrls.slice(0, 5) : ["/placeholder.jpg"]} />
       <div className="flex flex-col md:flex-row justify-center gap-10 mx-10 md:w-2/3 md:mx-auto mt-16 mb-8">
         <div className="order-2 md:order-1">
           <PropertyOverview propertyId={propertyId} />
           <PropertyDetails propertyId={propertyId} />
           <PropertyLocation propertyId={propertyId} />
+          <NearbyPlaces propertyId={propertyId} />
         </div>
 
         <div className="order-1 md:order-2">
@@ -38,6 +41,8 @@ const SingleListing = () => {
           />
         </div>
       </div>
+
+      <FooterSection />
 
       {authUser && (
         <ApplicationModal

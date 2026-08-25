@@ -440,19 +440,18 @@ export const api = createApi({
       },
     }),
 
-    createApplication: build.mutation<Application, Partial<Application>>({
+    createApplication: build.mutation<
+      Application,
+      Pick<Application, "propertyId" | "name" | "email" | "phoneNumber"> & {
+        message?: string;
+      }
+    >({
       query: (body) => ({
         url: `applications`,
         method: "POST",
         body: body,
       }),
       invalidatesTags: ["Applications"],
-      async onQueryStarted(_, { queryFulfilled }) {
-        await withToast(queryFulfilled, {
-          success: "Application created successfully!",
-          error: "Failed to create applications.",
-        });
-      },
     }),
   }),
 });

@@ -198,7 +198,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
           <RadioGroup
             value={String(field.value)}
             onValueChange={(value) =>
-              field.onChange(
+              field.onChange(singleSelection ? [value] :
                 value === "true" ? true : value === "false" ? false : value
               )
             }
@@ -240,7 +240,8 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
       case "number":
         return (
           <Input
-            type="number"
+            type="text"
+            inputMode="numeric"
             placeholder={placeholder}
             {...field}
             value={field.value ?? ""}

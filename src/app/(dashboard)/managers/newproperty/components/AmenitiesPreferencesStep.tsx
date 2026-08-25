@@ -32,14 +32,22 @@ const AmenitiesPreferencesStep = () => {
   useEffect(() => {
     const validItems = new Set(defaultOrder);
     setOrder((current) => {
-      const next = [
+      return [
         ...current.filter((item) => validItems.has(item)),
         ...defaultOrder.filter((item) => !current.includes(item)),
       ];
-      form.setValue("photoOrder", next, { shouldDirty: true });
-      return next;
     });
   }, [existingPhotoUrls.length, uploadedPhotos.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const currentOrder = form.getValues("photoOrder") ?? [];
+    if (
+      currentOrder.length === order.length &&
+      currentOrder.every((item, index) => item === order[index])
+    ) return;
+
+    form.setValue("photoOrder", order, { shouldDirty: true });
+  }, [form, order]);
 
   const movePhoto = (source: string, destination: string) => {
     if (source === destination) return;
@@ -86,7 +94,7 @@ const AmenitiesPreferencesStep = () => {
     <div className="space-y-7">
       <section className="space-y-5">
         <h3 className="text-sm font-semibold text-gray-900">
-          Amenities and Gender Preference
+          Amenities
         </h3>
         <CustomFormField
           name="amenities"
@@ -94,10 +102,31 @@ const AmenitiesPreferencesStep = () => {
           type="checkbox-group"
           options={PROPERTY_AMENITY_OPTIONS}
         />
+      </section>
+
+      <div className="border-t border-gray-200" />
+
+      <section className="space-y-5">
+        <h3 className="text-sm font-semibold text-gray-900">Smoking</h3>
+        <CustomFormField
+          name="smokingIncluded"
+          label="Smoking"
+          type="radio"
+          options={[
+            { value: "true", label: "Included" },
+            { value: "false", label: "Not Included" },
+          ]}
+        />
+      </section>
+
+      <div className="border-t border-gray-200" />
+
+      <section className="space-y-5">
+        <h3 className="text-sm font-semibold text-gray-900">Gender Preference</h3>
         <CustomFormField
           name="genderPreference"
           label="Gender Preference"
-          type="checkbox-group"
+          type="radio"
           singleSelection
           options={[
             { value: "NoPreference", label: "No Preference" },

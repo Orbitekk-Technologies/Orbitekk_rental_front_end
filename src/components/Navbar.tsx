@@ -8,7 +8,8 @@ import { Button } from "./ui/button";
 import { useGetAuthUserQuery } from "@/state/api";
 import { useAuth } from "@/app/(auth)/authProvider";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Menu, MessageCircle, Plus } from "lucide-react";
+import { Menu, Plus } from "lucide-react";
+// import { Bell, MessageCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,7 +75,7 @@ const Navbar = () => {
           >
             <div className="flex items-center gap-3">
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="Shagriha logo"
                 width={24}
                 height={24}
@@ -128,6 +129,7 @@ const Navbar = () => {
           )}
           {authUser ? (
             <>
+              {/* Uncomment after chat & notification implementation.
               <div className="relative hidden md:block">
                 <MessageCircle className="w-6 h-6 cursor-pointer text-primary-200 hover:text-primary-400" />
                 <span className="absolute top-0 right-0 w-2 h-2 bg-secondary-700 rounded-full"></span>
@@ -136,6 +138,7 @@ const Navbar = () => {
                 <Bell className="w-6 h-6 cursor-pointer text-primary-200 hover:text-primary-400" />
                 <span className="absolute top-0 right-0 w-2 h-2 bg-secondary-700 rounded-full"></span>
               </div>
+              */}
 
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-2 focus:outline-none">

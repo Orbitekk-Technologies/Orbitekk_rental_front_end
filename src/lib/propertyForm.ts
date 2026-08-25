@@ -10,6 +10,10 @@ export const DEFAULT_PROPERTY_FORM_VALUES: PropertyFormData = {
   securityDeposit: 500,
   isPetsAllowed: false,
   isParkingIncluded: false,
+  petCount: undefined,
+  petFee: undefined,
+  parkingFee: undefined,
+  smokingIncluded: false,
   photoUrls: [],
   existingPhotoUrls: [],
   photoOrder: [],
@@ -44,6 +48,13 @@ export function propertyToFormValues(property: Property): PropertyFormData {
     securityDeposit: property.securityDeposit ?? 0,
     isPetsAllowed: property.isPetsAllowed ?? false,
     isParkingIncluded: property.isParkingIncluded ?? false,
+    petCount: property.petCount,
+    petFee: property.petFee,
+    parkingFee: property.parkingFee,
+    smokingIncluded: property.smokingIncluded ?? property.amenities?.includes(AmenityEnum.SmokeFree) ?? false,
+    stayType: property.stayType ?? "WholeUnit",
+    bathType: property.bathType ?? "Private",
+    genderPreference: [property.genderPreference ?? "NoPreference"],
     photoUrls: [],
     existingPhotoUrls: property.photoUrls ?? [],
     photoOrder: (property.photoUrls ?? []).map((_, index) => `existing:${index}`),
@@ -77,6 +88,7 @@ export function buildPropertyFormData(values: PropertyFormData): FormData {
   const formData = new FormData();
 
   Object.entries(values).forEach(([key, value]) => {
+    if (value == null) return;
     if (key === "photoUrls") {
       (value as File[]).forEach((file) => formData.append("photos", file));
       return;
@@ -87,6 +99,12 @@ export function buildPropertyFormData(values: PropertyFormData): FormData {
       return;
     }
 
+    if (key === "beds" && values.stayType === "PayingGuest") {
+      formData.append(key, "0");
+      return;
+    }
+    if ((key === "petCount" || key === "petFee") && !values.isPetsAllowed) return;
+    if (key === "parkingFee" && !values.isParkingIncluded) return;
     formData.append(key, String(value));
   });
 
@@ -144,7 +162,14 @@ export function buildDemoProperty(
     highlights: existing?.highlights ?? [],
     isPetsAllowed: values.isPetsAllowed,
     isParkingIncluded: values.isParkingIncluded,
-    beds: Number(values.beds),
+    petCount: values.isPetsAllowed ? values.petCount : undefined,
+    petFee: values.isPetsAllowed ? values.petFee : undefined,
+    parkingFee: values.isParkingIncluded ? values.parkingFee : undefined,
+    smokingIncluded: values.smokingIncluded,
+    stayType: values.stayType,
+    bathType: values.bathType,
+    genderPreference: values.genderPreference[0],
+    beds: values.stayType === "PayingGuest" ? 0 : Number(values.beds),
     baths: Number(values.baths),
     squareFeet: Number(values.squareFeet),
     propertyType: values.propertyType,
@@ -182,7 +207,6 @@ export const PROPERTY_AMENITY_OPTIONS = [
   { value: AmenityEnum.Parking, label: "Parking" },
   { value: AmenityEnum.Refrigerator, label: "Refrigerator" },
   { value: AmenityEnum.PetsAllowed, label: "Pets Allowed" },
-  { value: AmenityEnum.SmokeFree, label: "Smoke Free" },
   { value: AmenityEnum.Pool, label: "Pool" },
   { value: AmenityEnum.Gym, label: "Gym" },
 ];

@@ -8,17 +8,19 @@ import {
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { ApplicationFormData, applicationSchema } from "@/lib/schemas";
+import { getApiErrorMessage } from "@/lib/apiError";
 import { useCreateApplicationMutation, useGetAuthUserQuery } from "@/state/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const ApplicationModal = ({
   isOpen,
   onClose,
   propertyId,
 }: ApplicationModalProps) => {
-  const [createApplication] = useCreateApplicationMutation();
+  const [createApplication, { isLoading }] = useCreateApplicationMutation();
   const { data: authUser } = useGetAuthUserQuery();
 
   const form = useForm<ApplicationFormData>({
@@ -37,14 +39,16 @@ const ApplicationModal = ({
       return;
     }
 
-    await createApplication({
-      ...data,
-      applicationDate: new Date().toISOString(),
-      status: "Pending",
-      propertyId: propertyId,
-      tenantUserId: authUser.authInfo.userId,
-    });
-    onClose();
+    try {
+      await createApplication({ ...data, propertyId }).unwrap();
+      toast.success("Application submitted successfully.");
+      form.reset();
+      onClose();
+    } catch (error) {
+      toast.error(
+        getApiErrorMessage(error, "Unable to submit your application.")
+      );
+    }
   };
 
   return (
@@ -79,8 +83,12 @@ const ApplicationModal = ({
               type="textarea"
               placeholder="Enter any additional information"
             />
-            <Button type="submit" className="bg-primary-700 text-white w-full">
-              Submit Application
+            <Button
+              type="submit"
+              className="bg-primary-700 text-white w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Submitting..." : "Submit Application"}
             </Button>
           </form>
         </Form>

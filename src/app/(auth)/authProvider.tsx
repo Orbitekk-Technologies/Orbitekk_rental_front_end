@@ -30,6 +30,7 @@ import {
   useEffect,
 } from "react";
 import { toast } from "sonner";
+import { CircleAlert } from "lucide-react";
 
 export type AuthIdentity = {
   userId: string;
@@ -64,6 +65,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
   const [signup, { isLoading: isSignupLoading }] = useSignupMutation();
   const [resetPassword, { isLoading: isResetLoading }] = useResetPasswordMutation();
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("oauthError") === "true") {
@@ -102,23 +104,40 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const email = String(form.get("email") ?? "").trim();
+    const password = String(form.get("password") ?? "");
+    const confirmPassword = String(form.get("confirmPassword") ?? "");
+    setFormError(null);
+
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      setFormError("Enter a valid email address.");
+      return;
+    }
+    if ((isSignUp || isReset) && (password.length < 10 || password.length > 100)) {
+      setFormError("Password must contain between 10 and 100 characters.");
+      return;
+    }
+    if ((isSignUp || isReset) && password !== confirmPassword) {
+      setFormError("Passwords do not match.");
+      return;
+    }
 
     try {
       const response = isReset
         ? await resetPassword({
-            email: String(form.get("email")),
-            password: String(form.get("password")),
-            confirmPassword: String(form.get("confirmPassword")),
+            email,
+            password,
+            confirmPassword,
           }).unwrap()
         : isSignUp
         ? await signup({
-            email: String(form.get("email")),
-            password: String(form.get("password")),
-            confirmPassword: String(form.get("confirmPassword")),
+            email,
+            password,
+            confirmPassword,
           }).unwrap()
         : await login({
-            login: String(form.get("email")),
-            password: String(form.get("password")),
+            login: email,
+            password,
           }).unwrap();
 
       setAccessToken(response.token.accessToken);
@@ -188,6 +207,12 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
         </header>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+          {formError && (
+            <div role="alert" className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
+              <CircleAlert aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{formError}</span>
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input

@@ -2,7 +2,7 @@ import { useGetPropertyQuery } from "@/state/api";
 import { Compass, MapPin } from "lucide-react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
@@ -13,19 +13,29 @@ const PropertyLocation = ({ propertyId }: PropertyDetailsProps) => {
     isLoading,
   } = useGetPropertyQuery(propertyId);
   const mapContainerRef = useRef(null);
+  const [mapError, setMapError] = useState(false);
 
   useEffect(() => {
     if (isLoading || isError || !property) return;
 
+    if (!mapboxgl.accessToken) {
+      setMapError(true);
+      return;
+    }
+
+    setMapError(false);
     const map = new mapboxgl.Map({
       container: mapContainerRef.current!,
-      style: "mapbox://styles/yuvi3123/cmsz24p3400aa01s9gniy9yvc",
+      style: "mapbox://styles/mapbox/streets-v12",
       center: [
         property.location.coordinates.longitude,
         property.location.coordinates.latitude,
       ],
       zoom: 14,
     });
+
+    map.on("error", () => setMapError(true));
+    map.on("load", () => setMapError(false));
 
     const marker = new mapboxgl.Marker()
       .setLngLat([
@@ -71,10 +81,14 @@ const PropertyLocation = ({ propertyId }: PropertyDetailsProps) => {
           Get Directions
         </a>
       </div>
-      <div
-        className="relative mt-4 h-[300px] rounded-lg overflow-hidden"
-        ref={mapContainerRef}
-      />
+      <div className="relative mt-4 h-[300px] overflow-hidden rounded-lg bg-gray-100">
+        <div className="absolute inset-0" ref={mapContainerRef} />
+        {mapError && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-100 px-6 text-center text-sm text-gray-600">
+            The map is temporarily unavailable. Use Get Directions to view this location.
+          </div>
+        )}
+      </div>
     </div>
   );
 };

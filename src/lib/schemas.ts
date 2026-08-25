@@ -10,15 +10,22 @@ export const propertySchema = z
     description: z.string().trim(),
     stayType: z.enum(["PayingGuest", "WholeUnit"]),
     pricePerMonth: z.coerce
-      .number()
-      .nonnegative("Monthly rent cannot be negative")
+      .number({ invalid_type_error: "Only whole numbers are allowed" })
+      .positive("Monthly rent must be greater than zero")
       .int("Monthly rent must be a whole number"),
     securityDeposit: z.coerce
-      .number()
+      .number({ invalid_type_error: "Only whole numbers are allowed" })
       .nonnegative("Security deposit cannot be negative")
       .int("Security deposit must be a whole number"),
     isPetsAllowed: z.boolean(),
     isParkingIncluded: z.boolean(),
+    petCount: z.preprocess((value) => value === "" || value == null ? undefined : value,
+      z.coerce.number({ invalid_type_error: "Only whole numbers are allowed" }).nonnegative("Number of pets cannot be negative").int("Only whole numbers are allowed").optional()),
+    petFee: z.preprocess((value) => value === "" || value == null ? undefined : value,
+      z.coerce.number({ invalid_type_error: "Only whole numbers are allowed" }).nonnegative("Pet price cannot be negative").int("Only whole numbers are allowed").optional()),
+    parkingFee: z.preprocess((value) => value === "" || value == null ? undefined : value,
+      z.coerce.number({ invalid_type_error: "Only whole numbers are allowed" }).nonnegative("Parking price cannot be negative").int("Only whole numbers are allowed").optional()),
+    smokingIncluded: z.boolean(),
     photoUrls: z.array(browserFileSchema).default([]),
     existingPhotoUrls: z.array(z.string()).default([]),
     photoOrder: z.array(z.string()).default([]),
@@ -30,17 +37,17 @@ export const propertySchema = z
       .array(z.enum(["Male", "Female", "NoPreference"]))
       .length(1, "Select one gender preference"),
     beds: z.coerce
-      .number()
+      .number({ invalid_type_error: "Only whole numbers are allowed" })
       .nonnegative("Beds cannot be negative")
       .max(10)
       .int(),
     baths: z.coerce
-      .number()
+      .number({ invalid_type_error: "Only whole numbers are allowed" })
       .nonnegative("Baths cannot be negative")
       .max(10)
       .int(),
     squareFeet: z.coerce
-      .number()
+      .number({ invalid_type_error: "Only whole numbers are allowed" })
       .positive("Square feet must be greater than zero")
       .int(),
     propertyType: z.nativeEnum(PropertyTypeEnum),

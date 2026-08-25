@@ -136,7 +136,13 @@ const FiltersBar = () => {
         </Button>
 
         {/* Search Location */}
-        <div className="flex items-center">
+        <form
+          className="flex items-center"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleLocationSearch();
+          }}
+        >
           <LocationAutocomplete
             placeholder="Search location"
             value={searchInput}
@@ -149,13 +155,13 @@ const FiltersBar = () => {
             className="w-56 rounded-l-xl border border-r-0 border-primary-400"
           />
           <Button
-            onClick={handleLocationSearch}
+            type="submit"
             className={`rounded-r-xl rounded-l-none border-l-none border-primary-400 shadow-none 
               border hover:bg-primary-700 hover:text-primary-50`}
           >
             <Search className="w-4 h-4" />
           </Button>
-        </div>
+        </form>
 
         {/* Price Range */}
         <div className="flex gap-1">

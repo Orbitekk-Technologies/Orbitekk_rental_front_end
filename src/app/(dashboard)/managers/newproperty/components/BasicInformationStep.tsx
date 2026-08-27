@@ -9,14 +9,15 @@ const BasicInformationStep = () => {
       <section className="space-y-5">
         <CustomFormField
           name="name"
-          label="Property Name (Optional)"
+          label="Property Name"
           placeholder="Enter the property name"
         />
         <CustomFormField
           name="description"
-          label="Description (Optional)"
+          label="Description"
           type="textarea"
           placeholder="Describe the property, neighborhood, and key features"
+          inputClassName="min-h-40"
         />
       </section>
 

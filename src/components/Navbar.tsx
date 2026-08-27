@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 import { useGetAuthUserQuery } from "@/state/api";
 import { useAuth } from "@/app/(auth)/authProvider";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, Plus } from "lucide-react";
+import { Heart, Menu, Plus } from "lucide-react";
 // import { Bell, MessageCircle } from "lucide-react";
 import {
   DropdownMenu,
@@ -117,6 +117,15 @@ const Navbar = () => {
           </nav>
         )}
         <div className="flex items-center gap-5">
+          {authUser && !isDashboardPage && (
+            <Link
+              href="/tenants/favourites"
+              className="hidden items-center gap-2 font-medium text-primary-100 transition-colors hover:text-secondary-500 lg:flex"
+            >
+              <Heart className="h-4 w-4" />
+              Saved Properties
+            </Link>
+          )}
           {!isDashboardPage && (
             <Button
               variant="ghost"
@@ -233,6 +242,14 @@ const Navbar = () => {
                       </Link>
                     </SheetClose>
                   ))}
+                  {authUser && (
+                    <SheetClose asChild>
+                      <Link href="/tenants/favourites" className="flex items-center gap-2 px-3 py-3 text-base font-medium text-white hover:text-secondary-500">
+                        <Heart className="h-4 w-4" />
+                        Saved Properties
+                      </Link>
+                    </SheetClose>
+                  )}
                 </nav>
                 <div className="mt-auto space-y-3">
                   <SheetClose asChild>

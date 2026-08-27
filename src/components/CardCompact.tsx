@@ -1,6 +1,6 @@
-import { Bath, Bed, Heart, House, Star } from "lucide-react";
+import { Bath, Bed, Heart, House } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const CardCompact = ({
@@ -13,9 +13,25 @@ const CardCompact = ({
   const [imgSrc, setImgSrc] = useState(
     property.photoUrls?.[0] || "/placeholder.jpg"
   );
+  const router = useRouter();
+
+  const openProperty = () => {
+    if (propertyLink) router.push(propertyLink, { scroll: false });
+  };
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-lg w-full flex h-40 mb-5">
+    <article
+      className={`bg-white rounded-xl overflow-hidden shadow-sm w-full flex h-40 mb-5 transition-all duration-200 ${propertyLink ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-8px_rgba(151,71,255,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500" : ""}`}
+      onClick={openProperty}
+      onKeyDown={(event) => {
+        if (propertyLink && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          openProperty();
+        }
+      }}
+      role={propertyLink ? "link" : undefined}
+      tabIndex={propertyLink ? 0 : undefined}
+    >
       <div className="relative w-1/3">
         <Image
           src={imgSrc}
@@ -42,22 +58,16 @@ const CardCompact = ({
         <div>
           <div className="flex justify-between items-start">
             <h2 className="text-xl font-bold mb-1">
-              {propertyLink ? (
-                <Link
-                  href={propertyLink}
-                  className="hover:underline hover:text-blue-600"
-                  scroll={false}
-                >
-                  {property.name}
-                </Link>
-              ) : (
-                property.name
-              )}
+              {property.name}
             </h2>
             {showFavoriteButton && (
               <button
                 className="bg-white rounded-full p-1"
-                onClick={onFavoriteToggle}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onFavoriteToggle?.();
+                }}
+                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
               >
                 <Heart
                   className={`w-4 h-4 ${
@@ -70,6 +80,7 @@ const CardCompact = ({
           <p className="text-gray-600 mb-1 text-sm">
             {property?.location?.address}, {property?.location?.city}
           </p>
+          {/* Reviews and ratings are hidden until that feature is reintroduced.
           <div className="flex text-sm items-center">
             <Star className="w-3 h-3 text-yellow-400 mr-1" />
             <span className="font-semibold">
@@ -79,6 +90,7 @@ const CardCompact = ({
               ({property.numberOfReviews})
             </span>
           </div>
+          */}
         </div>
         <div className="flex justify-between items-center text-sm">
           <div className="flex gap-2 text-gray-600">
@@ -102,7 +114,7 @@ const CardCompact = ({
           </p>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

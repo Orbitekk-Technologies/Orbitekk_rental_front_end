@@ -1,5 +1,5 @@
 import { useGetPropertyQuery } from "@/state/api";
-import { MapPin, Star } from "lucide-react";
+import { MapPin } from "lucide-react";
 import React from "react";
 
 const PropertyOverview = ({ propertyId }: PropertyOverviewProps) => {
@@ -32,11 +32,13 @@ const PropertyOverview = ({ propertyId }: PropertyOverviewProps) => {
             {property.location?.country}
           </span>
           <div className="flex justify-between items-center gap-3">
+            {/* Reviews and ratings are hidden until that feature is reintroduced.
             <span className="flex items-center text-yellow-500">
               <Star className="w-4 h-4 mr-1 fill-current" />
               {property.averageRating.toFixed(1)} ({property.numberOfReviews}{" "}
               Reviews)
             </span>
+            */}
             <span className="text-green-600">Verified Listing</span>
           </div>
         </div>

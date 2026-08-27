@@ -1,4 +1,4 @@
-import { Bath, Bed, Heart, House, Star } from "lucide-react";
+import { Bath, Bed, Heart, House } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -70,6 +70,7 @@ const Card = ({
           {property?.location?.address}, {property?.location?.city}
         </p>
         <div className="flex justify-between items-center">
+          {/* Reviews and ratings are hidden until that feature is reintroduced.
           <div className="flex items-center mb-2">
             <Star className="w-4 h-4 text-yellow-400 mr-1" />
             <span className="font-semibold">
@@ -79,6 +80,7 @@ const Card = ({
               ({property.numberOfReviews} Reviews)
             </span>
           </div>
+          */}
           <p className="text-lg font-bold mb-3">
             ${property.pricePerMonth.toFixed(0)}{" "}
             <span className="text-gray-600 text-base font-normal"> /month</span>

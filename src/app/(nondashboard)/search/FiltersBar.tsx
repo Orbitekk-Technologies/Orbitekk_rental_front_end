@@ -5,12 +5,12 @@ import {
 } from "@/state";
 import { useAppSelector } from "@/state/redux";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { debounce } from "lodash";
-import { cleanParams, cn, formatPriceValue } from "@/lib/utils";
+import { cleanParams, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Filter, Search } from "lucide-react";
+import { ChevronDown, Filter, Search } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import LocationAutocomplete, { type SelectedLocation } from "@/components/LocationAutocomplete";
 import {
   Select,
@@ -32,8 +32,20 @@ const FiltersBar = () => {
   const [searchInput, setSearchInput] = useState(filters.location);
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
   const [dismissSuggestions, setDismissSuggestions] = useState(0);
+  const [priceDraft, setPriceDraft] = useState<[number, number]>([
+    filters.priceRange[0] ?? 0,
+    filters.priceRange[1] ?? 10000,
+  ]);
 
-  const updateURL = debounce((newFilters: FiltersState) => {
+  useEffect(() => {
+    setPriceDraft([filters.priceRange[0] ?? 0, filters.priceRange[1] ?? 10000]);
+  }, [filters.priceRange]);
+
+  useEffect(() => {
+    setSearchInput(filters.location);
+  }, [filters.location]);
+
+  const updateURL = (newFilters: FiltersState) => {
     const cleanFilters = cleanParams(newFilters);
     const updatedSearchParams = new URLSearchParams();
 
@@ -44,8 +56,8 @@ const FiltersBar = () => {
       );
     });
 
-    router.push(`${pathname}?${updatedSearchParams.toString()}`);
-  });
+    router.replace(`${pathname}?${updatedSearchParams.toString()}`, { scroll: false });
+  };
 
   const handleFilterChange = (
     key: string,
@@ -56,18 +68,25 @@ const FiltersBar = () => {
 
     if (key === "priceRange" || key === "squareFeet") {
       const currentArrayRange = [...filters[key]];
-      if (isMin !== null) {
+      if (isMin === null && Array.isArray(value)) {
+        newValue = value;
+      } else if (isMin !== null) {
         const index = isMin ? 0 : 1;
         currentArrayRange[index] = value === "any" ? null : Number(value);
+        newValue = currentArrayRange;
       }
-      newValue = currentArrayRange;
     } else if (key === "coordinates") {
       newValue = value === "any" ? [0, 0] : value.map(Number);
     } else {
       newValue = value === "any" ? "any" : value;
     }
 
-    const newFilters = { ...filters, [key]: newValue };
+    const unitRules = key === "stayType"
+      ? newValue === "PayingGuest"
+        ? { beds: "1", baths: "1" }
+        : { bathType: "any" }
+      : {};
+    const newFilters = { ...filters, [key]: newValue, ...unitRules, page: 0 };
     dispatch(setFilters(newFilters));
     updateURL(newFilters);
   };
@@ -164,87 +183,44 @@ const FiltersBar = () => {
         </form>
 
         {/* Price Range */}
-        <div className="flex gap-1">
-          {/* Minimum Price Selector */}
-          <Select
-            value={filters.priceRange[0]?.toString() || "any"}
-            onValueChange={(value) =>
-              handleFilterChange("priceRange", value, true)
-            }
-          >
-            <SelectTrigger className="w-22 rounded-xl border-primary-400">
-              <SelectValue>
-                {formatPriceValue(filters.priceRange[0], true)}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="any">Any Min Price</SelectItem>
-              {[500, 1000, 1500, 2000, 3000, 5000, 10000].map((price) => (
-                <SelectItem key={price} value={price.toString()}>
-                  ${price / 1000}k+
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <details className="group relative">
+          <summary className="flex h-10 min-w-36 cursor-pointer list-none items-center justify-between gap-2 rounded-xl border border-primary-400 bg-white px-3 text-sm [&::-webkit-details-marker]:hidden">
+            <span>
+              {`$${(filters.priceRange[0] ?? 0).toLocaleString()} to $${filters.priceRange[1] == null ? "10k" : filters.priceRange[1].toLocaleString()}`}
+            </span>
+            <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="absolute left-0 top-12 z-50 w-72 rounded-xl border border-gray-200 bg-white p-5 shadow-xl">
+            <p className="mb-5 text-sm font-semibold">Monthly Price Range</p>
+            <Slider
+              min={0}
+              max={10000}
+              step={100}
+              value={priceDraft}
+              onValueChange={(value) => setPriceDraft(value as [number, number])}
+              onValueCommit={(value) => handleFilterChange("priceRange", value, null)}
+            />
+            <div className="mt-3 flex justify-between text-sm text-gray-700">
+              <span>${priceDraft[0].toLocaleString()}</span>
+              <span>${priceDraft[1].toLocaleString()}</span>
+            </div>
+            <Button variant="ghost" className="mt-3 h-8 w-full" onClick={() => { setPriceDraft([0, 10000]); handleFilterChange("priceRange", [null, null], null); }}>
+              Clear price range
+            </Button>
+          </div>
+        </details>
 
-          {/* Maximum Price Selector */}
-          <Select
-            value={filters.priceRange[1]?.toString() || "any"}
-            onValueChange={(value) =>
-              handleFilterChange("priceRange", value, false)
-            }
-          >
-            <SelectTrigger className="w-22 rounded-xl border-primary-400">
-              <SelectValue>
-                {formatPriceValue(filters.priceRange[1], false)}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="any">Any Max Price</SelectItem>
-              {[1000, 2000, 3000, 5000, 10000].map((price) => (
-                <SelectItem key={price} value={price.toString()}>
-                  &lt;${price / 1000}k
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Beds and Baths */}
-        <div className="flex gap-1">
-          {/* Beds */}
-          <Select
-            value={filters.beds}
-            onValueChange={(value) => handleFilterChange("beds", value, null)}
-          >
-            <SelectTrigger className="w-26 rounded-xl border-primary-400">
-              <SelectValue placeholder="Beds" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="any">Any Beds</SelectItem>
-              <SelectItem value="1">1+ bed</SelectItem>
-              <SelectItem value="2">2+ beds</SelectItem>
-              <SelectItem value="3">3+ beds</SelectItem>
-              <SelectItem value="4">4+ beds</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Baths */}
-          <Select
-            value={filters.baths}
-            onValueChange={(value) => handleFilterChange("baths", value, null)}
-          >
-            <SelectTrigger className="w-26 rounded-xl border-primary-400">
-              <SelectValue placeholder="Baths" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="any">Any Baths</SelectItem>
-              <SelectItem value="1">1+ bath</SelectItem>
-              <SelectItem value="2">2+ baths</SelectItem>
-              <SelectItem value="3">3+ baths</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Unit Type */}
+        <Select value={filters.stayType} onValueChange={(value) => handleFilterChange("stayType", value, null)}>
+          <SelectTrigger className="w-36 rounded-xl border-primary-400">
+            <SelectValue placeholder="Unit Type" />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem value="any">Any Unit Type</SelectItem>
+            <SelectItem value="WholeUnit">Whole Unit</SelectItem>
+            <SelectItem value="PayingGuest">Private Room</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Property Type */}
         <Select

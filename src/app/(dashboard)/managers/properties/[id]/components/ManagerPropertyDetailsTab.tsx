@@ -10,7 +10,7 @@ import {
 } from "@/lib/constants";
 import { formatEnumString } from "@/lib/utils";
 import type { Property } from "@/types/prismaTypes";
-import { HelpCircle, MapPin, Star } from "lucide-react";
+import { HelpCircle, MapPin } from "lucide-react";
 
 interface ManagerPropertyDetailsTabProps {
   property: Property;
@@ -69,11 +69,13 @@ const ManagerPropertyDetailsTab = ({
             </span>
 
             <div className="flex flex-wrap items-center gap-3">
+              {/* Reviews and ratings are hidden until that feature is reintroduced.
               <span className="flex items-center text-yellow-500">
                 <Star className="mr-1 h-4 w-4 fill-current" />
                 {property.averageRating.toFixed(1)} ({property.numberOfReviews}{" "}
                 Reviews)
               </span>
+              */}
               <span className="font-medium text-green-600">Verified Listing</span>
             </div>
           </div>

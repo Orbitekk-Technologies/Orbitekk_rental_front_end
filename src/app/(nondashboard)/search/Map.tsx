@@ -9,7 +9,7 @@ import { Property } from "@/types/prismaTypes";
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
 const Map = () => {
-  const mapContainerRef = useRef(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const filters = useAppSelector((state) => state.global.filters);
   const {
     data: result,
@@ -20,8 +20,11 @@ const Map = () => {
   useEffect(() => {
     if (isLoading || isError || !result) return;
 
+    const container = mapContainerRef.current;
+    if (!container) return;
+
     const map = new mapboxgl.Map({
-      container: mapContainerRef.current!,
+      container,
       style: "mapbox://styles/shagrihaadmin/cmt4yvuv300et01s4a9sy8rad",
       center: filters.coordinates.some((coordinate) => coordinate !== 0)
         ? filters.coordinates
@@ -36,12 +39,21 @@ const Map = () => {
       if (path) path.setAttribute("fill", "#000000");
     });
 
+    let active = true;
     const resizeMap = () => {
-      if (map) setTimeout(() => map.resize(), 700);
+      if (active && container.isConnected) map.resize();
     };
-    resizeMap();
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(resizeMap);
+    });
+    resizeObserver.observe(container);
+    map.once("load", resizeMap);
 
-    return () => map.remove();
+    return () => {
+      active = false;
+      resizeObserver.disconnect();
+      map.remove();
+    };
   }, [isLoading, isError, result, filters.coordinates]);
 
   if (isLoading) return <>Loading...</>;

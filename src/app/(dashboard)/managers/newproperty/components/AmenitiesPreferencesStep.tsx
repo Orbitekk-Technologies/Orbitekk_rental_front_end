@@ -106,6 +106,7 @@ const AmenitiesPreferencesStep = () => {
 
       <div className="border-t border-gray-200" />
 
+      {/* Gender preference is hidden for now. Keep this block for later reuse.
       <section className="space-y-5">
         <h3 className="text-sm font-semibold text-gray-900">Smoking</h3>
         <CustomFormField
@@ -118,6 +119,7 @@ const AmenitiesPreferencesStep = () => {
           ]}
         />
       </section>
+      */}
 
       <div className="border-t border-gray-200" />
 

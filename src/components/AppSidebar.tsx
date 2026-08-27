@@ -12,7 +12,6 @@ import {
 import {
   Building,
   FileText,
-  Heart,
   Home,
   Menu,
   Search,
@@ -31,7 +30,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
     userType === "manager" || userType === "user"
       ? [
           { icon: Search, label: "Search Listings", href: "/search" },
-          { icon: Heart, label: "Saved Properties", href: "/tenants/favourites" },
+          // Saved Properties now lives in the authenticated top navigation.
           { icon: FileText, label: "My Applications", href: "/tenants/applications" },
           { icon: Home, label: "My Residences", href: "/tenants/residences" },
           { icon: Building, label: "Properties", href: "/managers/properties" },
@@ -39,7 +38,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
           { icon: Settings, label: "Manager Settings", href: "/managers/settings" },
         ]
       : [
-          { icon: Heart, label: "Favourites", href: "/tenants/favourites" },
+          // Favourites now lives in the authenticated top navigation.
           {
             icon: FileText,
             label: "Applications",

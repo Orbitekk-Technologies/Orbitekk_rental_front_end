@@ -118,6 +118,15 @@ export const api = createApi({
           beds: filters.beds,
           baths: filters.baths,
           propertyType: filters.propertyType,
+          stayType: filters.stayType,
+          bathType: filters.bathType,
+          // Gender preference filtering is disabled for now.
+          petsAllowed: filters.petsAllowed,
+          parkingIncluded: filters.parkingIncluded,
+          smokingIncluded: filters.smokingIncluded,
+          petCount: filters.petCount,
+          petFeeMax: filters.petFeeMax,
+          parkingFeeMax: filters.parkingFeeMax,
           squareFeetMin: filters.squareFeet?.[0],
           squareFeetMax: filters.squareFeet?.[1],
           amenities: filters.amenities?.join(","),
@@ -192,6 +201,17 @@ export const api = createApi({
       },
     }),
 
+    getFavoriteProperties: build.query<Property[], void>({
+      query: () => "tenants/me/favorites",
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: "Properties" as const, id })),
+              { type: "Properties", id: "FAVORITES" },
+            ]
+          : [{ type: "Properties", id: "FAVORITES" }],
+    }),
+
     updateTenantSettings: build.mutation<
       Tenant,
       { userId: string } & Partial<Tenant>
@@ -214,13 +234,14 @@ export const api = createApi({
       Tenant,
       { userId: string; propertyId: number }
     >({
-      query: ({ userId, propertyId }) => ({
-        url: `tenants/${userId}/favorites/${propertyId}`,
+      query: ({ propertyId }) => ({
+        url: `tenants/me/favorites/${propertyId}`,
         method: "POST",
       }),
       invalidatesTags: (result) => [
         { type: "Tenants", id: result?.id },
         { type: "Properties", id: "LIST" },
+        { type: "Properties", id: "FAVORITES" },
       ],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {
@@ -234,13 +255,14 @@ export const api = createApi({
       Tenant,
       { userId: string; propertyId: number }
     >({
-      query: ({ userId, propertyId }) => ({
-        url: `tenants/${userId}/favorites/${propertyId}`,
+      query: ({ propertyId }) => ({
+        url: `tenants/me/favorites/${propertyId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result) => [
         { type: "Tenants", id: result?.id },
         { type: "Properties", id: "LIST" },
+        { type: "Properties", id: "FAVORITES" },
       ],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {
@@ -469,6 +491,7 @@ export const {
   useGetPropertyQuery,
   useGetNearbyPlacesQuery,
   useGetCurrentResidencesQuery,
+  useGetFavoritePropertiesQuery,
   useGetManagerPropertiesQuery,
   useCreatePropertyMutation,
   useUpdatePropertyMutation,

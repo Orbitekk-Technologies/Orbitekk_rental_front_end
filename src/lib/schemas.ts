@@ -6,8 +6,8 @@ const browserFileSchema =
 
 export const propertySchema = z
   .object({
-    name: z.string().trim(),
-    description: z.string().trim(),
+    name: z.string().trim().min(1, "Property name is required"),
+    description: z.string().trim().min(500, "Description must contain at least 500 characters"),
     stayType: z.enum(["PayingGuest", "WholeUnit"]),
     pricePerMonth: z.coerce
       .number({ invalid_type_error: "Only whole numbers are allowed" })
@@ -33,9 +33,9 @@ export const propertySchema = z
       .array(z.nativeEnum(AmenityEnum))
       .min(1, "Select at least one amenity"),
     bathType: z.enum(["Private", "SharedBath"]),
-    genderPreference: z
-      .array(z.enum(["Male", "Female", "NoPreference"]))
-      .length(1, "Select one gender preference"),
+    // Gender preference is intentionally retained in stored data for possible reuse,
+    // but its UI and search behavior are disabled for now.
+    genderPreference: z.array(z.enum(["Male", "Female", "NoPreference"])).default(["NoPreference"]),
     beds: z.coerce
       .number({ invalid_type_error: "Only whole numbers are allowed" })
       .nonnegative("Beds cannot be negative")
@@ -71,6 +71,13 @@ export const propertySchema = z
         code: z.ZodIssueCode.custom,
         path: ["addressLine1"],
         message: "Please select an address from the suggestions.",
+      });
+    }
+    if (data.stayType === "PayingGuest" && (data.beds !== 1 || data.baths !== 1)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["stayType"],
+        message: "Private room listings must have exactly one bed and one bath",
       });
     }
     if (data.photoUrls.length === 0 && data.existingPhotoUrls.length === 0) {
@@ -109,7 +116,7 @@ export type PropertyFormData = z.infer<typeof propertySchema>;
 export const applicationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
+  phoneNumber: z.string().regex(/^\d{10}$/, "Phone number must contain exactly 10 digits"),
   message: z.string().optional(),
 });
 
@@ -118,7 +125,7 @@ export type ApplicationFormData = z.infer<typeof applicationSchema>;
 export const settingsSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
+  phoneNumber: z.string().regex(/^\d{10}$/, "Phone number must contain exactly 10 digits"),
 });
 
 export type SettingsFormData = z.infer<typeof settingsSchema>;

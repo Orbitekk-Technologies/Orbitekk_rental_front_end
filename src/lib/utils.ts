@@ -61,8 +61,10 @@ export const withToast = async <T>(
     const result = await mutationFn;
     if (success) toast.success(success);
     return result;
-  } catch (err) {
+  } catch {
     if (error) toast.error(error);
-    throw err;
+    // RTK Query already exposes the rejected request to the component. Re-throwing
+    // here creates an unhandled object rejection that Next displays as [object Object].
+    return undefined;
   }
 };

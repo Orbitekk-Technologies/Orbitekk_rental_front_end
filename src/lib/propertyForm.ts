@@ -99,8 +99,8 @@ export function buildPropertyFormData(values: PropertyFormData): FormData {
       return;
     }
 
-    if (key === "beds" && values.stayType === "PayingGuest") {
-      formData.append(key, "0");
+    if ((key === "beds" || key === "baths") && values.stayType === "PayingGuest") {
+      formData.append(key, "1");
       return;
     }
     if ((key === "petCount" || key === "petFee") && !values.isPetsAllowed) return;
@@ -168,9 +168,10 @@ export function buildDemoProperty(
     smokingIncluded: values.smokingIncluded,
     stayType: values.stayType,
     bathType: values.bathType,
-    genderPreference: values.genderPreference[0],
-    beds: values.stayType === "PayingGuest" ? 0 : Number(values.beds),
-    baths: Number(values.baths),
+    // Gender preference is disabled, but the legacy field remains API-compatible.
+    genderPreference: "NoPreference",
+    beds: values.stayType === "PayingGuest" ? 1 : Number(values.beds),
+    baths: values.stayType === "PayingGuest" ? 1 : Number(values.baths),
     squareFeet: Number(values.squareFeet),
     propertyType: values.propertyType,
     postedDate: existing?.postedDate ?? new Date().toISOString(),

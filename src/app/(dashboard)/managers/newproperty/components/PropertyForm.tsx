@@ -71,7 +71,7 @@ const STEP_FIELDS: Record<PropertyFormStep, FieldPath<PropertyFormData>[]> = {
     "propertyType",
     "bathType",
   ],
-  amenities: ["amenities", "smokingIncluded", "genderPreference", "photoUrls"],
+  amenities: ["amenities", "smokingIncluded", "photoUrls"],
 };
 
 const STEP_COPY: Record<
@@ -122,6 +122,7 @@ const PropertyForm = ({
     mode === "edit" ? 2 : initialHighestAccessibleStep
   );
   const [isSavingLocally, setIsSavingLocally] = useState(false);
+  const [currentDraftId, setCurrentDraftId] = useState(draftId ?? undefined);
   const allowNavigationRef = useRef(false);
 
   const formDefaults = useMemo(
@@ -172,6 +173,33 @@ const PropertyForm = ({
   const handleNext = async () => {
     const isValid = await validateCurrentStep();
     if (!isValid) return;
+
+    if (mode !== "edit") {
+      const userId = authUser?.authInfo?.userId;
+      if (!userId) {
+        toast.error("Sign in before saving a draft");
+        return;
+      }
+      setIsSavingLocally(true);
+      try {
+        const values = await prepareValuesForPersistence(form.getValues());
+        const { photoUrls: _photoUrls, ...storedValues } = values;
+        const savedDraft = savePropertyDraft({
+          userId,
+          id: currentDraftId,
+          values: storedValues as StoredPropertyFormValues,
+          lastCompletedStep: activeStep,
+        });
+        setCurrentDraftId(savedDraft.id);
+        // The completed step is now persisted, so it becomes the new clean baseline.
+        form.reset(values);
+      } catch {
+        toast.error("Unable to save your progress.");
+        return;
+      } finally {
+        setIsSavingLocally(false);
+      }
+    }
 
     const nextIndex = Math.min(currentStepIndex + 1, STEP_ORDER.length - 1);
     setHighestAccessibleStep((current) => Math.max(current, nextIndex));
@@ -224,7 +252,7 @@ const PropertyForm = ({
 
       savePropertyDraft({
         userId,
-        id: draftId ?? undefined,
+        id: currentDraftId,
         values: storedValues as StoredPropertyFormValues,
         lastCompletedStep: activeStep,
       });
@@ -265,7 +293,7 @@ const PropertyForm = ({
         });
 
         upsertDemoPublishedProperty(property);
-        deletePropertyDraft(managerUserId, draftId);
+        deletePropertyDraft(managerUserId, currentDraftId);
         dispatch(
           api.util.invalidateTags([
             { type: "Properties", id: "LIST" },
@@ -295,7 +323,7 @@ const PropertyForm = ({
           ? await updateProperty({ id: propertyId, property: payload }).unwrap()
           : await createProperty(payload).unwrap();
 
-      deletePropertyDraft(managerUserId, draftId);
+      deletePropertyDraft(managerUserId, currentDraftId);
       allowNavigationRef.current = true;
       router.push(
         exitAfterSave

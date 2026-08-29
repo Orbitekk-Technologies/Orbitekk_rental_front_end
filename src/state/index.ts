@@ -5,6 +5,15 @@ export interface FiltersState {
   beds: string;
   baths: string;
   propertyType: string;
+  stayType: string;
+  bathType: string;
+  genderPreference: string;
+  petsAllowed: string;
+  parkingIncluded: string;
+  smokingIncluded: string;
+  petCount: string;
+  petFeeMax: string;
+  parkingFeeMax: string;
   amenities: string[];
   availableFrom: string;
   priceRange: [number, number] | [null, null];
@@ -29,6 +38,15 @@ export const initialState: InitialStateTypes = {
     beds: "any",
     baths: "any",
     propertyType: "any",
+    stayType: "any",
+    bathType: "any",
+    genderPreference: "any",
+    petsAllowed: "any",
+    parkingIncluded: "any",
+    smokingIncluded: "any",
+    petCount: "any",
+    petFeeMax: "any",
+    parkingFeeMax: "any",
     amenities: [],
     availableFrom: "any",
     priceRange: [null, null],

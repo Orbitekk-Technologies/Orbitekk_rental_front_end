@@ -6,8 +6,7 @@ import Loading from "@/components/Loading";
 import { Button } from "@/components/ui/button";
 import {
   useGetAuthUserQuery,
-  useGetPropertiesQuery,
-  useGetTenantQuery,
+  useGetFavoritePropertiesQuery,
 } from "@/state/api";
 import React from "react";
 import Link from "next/link";
@@ -15,24 +14,14 @@ import EmptyState from "@/components/EmptyState";
 
 const Favorites = () => {
   const { data: authUser } = useGetAuthUserQuery();
-  const { data: tenant, isLoading: isTenantLoading, error: tenantError } = useGetTenantQuery(
-    authUser?.authInfo?.userId || "",
-    {
-      skip: !authUser?.authInfo?.userId,
-    }
-  );
-
   const {
     data: favoriteProperties,
     isLoading,
     error,
-  } = useGetPropertiesQuery(
-    { favoriteIds: tenant?.favorites?.map((fav: { id: number }) => fav.id) },
-    { skip: !tenant?.favorites || tenant?.favorites.length === 0 }
-  );
+  } = useGetFavoritePropertiesQuery(undefined, { skip: !authUser });
 
-  if (isTenantLoading || isLoading) return <Loading />;
-  if (tenantError || error) return <div>Error loading favourites</div>;
+  if (isLoading) return <Loading />;
+  if (error) return <div>Error loading favourites</div>;
 
   return (
     <div className="dashboard-container">

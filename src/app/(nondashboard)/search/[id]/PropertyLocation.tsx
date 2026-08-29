@@ -1,10 +1,6 @@
 import { useGetPropertyQuery } from "@/state/api";
 import { Compass, MapPin } from "lucide-react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useEffect, useRef, useState } from "react";
-
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
+import React from "react";
 
 const PropertyLocation = ({ propertyId }: PropertyDetailsProps) => {
   const {
@@ -12,49 +8,17 @@ const PropertyLocation = ({ propertyId }: PropertyDetailsProps) => {
     isError,
     isLoading,
   } = useGetPropertyQuery(propertyId);
-  const mapContainerRef = useRef(null);
-  const [mapError, setMapError] = useState(false);
-
-  useEffect(() => {
-    if (isLoading || isError || !property) return;
-
-    if (!mapboxgl.accessToken) {
-      setMapError(true);
-      return;
-    }
-
-    setMapError(false);
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current!,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: [
-        property.location.coordinates.longitude,
-        property.location.coordinates.latitude,
-      ],
-      zoom: 14,
-    });
-
-    map.on("error", () => setMapError(true));
-    map.on("load", () => setMapError(false));
-
-    const marker = new mapboxgl.Marker()
-      .setLngLat([
-        property.location.coordinates.longitude,
-        property.location.coordinates.latitude,
-      ])
-      .addTo(map);
-
-    const markerElement = marker.getElement();
-    const path = markerElement.querySelector("path[fill='#3FB1CE']");
-    if (path) path.setAttribute("fill", "#000000");
-
-    return () => map.remove();
-  }, [property, isError, isLoading]);
-
   if (isLoading) return <>Loading...</>;
   if (isError || !property) {
     return <>Property not Found</>;
   }
+
+  const longitude = Number(property.location?.coordinates?.longitude);
+  const latitude = Number(property.location?.coordinates?.latitude);
+  const hasCoordinates = Number.isFinite(longitude) && Number.isFinite(latitude);
+  const mapQuery = hasCoordinates
+    ? `${latitude},${longitude}`
+    : property.location?.formattedAddress || property.location?.address || "";
 
   return (
     <div className="py-16">
@@ -82,12 +46,14 @@ const PropertyLocation = ({ propertyId }: PropertyDetailsProps) => {
         </a>
       </div>
       <div className="relative mt-4 h-[300px] overflow-hidden rounded-lg bg-gray-100">
-        <div className="absolute inset-0" ref={mapContainerRef} />
-        {mapError && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-100 px-6 text-center text-sm text-gray-600">
-            The map is temporarily unavailable. Use Get Directions to view this location.
-          </div>
-        )}
+        <iframe
+          title={`Map showing ${property.location?.address || property.name}`}
+          src={`https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=14&output=embed`}
+          className="absolute inset-0 h-full w-full border-0"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
+        />
       </div>
     </div>
   );

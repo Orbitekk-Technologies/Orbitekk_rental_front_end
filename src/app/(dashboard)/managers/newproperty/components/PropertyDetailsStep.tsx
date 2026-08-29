@@ -3,11 +3,18 @@
 import { CustomFormField } from "@/components/FormField";
 import { PropertyTypeEnum } from "@/lib/constants";
 import type { PropertyFormData } from "@/lib/schemas";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 const PropertyDetailsStep = () => {
   const form = useFormContext<PropertyFormData>();
   const stayType = form.watch("stayType");
+
+  useEffect(() => {
+    if (stayType !== "PayingGuest") return;
+    form.setValue("beds", 1, { shouldDirty: true, shouldValidate: true });
+    form.setValue("baths", 1, { shouldDirty: true, shouldValidate: true });
+  }, [form, stayType]);
 
   return (
     <div className="space-y-7">
@@ -33,6 +40,22 @@ const PropertyDetailsStep = () => {
         <h3 className="text-sm font-semibold text-gray-900">
           Property Details
         </h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <CustomFormField name="beds" label="Number of Beds" type="number" disabled={stayType === "PayingGuest"} />
+          <CustomFormField
+            name="squareFeet"
+            label="Square Feet"
+            type="number"
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <CustomFormField
+            name="baths"
+            label="Number of Baths"
+            type="number"
+            disabled={stayType === "PayingGuest"}
+          />
+        </div>
         {stayType === "PayingGuest" && (
           <CustomFormField
             name="bathType"
@@ -44,21 +67,6 @@ const PropertyDetailsStep = () => {
             ]}
           />
         )}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {stayType === "WholeUnit" && (
-            <CustomFormField name="beds" label="Number of Beds" type="number" />
-          )}
-          <CustomFormField
-            name="baths"
-            label="Number of Baths"
-            type="number"
-          />
-          <CustomFormField
-            name="squareFeet"
-            label="Square Feet"
-            type="number"
-          />
-        </div>
 
         <div className="space-y-4">
           <section className="space-y-4">

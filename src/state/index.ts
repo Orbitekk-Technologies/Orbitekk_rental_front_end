@@ -34,7 +34,7 @@ interface InitialStateTypes {
 
 export const initialState: InitialStateTypes = {
   filters: {
-    location: "Dallas, Texas",
+    location: "",
     beds: "any",
     baths: "any",
     propertyType: "any",
@@ -51,7 +51,7 @@ export const initialState: InitialStateTypes = {
     availableFrom: "any",
     priceRange: [null, null],
     squareFeet: [null, null],
-    coordinates: [-96.797, 32.7767],
+    coordinates: [0, 0],
     page: 0,
     size: 20,
     sort: "newest",

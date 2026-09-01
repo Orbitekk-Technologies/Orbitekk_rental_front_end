@@ -174,33 +174,6 @@ const PropertyForm = ({
     const isValid = await validateCurrentStep();
     if (!isValid) return;
 
-    if (mode !== "edit") {
-      const userId = authUser?.authInfo?.userId;
-      if (!userId) {
-        toast.error("Sign in before saving a draft");
-        return;
-      }
-      setIsSavingLocally(true);
-      try {
-        const values = await prepareValuesForPersistence(form.getValues());
-        const { photoUrls: _photoUrls, ...storedValues } = values;
-        const savedDraft = savePropertyDraft({
-          userId,
-          id: currentDraftId,
-          values: storedValues as StoredPropertyFormValues,
-          lastCompletedStep: activeStep,
-        });
-        setCurrentDraftId(savedDraft.id);
-        // The completed step is now persisted, so it becomes the new clean baseline.
-        form.reset(values);
-      } catch {
-        toast.error("Unable to save your progress.");
-        return;
-      } finally {
-        setIsSavingLocally(false);
-      }
-    }
-
     const nextIndex = Math.min(currentStepIndex + 1, STEP_ORDER.length - 1);
     setHighestAccessibleStep((current) => Math.max(current, nextIndex));
     setActiveStep(STEP_ORDER[nextIndex]);

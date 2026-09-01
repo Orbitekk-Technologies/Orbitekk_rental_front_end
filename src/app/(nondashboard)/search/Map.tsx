@@ -28,7 +28,7 @@ const Map = () => {
       style: "mapbox://styles/shagrihaadmin/cmt4yvuv300et01s4a9sy8rad",
       center: filters.coordinates.some((coordinate) => coordinate !== 0)
         ? filters.coordinates
-        : [-96.797, 32.7767],
+        : [-98.5795, 39.8283],
       zoom: 9,
     });
 

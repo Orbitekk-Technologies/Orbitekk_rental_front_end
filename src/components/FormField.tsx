@@ -62,6 +62,8 @@ interface FormFieldProps {
   disabled?: boolean;
   multiple?: boolean;
   maxFiles?: number;
+  maxLength?: number;
+  numericOnly?: boolean;
   isIcon?: boolean;
   singleSelection?: boolean;
   initialValue?: string | number | boolean | string[];
@@ -80,6 +82,8 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
   disabled = false,
   multiple = false,
   maxFiles,
+  maxLength,
+  numericOnly = false,
   isIcon = false,
   singleSelection = false,
   initialValue,
@@ -99,6 +103,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             rows={4}
             className={`min-h-28 resize-y border-gray-200 px-3 py-2 ${inputClassName ?? ""}`}
             disabled={disabled}
+            maxLength={maxLength}
           />
         );
 
@@ -244,9 +249,11 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             inputMode="numeric"
             placeholder={placeholder}
             {...field}
+            onChange={(event) => field.onChange(event.target.value.replace(/\D/g, ""))}
             value={field.value ?? ""}
             className={`border-gray-200 px-3 py-2 ${inputClassName ?? ""}`}
             disabled={disabled}
+            maxLength={maxLength}
           />
         );
 
@@ -264,11 +271,19 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
         return (
           <Input
             type={type}
+            inputMode={numericOnly ? "numeric" : undefined}
             placeholder={placeholder}
             {...field}
+            onChange={numericOnly
+              ? (event) => {
+                  const digits = event.target.value.replace(/\D/g, "");
+                  field.onChange(maxLength == null ? digits : digits.slice(0, maxLength));
+                }
+              : field.onChange}
             value={field.value ?? ""}
             className={`border-gray-200 px-3 py-2 ${inputClassName ?? ""}`}
             disabled={disabled}
+            maxLength={maxLength}
           />
         );
     }

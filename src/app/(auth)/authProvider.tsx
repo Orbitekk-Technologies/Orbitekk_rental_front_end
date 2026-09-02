@@ -66,6 +66,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
   const [resetPassword, { isLoading: isResetLoading }] = useResetPasswordMutation();
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("oauthError") === "true") {
@@ -110,9 +111,10 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
     setFormError(null);
 
     if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setFormError("Enter a valid email address.");
+      setEmailError("Enter a valid email address.");
       return;
     }
+    setEmailError(null);
     if ((isSignUp || isReset) && (password.length < 10 || password.length > 100)) {
       setFormError("Password must contain between 10 and 100 characters.");
       return;
@@ -221,10 +223,25 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
               type="email"
               placeholder="Enter your email address"
               autoComplete="email"
+              aria-invalid={Boolean(emailError)}
+              aria-describedby={emailError ? "email-error" : undefined}
+              onChange={(event) => {
+                const value = event.target.value.trim();
+                setEmailError(
+                  value.length > 0 && !/^\S+@\S+\.\S+$/.test(value)
+                    ? "Enter a valid email address."
+                    : null
+                );
+              }}
               onFocus={() => setFocusedField("email")}
               onBlur={() => setFocusedField(null)}
               required
             />
+            {emailError && (
+              <p id="email-error" role="alert" className="text-sm font-medium text-red-500">
+                {emailError}
+              </p>
+            )}
             {isSignUp && focusedField === "email" && (
               <p className="text-xs text-muted-foreground">
                 Your email will also be used as your account username.

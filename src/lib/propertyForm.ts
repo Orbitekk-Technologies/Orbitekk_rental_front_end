@@ -19,7 +19,6 @@ export const DEFAULT_PROPERTY_FORM_VALUES: PropertyFormData = {
   photoOrder: [],
   amenities: [],
   bathType: "Private",
-  genderPreference: ["NoPreference"],
   propertyType: PropertyTypeEnum.Apartment,
   beds: 1,
   baths: 1,
@@ -54,7 +53,6 @@ export function propertyToFormValues(property: Property): PropertyFormData {
     smokingIncluded: property.smokingIncluded ?? property.amenities?.includes(AmenityEnum.SmokeFree) ?? false,
     stayType: property.stayType ?? "WholeUnit",
     bathType: property.bathType ?? "Private",
-    genderPreference: [property.genderPreference ?? "NoPreference"],
     photoUrls: [],
     existingPhotoUrls: property.photoUrls ?? [],
     photoOrder: (property.photoUrls ?? []).map((_, index) => `existing:${index}`),
@@ -99,10 +97,6 @@ export function buildPropertyFormData(values: PropertyFormData): FormData {
       return;
     }
 
-    if ((key === "beds" || key === "baths") && values.stayType === "PayingGuest") {
-      formData.append(key, "1");
-      return;
-    }
     if ((key === "petCount" || key === "petFee") && !values.isPetsAllowed) return;
     if (key === "parkingFee" && !values.isParkingIncluded) return;
     formData.append(key, String(value));
@@ -168,10 +162,8 @@ export function buildDemoProperty(
     smokingIncluded: values.smokingIncluded,
     stayType: values.stayType,
     bathType: values.bathType,
-    // Gender preference is disabled, but the legacy field remains API-compatible.
-    genderPreference: "NoPreference",
-    beds: values.stayType === "PayingGuest" ? 1 : Number(values.beds),
-    baths: values.stayType === "PayingGuest" ? 1 : Number(values.baths),
+    beds: Number(values.beds),
+    baths: Number(values.baths),
     squareFeet: Number(values.squareFeet),
     propertyType: values.propertyType,
     postedDate: existing?.postedDate ?? new Date().toISOString(),

@@ -123,23 +123,6 @@ const AmenitiesPreferencesStep = () => {
 
       <div className="border-t border-gray-200" />
 
-      <section className="space-y-5">
-        <h3 className="text-sm font-semibold text-gray-900">Gender Preference</h3>
-        <CustomFormField
-          name="genderPreference"
-          label="Gender Preference"
-          type="radio"
-          singleSelection
-          options={[
-            { value: "NoPreference", label: "No Preference" },
-            { value: "Male", label: "Male" },
-            { value: "Female", label: "Female" },
-          ]}
-        />
-      </section>
-
-      <div className="border-t border-gray-200" />
-
       <section className="space-y-4">
         <h3 className="text-sm font-semibold text-gray-900">Photos</h3>
 

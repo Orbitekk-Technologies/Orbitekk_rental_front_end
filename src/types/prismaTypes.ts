@@ -68,7 +68,6 @@ export interface Property {
   smokingIncluded?: boolean;
   stayType?: "PayingGuest" | "WholeUnit";
   bathType?: "Private" | "SharedBath";
-  genderPreference?: "Male" | "Female" | "NoPreference";
   beds: number;
   baths: number;
   squareFeet: number;

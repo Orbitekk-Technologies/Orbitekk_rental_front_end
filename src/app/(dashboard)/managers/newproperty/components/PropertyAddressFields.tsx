@@ -1,7 +1,7 @@
 "use client";
 
-import { AddressAutofill } from "@mapbox/search-js-react";
 import type { AddressAutofillRetrieveResponse } from "@mapbox/search-js-core";
+import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -9,6 +9,11 @@ import { Input } from "@/components/ui/input";
 import type { PropertyFormData } from "@/lib/schemas";
 
 const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? "";
+
+const AddressAutofill = dynamic(
+  () => import("@mapbox/search-js-react").then((module) => module.AddressAutofill),
+  { ssr: false },
+);
 
 export function mapAutofillResult(response: AddressAutofillRetrieveResponse) {
   const feature = response.features[0];

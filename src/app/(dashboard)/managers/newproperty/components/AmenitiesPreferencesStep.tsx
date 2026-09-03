@@ -106,23 +106,6 @@ const AmenitiesPreferencesStep = () => {
 
       <div className="border-t border-gray-200" />
 
-      {/* Gender preference is hidden for now. Keep this block for later reuse.
-      <section className="space-y-5">
-        <h3 className="text-sm font-semibold text-gray-900">Smoking</h3>
-        <CustomFormField
-          name="smokingIncluded"
-          label="Smoking"
-          type="radio"
-          options={[
-            { value: "true", label: "Included" },
-            { value: "false", label: "Not Included" },
-          ]}
-        />
-      </section>
-      */}
-
-      <div className="border-t border-gray-200" />
-
       <section className="space-y-4">
         <h3 className="text-sm font-semibold text-gray-900">Photos</h3>
 
@@ -199,7 +182,7 @@ const AmenitiesPreferencesStep = () => {
             className="min-h-28 rounded-xl border border-secondary-500 bg-secondary-500 p-4 text-left text-white shadow-sm"
           >
             <span className="block font-semibold">Starter</span>
-            <span className="mt-2 block text-sm">$0, free</span>
+            <span className="mt-2 block text-sm">$0/month</span>
             <span className="mt-3 block text-xs font-medium uppercase tracking-wide">
               Selected
             </span>

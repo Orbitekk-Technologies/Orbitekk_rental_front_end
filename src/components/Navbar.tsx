@@ -31,7 +31,7 @@ import {
 
 const marketingLinks = [
   { label: "Home", href: "/" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contact Us", href: "/contact" },
   { label: "Listings", href: "/search" },
 ];
 

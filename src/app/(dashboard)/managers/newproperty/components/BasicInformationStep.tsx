@@ -18,6 +18,7 @@ const BasicInformationStep = () => {
           type="textarea"
           placeholder="Describe the property, neighborhood, and key features"
           inputClassName="min-h-40"
+          maxLength={500}
         />
       </section>
 

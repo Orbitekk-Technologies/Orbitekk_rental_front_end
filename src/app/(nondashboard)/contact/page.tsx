@@ -30,7 +30,7 @@ export default function ContactPage() {
             SHA<span className="font-light text-secondary-500">GRIHA</span>
           </h1>
           <p className="mt-2 text-muted-foreground">
-            <span className="font-bold text-foreground">Contact us</span>{" "}
+            <span className="font-bold text-foreground">Contact Us</span>{" "}
             and tell us how we can help.
           </p>
         </header>

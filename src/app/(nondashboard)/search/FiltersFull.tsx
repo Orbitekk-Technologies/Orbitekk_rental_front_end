@@ -195,15 +195,6 @@ const FiltersFull = () => {
             onChange={(bathType) => setLocalFilters((prev) => ({ ...prev, bathType }))}
             disabled={!isPrivateRoom}
           />
-          {/* Gender preference filtering is hidden for now.
-          <PreferenceOptions
-            className="order-8"
-            label="Gender Preference"
-            value={localFilters.genderPreference}
-            options={[["any", "Any"], ["NoPreference", "No preference"], ["Male", "Male"], ["Female", "Female"]]}
-            onChange={(genderPreference) => setLocalFilters((prev) => ({ ...prev, genderPreference }))}
-          />
-          */}
           <div className="order-8 space-y-3">
             <PreferenceOptions
               label="Pets"

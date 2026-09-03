@@ -25,6 +25,8 @@ const ApplicationModal = ({
 
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       name: "",
       email: "",
@@ -76,6 +78,8 @@ const ApplicationModal = ({
               label="Phone Number"
               type="text"
               placeholder="Enter your phone number"
+              numericOnly
+              maxLength={10}
             />
             <CustomFormField
               name="message"

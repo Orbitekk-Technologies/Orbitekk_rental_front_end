@@ -4,8 +4,28 @@ import Providers from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "Shagriha Rentals",
-  description: "Find and manage your next rental home",
+  metadataBase: new URL("https://www.shagriha.com"),
+  title: {
+    default: "Shagriha Rentals",
+    template: "%s | Shagriha",
+  },
+  description:
+    "Search rental homes and connect with property managers on Shagriha.",
+  applicationName: "Shagriha",
+  openGraph: {
+    type: "website",
+    siteName: "Shagriha",
+    title: "Shagriha Rentals",
+    description:
+      "Search rental homes and connect with property managers on Shagriha.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary",
+    title: "Shagriha Rentals",
+    description:
+      "Search rental homes and connect with property managers on Shagriha.",
+  },
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },

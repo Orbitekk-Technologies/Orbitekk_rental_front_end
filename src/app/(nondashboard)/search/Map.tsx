@@ -10,6 +10,8 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
 const Map = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const filters = useAppSelector((state) => state.global.filters);
   const {
     data: result,
@@ -18,26 +20,16 @@ const Map = () => {
   } = useSearchPropertiesQuery(filters);
 
   useEffect(() => {
-    if (isLoading || isError || !result) return;
-
     const container = mapContainerRef.current;
     if (!container) return;
 
     const map = new mapboxgl.Map({
       container,
       style: "mapbox://styles/shagrihaadmin/cmt4yvuv300et01s4a9sy8rad",
-      center: filters.coordinates.some((coordinate) => coordinate !== 0)
-        ? filters.coordinates
-        : [-98.5795, 39.8283],
+      center: [-98.5795, 39.8283],
       zoom: 9,
     });
-
-    result.properties.forEach((property) => {
-      const marker = createPropertyMarker(property, map);
-      const markerElement = marker.getElement();
-      const path = markerElement.querySelector("path[fill='#3FB1CE']");
-      if (path) path.setAttribute("fill", "#000000");
-    });
+    mapRef.current = map;
 
     let active = true;
     const resizeMap = () => {
@@ -52,12 +44,32 @@ const Map = () => {
     return () => {
       active = false;
       resizeObserver.disconnect();
+      markersRef.current = [];
+      mapRef.current = null;
       map.remove();
     };
-  }, [isLoading, isError, result, filters.coordinates]);
+  }, []); // The map canvas is persistent; results update markers below.
 
-  if (isLoading) return <>Loading...</>;
-  if (isError || !result) return <div>Failed to fetch properties</div>;
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (filters.coordinates.some((coordinate) => coordinate !== 0)) {
+      map.easeTo({ center: filters.coordinates });
+    }
+  }, [filters.coordinates]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !result) return;
+
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = result.properties.map((property) => {
+      const marker = createPropertyMarker(property, map);
+      const path = marker.getElement().querySelector("path[fill='#3FB1CE']");
+      if (path) path.setAttribute("fill", "#000000");
+      return marker;
+    });
+  }, [result]);
 
   return (
     <div className="basis-5/12 grow relative rounded-xl">
@@ -69,6 +81,16 @@ const Map = () => {
           width: "100%",
         }}
       />
+      {isLoading && (
+        <div className="pointer-events-none absolute inset-x-3 top-3 rounded-lg bg-white/90 px-3 py-2 text-sm shadow">
+          Updating properties...
+        </div>
+      )}
+      {isError && (
+        <div className="absolute inset-x-3 top-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 shadow">
+          Failed to fetch properties.
+        </div>
+      )}
     </div>
   );
 };

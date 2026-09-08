@@ -58,7 +58,10 @@ const ApplicationCard = ({
       : application.property.manager;
 
   const contactName = contactPerson?.name ?? "Property Manager";
-  const contactPhone = contactPerson?.phoneNumber ?? "Contact unavailable";
+  const contactPhone =
+    contactPerson?.phoneNumber ||
+    (userType === "manager" ? application.phoneNumber : undefined) ||
+    "Contact unavailable";
   const contactEmail = contactPerson?.email ?? "Email unavailable";
 
   return (

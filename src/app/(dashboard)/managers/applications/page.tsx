@@ -13,6 +13,7 @@ import { CircleCheckBig, Download, File, Hospital } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 import EmptyState from "@/components/EmptyState";
+import { toast } from "sonner";
 
 const Applications = () => {
   const { data: authUser } = useGetAuthUserQuery();
@@ -26,6 +27,10 @@ const Applications = () => {
     "manager",
     {
       skip: !authUser?.authInfo?.userId,
+      pollingInterval: 15_000,
+      skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
+      refetchOnMountOrArgChange: true,
     }
   );
   const [updateApplicationStatus] = useUpdateApplicationStatusMutation();
@@ -152,6 +157,7 @@ const Applications = () => {
                       {application.status === "Approved" && (
                         <button
                           className="flex min-h-10 items-center justify-center whitespace-nowrap rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-primary-700 hover:text-primary-50"
+                          onClick={() => toast.info("No document available.")}
                         >
                           <Download className="mr-2 h-5 w-5" />
                           Download Agreement

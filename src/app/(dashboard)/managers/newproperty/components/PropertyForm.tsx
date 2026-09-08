@@ -165,10 +165,15 @@ const PropertyForm = ({
     };
   }, [form.formState.isDirty]);
 
-  const validateCurrentStep = () =>
-    form.trigger(STEP_FIELDS[activeStep], {
+  const validateCurrentStep = async () => {
+    const isValid = await form.trigger(STEP_FIELDS[activeStep], {
       shouldFocus: true,
     });
+    if (!isValid) {
+      toast.error("Please correct the highlighted fields before continuing.");
+    }
+    return isValid;
+  };
 
   const handleNext = async () => {
     const isValid = await validateCurrentStep();
@@ -213,9 +218,6 @@ const PropertyForm = ({
   };
 
   const saveDraftAndExit = async () => {
-    const isValid = await validateCurrentStep();
-    if (!isValid) return;
-
     setIsSavingLocally(true);
     try {
       const userId = authUser?.authInfo?.userId;

@@ -19,9 +19,9 @@ interface PropertyTabsProps {
 }
 
 const validTabs: PropertyTabValue[] = [
-  "tenants",
   "details",
   "applications",
+  "tenants",
   "lease",
 ];
 
@@ -37,7 +37,7 @@ const PropertyTabs = ({
 
   const requestedTab = useMemo(() => {
     const tab = searchParams.get("tab") as PropertyTabValue | null;
-    return tab && validTabs.includes(tab) ? tab : "tenants";
+    return tab && validTabs.includes(tab) ? tab : "details";
   }, [searchParams]);
 
   const [activeTab, setActiveTab] = useState<PropertyTabValue>(requestedTab);
@@ -51,7 +51,7 @@ const PropertyTabs = ({
     setActiveTab(nextTab);
 
     const params = new URLSearchParams(searchParams.toString());
-    if (nextTab === "tenants") {
+    if (nextTab === "details") {
       params.delete("tab");
     } else {
       params.set("tab", nextTab);
@@ -70,12 +70,6 @@ const PropertyTabs = ({
       <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-none border-b border-gray-200 bg-white p-0 sm:grid-cols-4">
         <TabsTrigger
           className="min-h-11 rounded-none border-b-[3px] border-transparent data-[state=active]:border-secondary-500 data-[state=active]:bg-transparent data-[state=active]:text-gray-950 data-[state=active]:shadow-none"
-          value="tenants"
-        >
-          Tenants Overview
-        </TabsTrigger>
-        <TabsTrigger
-          className="min-h-11 rounded-none border-b-[3px] border-transparent data-[state=active]:border-secondary-500 data-[state=active]:bg-transparent data-[state=active]:text-gray-950 data-[state=active]:shadow-none"
           value="details"
         >
           Property Details
@@ -88,15 +82,17 @@ const PropertyTabs = ({
         </TabsTrigger>
         <TabsTrigger
           className="min-h-11 rounded-none border-b-[3px] border-transparent data-[state=active]:border-secondary-500 data-[state=active]:bg-transparent data-[state=active]:text-gray-950 data-[state=active]:shadow-none"
+          value="tenants"
+        >
+          Tenants Overview
+        </TabsTrigger>
+        <TabsTrigger
+          className="min-h-11 rounded-none border-b-[3px] border-transparent data-[state=active]:border-secondary-500 data-[state=active]:bg-transparent data-[state=active]:text-gray-950 data-[state=active]:shadow-none"
           value="lease"
         >
           Lease
         </TabsTrigger>
       </TabsList>
-
-      <TabsContent value="tenants" className="mt-4 min-w-0">
-        <TenantsOverviewTab leases={leases} />
-      </TabsContent>
 
       <TabsContent value="details" className="mt-4 min-w-0">
         <ManagerPropertyDetailsTab property={property} />
@@ -108,6 +104,10 @@ const PropertyTabs = ({
           applications={applications}
           onOpenPropertyDetails={() => handleTabChange("details")}
         />
+      </TabsContent>
+
+      <TabsContent value="tenants" className="mt-4 min-w-0">
+        <TenantsOverviewTab leases={leases} />
       </TabsContent>
 
       <TabsContent value="lease" className="mt-4 min-w-0">

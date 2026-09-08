@@ -32,6 +32,7 @@ const ManagerSettings = () => {
       initialData={initialData}
       onSubmit={handleSubmit}
       userType="manager"
+      canChangePassword={authUser.authInfo.provider === "local"}
     />
   );
 };

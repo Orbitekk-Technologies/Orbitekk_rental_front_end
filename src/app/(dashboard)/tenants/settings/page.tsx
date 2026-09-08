@@ -32,6 +32,7 @@ const TenantSettings = () => {
       initialData={initialData}
       onSubmit={handleSubmit}
       userType="tenant"
+      canChangePassword={authUser.authInfo.provider === "local"}
     />
   );
 };

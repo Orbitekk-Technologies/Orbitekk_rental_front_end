@@ -68,27 +68,6 @@ const PropertyAddressFields = () => {
     <div className="space-y-5">
       <FormField
         control={form.control}
-        name="countryName"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Country</FormLabel>
-            <FormControl>
-              <select
-                {...field}
-                autoComplete="country-name"
-                onChange={(event) => { field.onChange(event); invalidateSelection("countryName", event.target.value); }}
-                className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
-              >
-                <option value="United States">United States</option>
-              </select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
         name="addressLine1"
         render={({ field }) => (
           <FormItem>
@@ -113,6 +92,11 @@ const PropertyAddressFields = () => {
             </AddressAutofill>
             {!token && <p className="text-sm text-amber-700">Address suggestions require NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN.</p>}
             <FormMessage />
+            {(form.formState.errors.latitude || form.formState.errors.longitude) && (
+              <p role="alert" className="text-sm font-medium text-red-600">
+                Select an address from the suggestions to confirm its location.
+              </p>
+            )}
           </FormItem>
         )}
       />
@@ -133,6 +117,26 @@ const PropertyAddressFields = () => {
           <FormItem><FormLabel>State / Province</FormLabel><FormControl><Input {...field} autoComplete="address-level1" onChange={(event) => { field.onChange(event); invalidateSelection("stateName", event.target.value); }} /></FormControl><FormMessage /></FormItem>
         )} />
       </div>
+      <FormField
+        control={form.control}
+        name="countryName"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Country</FormLabel>
+            <FormControl>
+              <select
+                {...field}
+                autoComplete="country-name"
+                onChange={(event) => { field.onChange(event); invalidateSelection("countryName", event.target.value); }}
+                className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+              >
+                <option value="United States">United States</option>
+              </select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       <FormField control={form.control} name="postalCode" render={({ field }) => (
         <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input {...field} autoComplete="postal-code" onChange={(event) => { field.onChange(event); invalidateSelection("postalCode", event.target.value); }} /></FormControl><FormMessage /></FormItem>
       )} />

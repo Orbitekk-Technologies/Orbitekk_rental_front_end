@@ -103,9 +103,7 @@ const TenantRow = ({ lease }: { lease: Lease }) => {
           type="button"
           variant="outline"
           onClick={() =>
-            toast.info(
-              "Agreement download will be connected to the stored lease document."
-            )
+            toast.info("No document available.")
           }
         >
           <ArrowDownToLine className="h-4 w-4" />
@@ -135,9 +133,7 @@ const TenantsOverviewTab = ({ leases }: TenantsOverviewTabProps) => {
           className="w-full sm:w-auto"
           disabled={leases.length === 0}
           onClick={() =>
-            toast.info(
-              "Bulk agreement download will be connected when lease files are stored."
-            )
+            toast.info("No documents available.")
           }
         >
           <Download className="h-4 w-4" />

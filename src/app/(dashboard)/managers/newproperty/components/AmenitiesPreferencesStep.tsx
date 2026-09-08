@@ -158,6 +158,11 @@ const AmenitiesPreferencesStep = () => {
         <p className="text-sm text-gray-500">
           Upload up to 5 images, each smaller than 10 MB. Drag photos to reorder them—the first image is your property&apos;s cover photo on search and detail pages.
         </p>
+        {form.formState.errors.photoUrls?.message && (
+          <p role="alert" className="text-sm font-medium text-red-600">
+            {String(form.formState.errors.photoUrls.message)}
+          </p>
+        )}
       </section>
 
       <div className="border-t border-gray-200" />

@@ -206,9 +206,7 @@ const PropertyApplicationsTab = ({
                       type="button"
                       variant="outline"
                       onClick={() =>
-                        toast.info(
-                          "Agreement download will use the uploaded lease document."
-                        )
+                        toast.info("No document available.")
                       }
                     >
                       <Download className="h-4 w-4" />

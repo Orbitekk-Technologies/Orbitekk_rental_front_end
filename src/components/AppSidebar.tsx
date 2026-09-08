@@ -35,7 +35,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
           { icon: Home, label: "My Residences", href: "/tenants/residences" },
           { icon: Building, label: "Properties", href: "/managers/properties" },
           { icon: FileText, label: "Listing Applications", href: "/managers/applications" },
-          { icon: Settings, label: "Manager Settings", href: "/managers/settings" },
+          { icon: Settings, label: "Account Settings", href: "/managers/settings" },
         ]
       : [
           // Favourites now lives in the authenticated top navigation.

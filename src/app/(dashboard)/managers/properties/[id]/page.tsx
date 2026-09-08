@@ -36,7 +36,12 @@ const ManagerPropertyPage = () => {
     data: applications = [],
     isLoading: applicationsLoading,
     isError: applicationsError,
-  } = useGetApplicationsQuery("manager");
+  } = useGetApplicationsQuery("manager", {
+    pollingInterval: 15_000,
+    skipPollingIfUnfocused: true,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
 
   if (propertyLoading || leasesLoading || applicationsLoading) {
     return <Loading />;

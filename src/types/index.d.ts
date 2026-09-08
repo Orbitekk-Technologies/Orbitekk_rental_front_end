@@ -26,6 +26,12 @@ declare global {
     confirmPassword: string;
   }
 
+  interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }
+
   interface AuthResponse {
     token: {
       accessToken: string;
@@ -154,12 +160,14 @@ declare global {
     initialData: SettingsFormData;
     onSubmit: (data: SettingsFormData) => Promise<void>;
     userType: "manager" | "tenant";
+    canChangePassword?: boolean;
   }
 
   interface User {
     authInfo: {
       userId: string;
       username?: string;
+      provider?: "local" | "google";
     };
     userInfo: Tenant | Manager;
     userRole: "user" | "manager" | "tenant";

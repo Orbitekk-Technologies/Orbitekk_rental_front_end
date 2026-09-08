@@ -82,6 +82,16 @@ export const api = createApi({
       query: (body) => ({ url: "auth/reset-password", method: "POST", body }),
     }),
 
+    changePassword: build.mutation<void, ChangePasswordRequest>({
+      query: (body) => ({ url: "auth/change-password", method: "POST", body }),
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Password changed successfully.",
+          error: "Unable to change password.",
+        });
+      },
+    }),
+
     enableManager: build.mutation<AuthResponse, { authorizedToList: boolean }>({
       query: (body) => ({ url: "auth/enable-manager", method: "POST", body }),
       invalidatesTags: ["Managers", "Tenants"],
@@ -482,6 +492,7 @@ export const {
   useLoginMutation,
   useSignupMutation,
   useResetPasswordMutation,
+  useChangePasswordMutation,
   useEnableManagerMutation,
   useGetAuthUserQuery,
   useUpdateTenantSettingsMutation,

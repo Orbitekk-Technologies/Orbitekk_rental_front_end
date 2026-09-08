@@ -1,7 +1,7 @@
 import { FiltersState, initialState, setFilters } from "@/state";
 import { useAppSelector } from "@/state/redux";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { cleanParams, cn } from "@/lib/utils";
 import LocationAutocomplete, { type SelectedLocation } from "@/components/LocationAutocomplete";
@@ -37,7 +37,7 @@ const FiltersFull = () => {
     if (isFiltersFullOpen) setLocalFilters(filters);
   }, [filters, isFiltersFullOpen]);
 
-  const updateURL = (newFilters: FiltersState) => {
+  const updateURL = useCallback((newFilters: FiltersState) => {
     const cleanFilters = cleanParams(newFilters);
     const updatedSearchParams = new URLSearchParams();
 
@@ -49,7 +49,21 @@ const FiltersFull = () => {
     });
 
     router.replace(`${pathname}?${updatedSearchParams.toString()}`, { scroll: false });
-  };
+  }, [pathname, router]);
+
+  useEffect(() => {
+    if (!isFiltersFullOpen) return;
+
+    const nextFilters = { ...localFilters, page: 0 };
+    if (JSON.stringify(nextFilters) === JSON.stringify(filters)) return;
+
+    const timeout = window.setTimeout(() => {
+      dispatch(setFilters(nextFilters));
+      updateURL(nextFilters);
+    }, 300);
+
+    return () => window.clearTimeout(timeout);
+  }, [dispatch, filters, isFiltersFullOpen, localFilters, updateURL]);
 
   const handleSubmit = () => {
     const nextFilters = { ...localFilters, page: 0 };

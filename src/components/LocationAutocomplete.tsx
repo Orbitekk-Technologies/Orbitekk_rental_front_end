@@ -53,12 +53,21 @@ export default function LocationAutocomplete({
   const [suggestions, setSuggestions] = useState<SearchBoxSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
   useEffect(() => {
     const query = value.trim();
     if (selectedLabel.current === query) {
       selectedLabel.current = null;
+      return;
+    }
+    // Values also change when another filter control syncs global state. Only
+    // the autocomplete the user is actively editing should request/open results.
+    if (!isFocused) {
+      setSuggestions([]);
+      setIsOpen(false);
+      setIsLoading(false);
       return;
     }
     if (!token || query.length < 3) {
@@ -94,7 +103,7 @@ export default function LocationAutocomplete({
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [search, value]);
+  }, [isFocused, search, value]);
 
   useEffect(() => {
     suggestionRequest.current += 1;
@@ -157,8 +166,14 @@ export default function LocationAutocomplete({
         type="search"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        onFocus={() => suggestions.length > 0 && setIsOpen(true)}
-        onBlur={() => window.setTimeout(() => setIsOpen(false), 150)}
+        onFocus={() => {
+          setIsFocused(true);
+          if (suggestions.length > 0) setIsOpen(true);
+        }}
+        onBlur={() => {
+          setIsFocused(false);
+          window.setTimeout(() => setIsOpen(false), 150);
+        }}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         aria-label="Search location"

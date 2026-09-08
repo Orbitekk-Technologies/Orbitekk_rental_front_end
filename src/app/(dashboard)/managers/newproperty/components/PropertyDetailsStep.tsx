@@ -3,11 +3,24 @@
 import { CustomFormField } from "@/components/FormField";
 import { PropertyTypeEnum } from "@/lib/constants";
 import type { PropertyFormData } from "@/lib/schemas";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 const PropertyDetailsStep = () => {
   const form = useFormContext<PropertyFormData>();
+  const { setValue } = form;
   const stayType = form.watch("stayType");
+  const isPrivateRoom = stayType === "PayingGuest";
+
+  useEffect(() => {
+    if (!isPrivateRoom) return;
+
+    // Frontend-only release rule. Previously these fields remained editable
+    // for every stay type; remove this effect and the disabled props below to
+    // restore that behavior. Backend validation intentionally remains unchanged.
+    setValue("beds", 1, { shouldDirty: true, shouldValidate: true });
+    setValue("baths", 1, { shouldDirty: true, shouldValidate: true });
+  }, [isPrivateRoom, setValue]);
 
   return (
     <div className="space-y-7">
@@ -34,7 +47,12 @@ const PropertyDetailsStep = () => {
           Property Details
         </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <CustomFormField name="beds" label="Number of Beds" type="number" />
+          <CustomFormField
+            name="beds"
+            label="Number of Beds"
+            type="number"
+            disabled={isPrivateRoom}
+          />
           <CustomFormField
             name="squareFeet"
             label="Square Feet"
@@ -46,8 +64,15 @@ const PropertyDetailsStep = () => {
             name="baths"
             label="Number of Baths"
             type="number"
+            disabled={isPrivateRoom}
           />
         </div>
+        {isPrivateRoom && (
+          <p className="text-sm text-amber-700">
+            Private Room listings are fixed at 1 bed and 1 bath. To add more
+            beds or baths, select Whole Unit as the stay type.
+          </p>
+        )}
         {stayType === "PayingGuest" && (
           <CustomFormField
             name="bathType"
@@ -64,11 +89,11 @@ const PropertyDetailsStep = () => {
           <section className="space-y-4">
             <CustomFormField
               name="isPetsAllowed"
-              label="Pets Allowed"
+              label="Pets"
               type="radio"
               options={[
-                { value: "true", label: "Include" },
-                { value: "false", label: "Not Included" },
+                { value: "true", label: "Allowed" },
+                { value: "false", label: "Not Allowed" },
               ]}
             />
             {form.watch("isPetsAllowed") && (
@@ -84,11 +109,11 @@ const PropertyDetailsStep = () => {
           <section className="space-y-4">
             <CustomFormField
               name="isParkingIncluded"
-              label="Parking Included"
+              label="Parking"
               type="radio"
               options={[
-                { value: "true", label: "Include" },
-                { value: "false", label: "Not Included" },
+                { value: "true", label: "Included" },
+                { value: "false", label: "Not included" },
               ]}
             />
             {form.watch("isParkingIncluded") && (

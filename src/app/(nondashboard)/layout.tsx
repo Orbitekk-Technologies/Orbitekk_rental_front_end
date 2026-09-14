@@ -35,6 +35,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   }, [user, authUser, router, pathname]);
 
   if ((user && authLoading) || isRedirecting) return <>Loading...</>;
+  if (pathname === "/contact") return <>{children}</>;
 
   return (
     <div className="h-full w-full">

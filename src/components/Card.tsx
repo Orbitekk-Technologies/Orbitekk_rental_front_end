@@ -27,6 +27,7 @@ const Card = ({
             onError={() => setImgSrc("/placeholder.jpg")}
           />
         </div>
+        {/* Property preference badges are intentionally hidden on listing images.
         <div className="absolute bottom-4 left-4 flex gap-2">
           {property.isPetsAllowed && (
             <span className="bg-white/80 text-black text-xs font-semibold px-2 py-1 rounded-full">
@@ -39,6 +40,7 @@ const Card = ({
             </span>
           )}
         </div>
+        */}
         {showFavoriteButton && (
           <button
             className="absolute bottom-4 right-4 bg-white hover:bg-white/90 rounded-full p-2 cursor-pointer"
@@ -98,7 +100,7 @@ const Card = ({
           </span>
           <span className="flex items-center">
             <House className="w-5 h-5 mr-2" />
-            {property.squareFeet} sq ft
+            {property.squareFeet} Sqft
           </span>
         </div>
       </div>

@@ -456,12 +456,12 @@ export const api = createApi({
 
     updateApplicationStatus: build.mutation<
       Application & { lease?: Lease },
-      { id: number; status: string }
+      { id: number; status: string; startDate?: string; endDate?: string }
     >({
-      query: ({ id, status }) => ({
+      query: ({ id, ...body }) => ({
         url: `applications/${id}/status`,
         method: "PUT",
-        body: { status },
+        body,
       }),
       invalidatesTags: ["Applications", "Leases"],
       async onQueryStarted(_, { queryFulfilled }) {
@@ -474,7 +474,7 @@ export const api = createApi({
 
     createApplication: build.mutation<
       Application,
-      Pick<Application, "propertyId" | "name" | "email" | "phoneNumber"> & {
+      Pick<Application, "propertyId" | "name" | "email" | "phoneNumber" | "desiredMoveInDate"> & {
         message?: string;
       }
     >({

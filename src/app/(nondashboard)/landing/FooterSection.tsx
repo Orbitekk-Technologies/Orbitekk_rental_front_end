@@ -1,82 +1,31 @@
 import Link from "next/link";
-import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFacebook,
-  faInstagram,
-  faTwitter,
-  faLinkedin,
-  faYoutube,
-} from "@fortawesome/free-brands-svg-icons";
+import { faFacebook, faInstagram } from "@fortawesome/free-brands-svg-icons";
 
-const FooterSection = () => {
-  return (
-    <footer className="border-t border-gray-200 py-20">
-      <div className="max-w-4xl mx-auto px-6 sm:px-8">
-        <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
-          <div className="mb-4">
-            <Link href="/" className="text-xl font-bold" scroll={false}>
-              SHAGRIHA
-            </Link>
-          </div>
-          <nav className="mb-4" aria-label="Footer navigation">
-            <ul className="flex flex-wrap justify-center gap-x-6 gap-y-3">
-              <li>
-                <Link href="/about">About Us</Link>
-              </li>
-              <li>
-                <Link href="/contact">Contact Us</Link>
-              </li>
-              <li>
-                <Link href="/faq">FAQ</Link>
-              </li>
-              <li>
-                <Link href="/terms">Terms</Link>
-              </li>
-              <li>
-                <Link href="/privacy">Privacy</Link>
-              </li>
-            </ul>
-          </nav>
-          <div className="flex space-x-4 mb-4">
-            <a
-              href="#"
-              aria-label="Facebook"
-              className="hover:text-primary-600"
-            >
-              <FontAwesomeIcon icon={faFacebook} className="h-6 w-6" />
-            </a>
-            <a
-              href="#"
-              aria-label="Instagram"
-              className="hover:text-primary-600"
-            >
-              <FontAwesomeIcon icon={faInstagram} className="h-6 w-6" />
-            </a>
-            <a href="#" aria-label="Twitter" className="hover:text-primary-600">
-              <FontAwesomeIcon icon={faTwitter} className="h-6 w-6" />
-            </a>
-            <a
-              href="#"
-              aria-label="Linkedin"
-              className="hover:text-primary-600"
-            >
-              <FontAwesomeIcon icon={faLinkedin} className="h-6 w-6" />
-            </a>
-            <a href="#" aria-label="Youtube" className="hover:text-primary-600">
-              <FontAwesomeIcon icon={faYoutube} className="h-6 w-6" />
-            </a>
-          </div>
-        </div>
-        <div className="mt-8 flex flex-wrap justify-center gap-x-4 gap-y-2 text-center text-sm text-gray-500">
-          <span>© ShaGriha. All rights reserved.</span>
-          <Link href="/privacy">Privacy Policy</Link>
-          <Link href="/terms">Terms of Service</Link>
-          <Link href="/cookies">Cookie Policy</Link>
-        </div>
-      </div>
-    </footer>
-  );
-};
+const FooterSection = () => (
+  <footer className="mx-auto flex w-full max-w-[1536px] flex-col items-center gap-4 px-6 pb-5 pt-3 text-sm text-gray-500 sm:px-10 md:flex-row md:justify-between lg:px-16 xl:px-20">
+    <div className="flex flex-wrap items-center justify-center gap-x-9 gap-y-3">
+      <span>© ShaGriha 2026</span>
+      <Link href="/faq" className="transition-colors hover:text-secondary-500">FAQ&apos;s</Link>
+      <Link href="/terms" className="transition-colors hover:text-secondary-500">T&amp;C</Link>
+      <Link href="/privacy" className="transition-colors hover:text-secondary-500">Privacy</Link>
+    </div>
+    <div className="flex items-center gap-6 text-gray-600">
+      {/* Facebook URL will be added in a later phase. */}
+      <span aria-label="Facebook link coming soon" title="Facebook link coming soon">
+        <FontAwesomeIcon icon={faFacebook} className="h-5 w-5" />
+      </span>
+      <a
+        href="https://www.instagram.com/shagriha/"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Shagriha on Instagram"
+        className="transition-colors hover:text-secondary-500"
+      >
+        <FontAwesomeIcon icon={faInstagram} className="h-5 w-5" />
+      </a>
+    </div>
+  </footer>
+);
 
 export default FooterSection;

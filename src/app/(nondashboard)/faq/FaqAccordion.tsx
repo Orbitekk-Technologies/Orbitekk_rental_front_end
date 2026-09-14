@@ -25,11 +25,6 @@ const faqs = [
       "Signed-in tenants can keep track of properties they are interested in from their account.",
   },
   {
-    question: "How do I contact a property manager?",
-    answer:
-      "Open a property listing to view the available contact and application options for that property.",
-  },
-  {
     question: "Where can I get more help?",
     answer:
       "Visit the Contact page to send your question to the Shagriha team.",

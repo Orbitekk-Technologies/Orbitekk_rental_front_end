@@ -6,8 +6,8 @@ export const DEFAULT_PROPERTY_FORM_VALUES: PropertyFormData = {
   name: "",
   description: "",
   stayType: "WholeUnit",
-  pricePerMonth: 1000,
-  securityDeposit: 500,
+  pricePerMonth: "" as unknown as number,
+  securityDeposit: "" as unknown as number,
   isPetsAllowed: false,
   isParkingIncluded: false,
   petCount: undefined,
@@ -20,9 +20,9 @@ export const DEFAULT_PROPERTY_FORM_VALUES: PropertyFormData = {
   amenities: [],
   bathType: "Private",
   propertyType: PropertyTypeEnum.Apartment,
-  beds: 1,
-  baths: 1,
-  squareFeet: 1000,
+  beds: "" as unknown as number,
+  baths: "" as unknown as number,
+  squareFeet: "" as unknown as number,
   addressLine1: "",
   addressLine2: "",
   city: "",
@@ -56,7 +56,9 @@ export function propertyToFormValues(property: Property): PropertyFormData {
     photoUrls: [],
     existingPhotoUrls: property.photoUrls ?? [],
     photoOrder: (property.photoUrls ?? []).map((_, index) => `existing:${index}`),
-    amenities: property.amenities ?? [],
+    amenities: (property.amenities ?? []).filter(
+      (amenity) => amenity !== AmenityEnum.Parking && amenity !== AmenityEnum.PetsAllowed
+    ),
     propertyType:
       property.propertyType === PropertyTypeEnum.Townhouse
         ? PropertyTypeEnum.Townhouse
@@ -85,7 +87,15 @@ export function propertyToFormValues(property: Property): PropertyFormData {
 export function buildPropertyFormData(values: PropertyFormData): FormData {
   const formData = new FormData();
 
-  Object.entries(values).forEach(([key, value]) => {
+  // Normalize user-authored text before it crosses the multipart boundary so
+  // the API receives exactly the current form value, never stale draft text.
+  const normalizedValues = {
+    ...values,
+    name: values.name.trim(),
+    description: values.description.trim(),
+  };
+
+  Object.entries(normalizedValues).forEach(([key, value]) => {
     if (value == null) return;
     if (key === "photoUrls") {
       (value as File[]).forEach((file) => formData.append("photos", file));
@@ -93,7 +103,12 @@ export function buildPropertyFormData(values: PropertyFormData): FormData {
     }
 
     if (Array.isArray(value)) {
-      formData.append(key, JSON.stringify(value));
+      const normalizedArray = key === "amenities"
+        ? value.filter(
+            (item) => item !== AmenityEnum.Parking && item !== AmenityEnum.PetsAllowed
+          )
+        : value;
+      formData.append(key, JSON.stringify(normalizedArray));
       return;
     }
 
@@ -197,9 +212,7 @@ export const PROPERTY_AMENITY_OPTIONS = [
   { value: AmenityEnum.Dishwasher, label: "Dishwasher" },
   { value: AmenityEnum.HighSpeedInternet, label: "High-Speed Internet" },
   { value: AmenityEnum.AirConditioning, label: "Air Conditioning" },
-  { value: AmenityEnum.Parking, label: "Parking" },
   { value: AmenityEnum.Refrigerator, label: "Refrigerator" },
-  { value: AmenityEnum.PetsAllowed, label: "Pets Allowed" },
   { value: AmenityEnum.Pool, label: "Pool" },
   { value: AmenityEnum.Gym, label: "Gym" },
 ];

@@ -143,6 +143,7 @@ export interface Application {
   name: string;
   email: string;
   phoneNumber: string;
+  desiredMoveInDate: string;
   message: string | null;
   leaseId: number | null;
   property: Property;

@@ -6,9 +6,33 @@ type DocumentPageProps = {
 };
 
 type ContentBlock =
-  | { type: "heading"; value: string }
+  | { type: "heading"; value: string; level: number }
   | { type: "paragraph"; value: string }
   | { type: "list"; items: string[] };
+
+const renderInlineMarkdown = (value: string) =>
+  value.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g).map((part, index) => {
+    const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (link) {
+      const external = link[2].startsWith("http");
+      return (
+        <a
+          key={`${part}-${index}`}
+          href={link[2]}
+          className="font-medium text-secondary-600 underline decoration-secondary-300 underline-offset-2 hover:text-secondary-700"
+          {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+        >
+          {link[1]}
+        </a>
+      );
+    }
+
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={`${part}-${index}`} className="font-semibold text-primary-800">{part.slice(2, -2)}</strong>;
+    }
+
+    return part;
+  });
 
 const parseDocument = (content: string): ContentBlock[] => {
   const lines = content
@@ -21,15 +45,18 @@ const parseDocument = (content: string): ContentBlock[] => {
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
 
-    if (/^\d+\.\s+/.test(line)) {
-      blocks.push({ type: "heading", value: line });
+    const markdownHeading = line.match(/^(#{1,6})\s+(.+)$/);
+    if (markdownHeading) {
+      if (markdownHeading[1].length > 1) {
+        blocks.push({ type: "heading", value: markdownHeading[2], level: markdownHeading[1].length });
+      }
       continue;
     }
 
-    if (line.startsWith("•")) {
+    if (line.startsWith("•") || line.startsWith("- ")) {
       const items: string[] = [];
-      while (index < lines.length && lines[index].startsWith("•")) {
-        items.push(lines[index].replace(/^•\s*/, ""));
+      while (index < lines.length && /^(?:•|- )/.test(lines[index])) {
+        items.push(lines[index].replace(/^(?:•\s*|-\s+)/, ""));
         index += 1;
       }
       index -= 1;
@@ -55,12 +82,15 @@ const DocumentPage = ({ title, content }: DocumentPageProps) => {
       <div className="text-base leading-8 text-primary-600">
         {blocks.map((block, index) => {
           if (block.type === "heading") {
+            const isSubheading = block.level >= 3;
             return (
               <h2
                 key={`${block.value}-${index}`}
-                className="mb-4 mt-10 text-xl font-semibold text-primary-900 first:mt-0 sm:text-2xl"
+                className={isSubheading
+                  ? "mb-3 mt-7 text-lg font-semibold text-primary-900"
+                  : "mb-4 mt-10 text-xl font-semibold text-primary-900 first:mt-0 sm:text-2xl"}
               >
-                {block.value}
+                {renderInlineMarkdown(block.value)}
               </h2>
             );
           }
@@ -73,20 +103,20 @@ const DocumentPage = ({ title, content }: DocumentPageProps) => {
               >
                 {block.items.map((item, itemIndex) => (
                   <li key={`${item}-${itemIndex}`} className="pl-1">
-                    {item}
+                    {renderInlineMarkdown(item)}
                   </li>
                 ))}
               </ul>
             );
           }
 
-          const isLastUpdated = block.value.startsWith("Last Updated:");
+          const isLastUpdated = block.value.toLowerCase().startsWith("last updated:");
           return (
             <p
               key={`${block.value}-${index}`}
               className={isLastUpdated ? "mb-8 text-sm font-medium text-primary-500" : "mb-4"}
             >
-              {block.value}
+              {renderInlineMarkdown(block.value)}
             </p>
           );
         })}

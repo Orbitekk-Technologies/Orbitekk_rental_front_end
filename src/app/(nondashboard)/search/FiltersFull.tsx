@@ -4,10 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { cleanParams, cn } from "@/lib/utils";
-import LocationAutocomplete, { type SelectedLocation } from "@/components/LocationAutocomplete";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
 import { AmenityEnum, AmenityIcons, PropertyTypeIcons } from "@/lib/constants";
 import { PROPERTY_AMENITY_OPTIONS } from "@/lib/propertyForm";
 import { Slider } from "@/components/ui/slider";
@@ -26,8 +24,6 @@ const FiltersFull = () => {
   const pathname = usePathname();
   const filters = useAppSelector((state) => state.global.filters);
   const [localFilters, setLocalFilters] = useState(initialState.filters);
-  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
-  const [dismissSuggestions, setDismissSuggestions] = useState(0);
   const isFiltersFullOpen = useAppSelector(
     (state) => state.global.isFiltersFullOpen
   );
@@ -86,83 +82,26 @@ const FiltersFull = () => {
     }));
   };
 
-  const handleLocationSearch = async () => {
-    setDismissSuggestions((signal) => signal + 1);
-    try {
-      if (selectedLocation?.label === localFilters.location.trim()) {
-        setLocalFilters((prev) => ({
-          ...prev,
-          location: selectedLocation.label,
-          coordinates: selectedLocation.coordinates,
-        }));
-        return;
-      }
-
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-          localFilters.location
-        )}.json?access_token=${
-          process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
-        }&fuzzyMatch=true`
-      );
-      const data = await response.json();
-      if (data.features && data.features.length > 0) {
-        const [lng, lat] = data.features[0].center;
-        setLocalFilters((prev) => ({
-          ...prev,
-          coordinates: [lng, lat],
-        }));
-      }
-    } catch (err) {
-      console.error("Error search location:", err);
-    }
-  };
-
   if (!isFiltersFullOpen) return null;
 
   return (
     <div className="bg-white rounded-lg px-4 h-full overflow-auto pb-10">
       <div className="flex flex-col gap-6">
-        {/* Location */}
-        <div className="order-1">
-          <h4 className="font-bold mb-2">Location</h4>
-          <div className="flex items-center">
-            <LocationAutocomplete
-              placeholder="Enter location"
-              value={localFilters.location}
-              onChange={(value) => {
-                setLocalFilters((prev) => ({
-                  ...prev,
-                  location: value,
-                }));
-                if (value !== selectedLocation?.label) setSelectedLocation(null);
-              }}
-              onSelect={(location) => {
-                setSelectedLocation(location);
-                setLocalFilters((prev) => ({
-                  ...prev,
-                  location: location.label,
-                  coordinates: location.coordinates,
-                  city: location.city,
-                  state: location.state,
-                }));
-              }}
-              dismissSignal={dismissSuggestions}
-              className="rounded-l-xl border border-r-0 border-black"
-            />
-            <Button
-              onClick={handleLocationSearch}
-              className="rounded-r-xl rounded-l-none border-l-none border-black shadow-none border hover:bg-primary-700 hover:text-primary-50"
-            >
-              <Search className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
         {/* Property Type */}
         <div className="order-3">
           <h4 className="font-bold mb-2">Property Type</h4>
           <div className="grid grid-cols-2 gap-4">
+            <div
+              className={cn(
+                "flex flex-col items-center justify-center p-4 border rounded-xl cursor-pointer",
+                localFilters.propertyType === "any"
+                  ? "border-secondary-500 bg-secondary-500 text-white shadow-sm"
+                  : "border-gray-200"
+              )}
+              onClick={() => setLocalFilters((prev) => ({ ...prev, propertyType: "any" }))}
+            >
+              <span className="font-medium">Any</span>
+            </div>
             {Object.entries(PropertyTypeIcons).map(([type, Icon]) => (
               <div
                 key={type}
@@ -357,9 +296,7 @@ const FiltersFull = () => {
         <div className="order-11">
           <h4 className="font-bold mb-2">Amenities</h4>
           <div className="flex flex-wrap gap-2">
-            {PROPERTY_AMENITY_OPTIONS
-              .filter(({ value }) => value !== AmenityEnum.Parking && value !== AmenityEnum.PetsAllowed)
-              .map(({ value: amenity, label }) => {
+            {PROPERTY_AMENITY_OPTIONS.map(({ value: amenity, label }) => {
                 const Icon = AmenityIcons[amenity];
                 return (
               <div

@@ -41,6 +41,7 @@ const CardCompact = ({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onError={() => setImgSrc("/placeholder.jpg")}
         />
+        {/* Property preference badges are intentionally hidden on listing images.
         <div className="absolute bottom-2 left-2 flex gap-1 flex-col">
           {property.isPetsAllowed && (
             <span className="bg-white/80 text-black text-xs font-semibold px-2 py-1 rounded-full w-fit">
@@ -53,6 +54,7 @@ const CardCompact = ({
             </span>
           )}
         </div>
+        */}
       </div>
       <div className="w-2/3 p-4 flex flex-col justify-between">
         <div>
@@ -104,7 +106,7 @@ const CardCompact = ({
             </span>
             <span className="flex items-center">
               <House className="w-4 h-4 mr-1" />
-              {property.squareFeet}
+              {property.squareFeet} Sqft
             </span>
           </div>
 

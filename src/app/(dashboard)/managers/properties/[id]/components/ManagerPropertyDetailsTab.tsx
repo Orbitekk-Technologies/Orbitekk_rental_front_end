@@ -76,7 +76,9 @@ const ManagerPropertyDetailsTab = ({
                 Reviews)
               </span>
               */}
+              {/* Re-enable once property-owner identity verification is implemented.
               <span className="font-medium text-green-600">Verified Listing</span>
+              */}
             </div>
           </div>
         </div>

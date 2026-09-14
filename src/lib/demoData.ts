@@ -89,6 +89,7 @@ export const demoApplications: Application[] = [
     name: "Jordan Lee",
     email: "jordan@example.com",
     phoneNumber: "(312) 555-0184",
+    desiredMoveInDate: "2026-08-01",
     message: "I am interested in moving in next month.",
     leaseId: null,
     property: demoProperty,
@@ -104,6 +105,7 @@ export const demoApplications: Application[] = [
     name: "Taylor Morgan",
     email: "taylor@example.com",
     phoneNumber: "(773) 555-0142",
+    desiredMoveInDate: "2026-08-15",
     message: null,
     leaseId: demoLease.id,
     property: demoProperty,
@@ -119,6 +121,7 @@ export const demoApplications: Application[] = [
     name: "Casey Smith",
     email: "casey@example.com",
     phoneNumber: "(847) 555-0129",
+    desiredMoveInDate: "2026-09-01",
     message: null,
     leaseId: null,
     property: demoProperty,
@@ -232,7 +235,22 @@ export function getDemoApiData(
   if (/^tenants\/[^/]+\/favorites\/\d+$/.test(url)) return demoLease.tenant;
   if (/^tenants\/[^/]+$/.test(url)) return demoLease.tenant;
   if (url === "applications") return demoApplications;
-  if (/^applications\/\d+\/status$/.test(url)) return demoApplications[0];
+  if (/^applications\/\d+\/status$/.test(url) && method === "PUT") {
+    const applicationId = Number(url.split("/")[1]);
+    const application = demoApplications.find((item) => item.id === applicationId);
+    const update = body as { status?: Application["status"]; startDate?: string; endDate?: string };
+    if (!application) return demoApplications[0];
+    if (update.status) application.status = update.status;
+    if (update.startDate && update.endDate) {
+      application.lease = {
+        ...(application.lease ?? demoLease),
+        startDate: update.startDate,
+        endDate: update.endDate,
+      };
+      application.leaseId = application.lease.id;
+    }
+    return application;
+  }
   if (url === "leases") return [demoLease];
   if (/^leases\/\d+\/payments$/.test(url)) return demoPayments;
 

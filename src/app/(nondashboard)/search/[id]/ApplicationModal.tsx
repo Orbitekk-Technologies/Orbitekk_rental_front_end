@@ -31,6 +31,7 @@ const ApplicationModal = ({
       name: "",
       email: "",
       phoneNumber: "",
+      desiredMoveInDate: "",
       message: "",
     },
   });
@@ -80,6 +81,12 @@ const ApplicationModal = ({
               placeholder="Enter your phone number"
               numericOnly
               maxLength={10}
+            />
+            <CustomFormField
+              name="desiredMoveInDate"
+              label="Desired Move-in Date"
+              type="date"
+              min={new Date().toLocaleDateString("en-CA")}
             />
             <CustomFormField
               name="message"

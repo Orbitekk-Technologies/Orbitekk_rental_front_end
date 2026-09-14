@@ -4,17 +4,23 @@ import { setFilters } from "@/state";
 import { useAppDispatch } from "@/state/redux";
 import { Button } from "@/components/ui/button";
 import { LocateFixed, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type LocationState = "idle" | "requesting" | "denied" | "unavailable" | "resolved";
 
 export default function LocationInitializer() {
   const dispatch = useAppDispatch();
-  const requested = useRef(false);
+  const pathname = usePathname();
+  const isLocationPage = pathname === "/" || pathname === "/landing" || pathname.startsWith("/search");
   const [status, setStatus] = useState<LocationState>("idle");
   const [dismissed, setDismissed] = useState(false);
 
   const resolveLocation = useCallback(() => {
+    if (!window.isSecureContext) {
+      setStatus("unavailable");
+      return;
+    }
     if (!navigator.geolocation) {
       setStatus("unavailable");
       return;
@@ -58,11 +64,7 @@ export default function LocationInitializer() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!requested.current) {
-      requested.current = true;
-      resolveLocation();
-    }
-
+    if (!isLocationPage) return;
     if (!navigator.permissions) return;
     let permission: PermissionStatus | undefined;
     const handlePermissionChange = () => {
@@ -71,12 +73,14 @@ export default function LocationInitializer() {
     };
     void navigator.permissions.query({ name: "geolocation" }).then((result) => {
       permission = result;
+      if (permission.state === "granted") resolveLocation();
+      else if (permission.state === "denied") setStatus("denied");
       permission.addEventListener("change", handlePermissionChange);
     }).catch(() => undefined);
     return () => permission?.removeEventListener("change", handlePermissionChange);
-  }, [resolveLocation]);
+  }, [isLocationPage, resolveLocation]);
 
-  if (status === "resolved" || dismissed) return null;
+  if (!isLocationPage || status === "resolved" || dismissed) return null;
 
   return (
     <div className="fixed bottom-4 left-1/2 z-[100] flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-xl" role="status">
@@ -89,6 +93,8 @@ export default function LocationInitializer() {
           <p className="mt-1 text-sm text-gray-600">
             {status === "denied"
               ? "Location is blocked. Allow it from your browser’s site controls, then try again—or search for a city manually."
+              : typeof window !== "undefined" && !window.isSecureContext
+                ? "Chrome requires a secure HTTPS connection to share your location. You can still search for a city manually."
               : "Enable location to automatically show nearby properties, or search for a city manually."}
           </p>
         )}

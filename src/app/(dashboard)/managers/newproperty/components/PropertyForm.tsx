@@ -68,10 +68,11 @@ const STEP_FIELDS: Record<PropertyFormStep, FieldPath<PropertyFormData>[]> = {
     "petFee",
     "isParkingIncluded",
     "parkingFee",
+    "smokingIncluded",
     "propertyType",
     "bathType",
   ],
-  amenities: ["amenities", "smokingIncluded", "photoUrls"],
+  amenities: ["amenities", "photoUrls"],
 };
 
 const STEP_COPY: Record<
@@ -88,8 +89,8 @@ const STEP_COPY: Record<
     description: "Add pricing, unit information, and property preferences.",
   },
   amenities: {
-    title: "Amenities & Preference",
-    description: "Select amenities, tenant preference, and property photos.",
+    title: "Amenities & Billing",
+    description: "Select amenities, tenant preference, property photos and billing plan.",
   },
 };
 
@@ -222,17 +223,25 @@ const PropertyForm = ({
     try {
       const userId = authUser?.authInfo?.userId;
       if (!userId) throw new Error("Sign in before saving a draft");
-      const values = await prepareValuesForPersistence(form.getValues());
-      const { photoUrls: _photoUrls, ...storedValues } = values;
+      const values = form.getValues();
+      // File objects and data URLs can exceed localStorage's small quota. A
+      // draft retains all listing fields while uploaded photos are reselected
+      // when the manager resumes it.
+      const { photoUrls: _photoUrls, existingPhotoUrls: _existingPhotoUrls, ...storedValues } = values;
 
-      savePropertyDraft({
+      const draft = savePropertyDraft({
         userId,
         id: currentDraftId,
         values: storedValues as StoredPropertyFormValues,
         lastCompletedStep: activeStep,
       });
+      setCurrentDraftId(draft.id);
 
-      toast.success("Property draft saved.");
+      toast.success(
+        values.photoUrls.length > 0
+          ? "Property draft saved. Please add the photos again when you resume."
+          : "Property draft saved."
+      );
       allowNavigationRef.current = true;
       router.push("/managers/properties");
     } catch {

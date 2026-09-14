@@ -196,7 +196,7 @@ export default function LocationAutocomplete({
               aria-selected={index === activeIndex}
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => void selectSuggestion(suggestion)}
-              className={cn("flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-secondary-50", index === activeIndex && "bg-secondary-50")}
+              className={cn("flex w-full items-start gap-3 px-3 py-2.5 text-left transition-colors hover:bg-secondary-100", index === activeIndex && "bg-secondary-100")}
             >
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-secondary-500" />
               <span className="min-w-0">

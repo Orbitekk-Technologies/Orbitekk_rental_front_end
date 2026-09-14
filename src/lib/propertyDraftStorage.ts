@@ -37,8 +37,12 @@ function readJson<T>(key: string, fallback: T): T {
 }
 
 function writeJson<T>(key: string, value: T) {
-  if (!canUseStorage()) return;
-  window.localStorage.setItem(key, JSON.stringify(value));
+  if (!canUseStorage()) throw new Error("Browser storage is unavailable");
+  const serialized = JSON.stringify(value);
+  window.localStorage.setItem(key, serialized);
+  if (window.localStorage.getItem(key) !== serialized) {
+    throw new Error("The property draft could not be verified after saving");
+  }
   window.dispatchEvent(new Event(PROPERTY_STORAGE_UPDATED_EVENT));
 }
 

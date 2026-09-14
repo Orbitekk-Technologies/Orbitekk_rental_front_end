@@ -3,24 +3,11 @@
 import { CustomFormField } from "@/components/FormField";
 import { PropertyTypeEnum } from "@/lib/constants";
 import type { PropertyFormData } from "@/lib/schemas";
-import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 const PropertyDetailsStep = () => {
   const form = useFormContext<PropertyFormData>();
-  const { setValue } = form;
   const stayType = form.watch("stayType");
-  const isPrivateRoom = stayType === "PayingGuest";
-
-  useEffect(() => {
-    if (!isPrivateRoom) return;
-
-    // Frontend-only release rule. Previously these fields remained editable
-    // for every stay type; remove this effect and the disabled props below to
-    // restore that behavior. Backend validation intentionally remains unchanged.
-    setValue("beds", 1, { shouldDirty: true, shouldValidate: true });
-    setValue("baths", 1, { shouldDirty: true, shouldValidate: true });
-  }, [isPrivateRoom, setValue]);
 
   return (
     <div className="space-y-7">
@@ -31,11 +18,13 @@ const PropertyDetailsStep = () => {
             name="pricePerMonth"
             label="Price per Month"
             type="number"
+            placeholder="Ex: 1000"
           />
           <CustomFormField
             name="securityDeposit"
             label="Security Deposit"
             type="number"
+            placeholder="Ex: 500"
           />
         </div>
       </section>
@@ -51,12 +40,13 @@ const PropertyDetailsStep = () => {
             name="beds"
             label="Number of Beds"
             type="number"
-            disabled={isPrivateRoom}
+            placeholder="Ex: 1"
           />
           <CustomFormField
             name="squareFeet"
             label="Square Feet"
             type="number"
+            placeholder="Ex: 1000"
           />
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -64,15 +54,10 @@ const PropertyDetailsStep = () => {
             name="baths"
             label="Number of Baths"
             type="number"
-            disabled={isPrivateRoom}
+            placeholder={stayType === "WholeUnit" ? "Ex: 0.5, 1, or 1.5" : "Ex: 1"}
+            allowDecimal={stayType === "WholeUnit"}
           />
         </div>
-        {isPrivateRoom && (
-          <p className="text-sm text-amber-700">
-            Private Room listings are fixed at 1 bed and 1 bath. To add more
-            beds or baths, select Whole Unit as the stay type.
-          </p>
-        )}
         {stayType === "PayingGuest" && (
           <CustomFormField
             name="bathType"
@@ -121,6 +106,20 @@ const PropertyDetailsStep = () => {
                 <CustomFormField name="parkingFee" label="Parking Price (Optional)" type="number" />
               </div>
             )}
+          </section>
+
+          <div className="border-t border-gray-200" />
+
+          <section className="space-y-4">
+            <CustomFormField
+              name="smokingIncluded"
+              label="Smoking"
+              type="radio"
+              options={[
+                { value: "true", label: "Allowed" },
+                { value: "false", label: "Not Allowed" },
+              ]}
+            />
           </section>
         </div>
 

@@ -31,6 +31,10 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { CircleAlert } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
+import AuthVisualCarousel from "@/components/AuthVisualCarousel";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFacebook, faInstagram } from "@fortawesome/free-brands-svg-icons";
 
 export type AuthIdentity = {
   userId: string;
@@ -188,27 +192,32 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-      <section className="w-full max-w-md rounded-lg border border-border bg-background p-8">
-        <header className="mb-7">
-          <Link
-            href="/"
-            aria-label="SHAGRIHA home"
-            className="inline-block rounded-sm text-2xl font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2"
-          >
-            SHA<span className="font-light text-secondary-500">GRIHA</span>
-          </Link>
-          <p className="mt-2 text-muted-foreground">
-            <span className="font-bold">Welcome!</span>{" "}
-            {isReset
-              ? "Update your password to continue"
-              : isSignUp
-                ? "Create an account to continue"
-                : "Please sign in to continue"}
-          </p>
-        </header>
+    <main className="grid min-h-screen bg-[#f8f9fb] lg:grid-cols-[35%_65%]">
+      <aside className="relative hidden flex-col bg-[#f6efff] px-12 py-10 lg:flex xl:px-16">
+        <BrandLogo />
+        <div className="flex flex-1 items-center justify-center pb-16">
+          <AuthVisualCarousel />
+        </div>
+      </aside>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+      <section className="flex min-h-screen flex-col px-6 py-8 sm:px-10 lg:px-16 xl:px-24">
+        <BrandLogo className="lg:hidden" />
+        <div className="flex flex-1 items-center justify-center py-10">
+          <div className="w-full max-w-xl">
+            <header className="mb-10">
+              <h1 className="text-xl font-bold tracking-tight">
+                <span className="text-secondary-500">SHA</span>GRIHA
+              </h1>
+              <p className="mt-1 text-base text-gray-500">
+                {isReset
+                  ? "Reset your password to continue"
+                  : isSignUp
+                    ? "Welcome! Create your account to continue"
+                    : "Welcome! Please sign in to continue"}
+              </p>
+            </header>
+
+            <form className="space-y-5" onSubmit={handleSubmit}>
           {formError && (
             <div role="alert" className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
               <CircleAlert aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
@@ -216,7 +225,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-base font-normal text-gray-600">Email</Label>
             <Input
               id="email"
               name="email"
@@ -235,6 +244,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
               }}
               onFocus={() => setFocusedField("email")}
               onBlur={() => setFocusedField(null)}
+              className="h-14 border-0 bg-gray-100 px-4 text-base shadow-none focus-visible:ring-secondary-500"
               required
             />
             {emailError && (
@@ -250,7 +260,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-base font-normal text-gray-600">Password</Label>
             <PasswordInput
               id="password"
               name="password"
@@ -260,6 +270,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
               maxLength={100}
               onFocus={() => setFocusedField("password")}
               onBlur={() => setFocusedField(null)}
+              className="h-14 border-0 bg-gray-100 px-4 text-base shadow-none focus-visible:ring-secondary-500"
               required
             />
             {(isSignUp || isReset) && focusedField === "password" && (
@@ -272,7 +283,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
           {(isSignUp || isReset) && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Label htmlFor="confirm-password" className="text-base font-normal text-gray-600">Confirm Password</Label>
                 <PasswordInput
                   id="confirm-password"
                   name="confirmPassword"
@@ -282,6 +293,7 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
                   maxLength={100}
                   onFocus={() => setFocusedField("confirmPassword")}
                   onBlur={() => setFocusedField(null)}
+                  className="h-14 border-0 bg-gray-100 px-4 text-base shadow-none focus-visible:ring-secondary-500"
                   required
                 />
                 {focusedField === "confirmPassword" && (
@@ -295,44 +307,67 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
           )}
 
           {!isSignUp && !isReset && (
-            <div className="text-right">
-              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-                Forgot password?
+            <div className="flex items-center justify-between gap-4">
+              <label className="flex items-center gap-3 text-sm text-gray-600">
+                <input type="checkbox" name="rememberMe" className="h-5 w-5 rounded border-gray-400 accent-[#9747ff]" />
+                Remember me
+              </label>
+              <Link href="/forgot-password" className="text-sm font-semibold text-secondary-500 hover:underline">
+                Forgot Password?
               </Link>
             </div>
           )}
 
-          <Button type="submit" className="mt-2 w-full" disabled={isLoginLoading || isSignupLoading || isResetLoading}>
+          <Button type="submit" className="mt-2 h-14 w-full rounded-md bg-secondary-500 text-lg text-white hover:bg-secondary-600" disabled={isLoginLoading || isSignupLoading || isResetLoading}>
             {isLoginLoading || isSignupLoading || isResetLoading
               ? "Please wait..."
-              : isReset ? "Update password" : isSignUp ? "Create account" : "Sign in"}
+              : isReset ? "Update Password" : isSignUp ? "Register" : "Log In"}
           </Button>
-        </form>
+            </form>
 
-        <div className="mt-5 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-sm text-gray-500 sm:text-base">
           {isReset ? (
-            <Link href="/signin" className="text-primary hover:underline">
-              Back to sign in
+            <Link href="/signin" className="font-semibold text-secondary-500 hover:underline">
+              Back to Log In
             </Link>
           ) : (
             <>
           <span>
-            {isSignUp ? "Already have an account?" : "Don’t have an account?"}
+            {isSignUp ? "Already a member?" : "New member here?"}
           </span>
-          <a href={isSignUp ? "/signin" : "/signup"} className="text-primary hover:underline">
-            {isSignUp ? "Sign in" : "Sign up here"}
-          </a>
-          <span>or</span>
+          <Link href={isSignUp ? "/signin" : "/signup"} className="font-semibold text-secondary-500 hover:underline">
+            {isSignUp ? "Log In" : "Register Now"}
+          </Link>
+          <span>or Use</span>
           <button
             type="button"
             onClick={handleGoogle}
-            className="border-0 bg-transparent p-0 text-primary hover:underline"
+            className="border-0 bg-transparent p-0 font-semibold text-secondary-500 hover:underline"
           >
             Google
           </button>
             </>
           )}
+            </div>
+          </div>
         </div>
+
+        <footer className="flex flex-col items-center justify-between gap-5 text-sm text-gray-500 sm:flex-row">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
+            <span>© ShaGriha 2026</span>
+            <Link href="/faq" className="hover:text-secondary-500">FAQ&apos;s</Link>
+            <Link href="/terms" className="hover:text-secondary-500">T&amp;C</Link>
+            <Link href="/privacy" className="hover:text-secondary-500">Privacy</Link>
+          </div>
+          <div className="flex items-center gap-6 text-gray-600">
+            <span aria-label="Facebook link coming soon" title="Facebook link coming soon">
+              <FontAwesomeIcon icon={faFacebook} className="h-5 w-5" />
+            </span>
+            <a href="https://www.instagram.com/shagriha/" target="_blank" rel="noreferrer" aria-label="Shagriha on Instagram" className="hover:text-secondary-500">
+              <FontAwesomeIcon icon={faInstagram} className="h-5 w-5" />
+            </a>
+          </div>
+        </footer>
       </section>
     </main>
   );

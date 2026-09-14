@@ -1,17 +1,17 @@
 import React from "react";
 import HeroSection from "./HeroSection";
-import FeaturesSection from "./FeaturesSection";
-import DiscoverSection from "./DiscoverSection";
-import CallToActionSection from "./CallToActionSection";
+// import FeaturesSection from "./FeaturesSection";
+// import DiscoverSection from "./DiscoverSection";
+// import CallToActionSection from "./CallToActionSection";
 import FooterSection from "./FooterSection";
 
 const Landing = () => {
   return (
-    <div>
+    <div className="flex h-[calc(100vh-80px)] min-h-[620px] flex-col bg-white lg:min-h-0">
       <HeroSection />
-      <FeaturesSection />
-      <DiscoverSection />
-      <CallToActionSection />
+      {/* <FeaturesSection /> */}
+      {/* <DiscoverSection /> */}
+      {/* <CallToActionSection /> */}
       <FooterSection />
     </div>
   );

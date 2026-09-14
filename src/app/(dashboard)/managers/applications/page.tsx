@@ -1,6 +1,7 @@
 "use client";
 
 import ApplicationCard from "@/components/ApplicationCard";
+import LeaseDateEditor from "@/components/LeaseDateEditor";
 import Header from "@/components/Header";
 import Loading from "@/components/Loading";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -165,14 +166,7 @@ const Applications = () => {
                       )}
                       {application.status === "Pending" && (
                         <>
-                          <button
-                            className="min-h-10 rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-500"
-                            onClick={() =>
-                              handleStatusChange(application.id, "Approved")
-                            }
-                          >
-                            Approve
-                          </button>
+                          <LeaseDateEditor application={application} />
                           <button
                             className="min-h-10 rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-500"
                             onClick={() =>

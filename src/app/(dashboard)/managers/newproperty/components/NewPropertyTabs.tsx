@@ -10,7 +10,7 @@ import type { PropertyFormStep } from "@/lib/propertyDraftStorage";
 const STEPS: Array<{ value: PropertyFormStep; label: string }> = [
   { value: "basic", label: "Basic Information" },
   { value: "details", label: "Property Details" },
-  { value: "amenities", label: "Amenities & Preference" },
+  { value: "amenities", label: "Amenities & Billing" },
 ];
 
 interface NewPropertyTabsProps {
@@ -49,3 +49,4 @@ const NewPropertyTabs = ({
 };
 
 export default NewPropertyTabs;
+  

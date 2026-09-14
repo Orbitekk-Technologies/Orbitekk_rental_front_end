@@ -93,12 +93,17 @@ const AmenitiesPreferencesStep = () => {
   return (
     <div className="space-y-7">
       <section className="space-y-5">
-        <h3 className="text-sm font-semibold text-gray-900">
-          Amenities
-        </h3>
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">
+            Amenities
+            </h3>
+            <p className="text-sm text-gray-500">
+              Select the amenities and preferences that apply to this property.
+              </p>
+        </div>
         <CustomFormField
           name="amenities"
-          label="Amenities"
+          //label="Amenities"
           type="checkbox-group"
           options={PROPERTY_AMENITY_OPTIONS}
         />
@@ -107,8 +112,12 @@ const AmenitiesPreferencesStep = () => {
       <div className="border-t border-gray-200" />
 
       <section className="space-y-4">
-        <h3 className="text-sm font-semibold text-gray-900">Photos</h3>
-
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">Photos</h3>
+          <p className="text-sm text-gray-500">
+            Upload up to 5 images, each smaller than 10 MB. Drag photos to reorder them the first image is your property&apos;s cover photo on search and detail pages.
+            </p>
+        </div>
         {order.length > 0 && (
           <div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -155,9 +164,6 @@ const AmenitiesPreferencesStep = () => {
             <input type="file" accept="image/*" multiple className="sr-only" onChange={(event) => { addPhotos(event.target.files); event.target.value = ""; }} />
           </label>
         )}
-        <p className="text-sm text-gray-500">
-          Upload up to 5 images, each smaller than 10 MB. Drag photos to reorder them—the first image is your property&apos;s cover photo on search and detail pages.
-        </p>
         {form.formState.errors.photoUrls?.message && (
           <p role="alert" className="text-sm font-medium text-red-600">
             {String(form.formState.errors.photoUrls.message)}

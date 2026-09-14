@@ -1,39 +1,17 @@
 "use client";
 
-import type { Lease } from "@/types/prismaTypes";
 import { Mail, MapPin, PhoneCall } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import LeaseDateEditor from "@/components/LeaseDateEditor";
 
 const formatDate = (value?: string | Date | null) => {
-  if (!value) return "—";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString();
-};
-
-const getNextPaymentDate = (lease?: Lease | null) => {
-  if (!lease) return "—";
-
-  const today = new Date();
-  const startDate = new Date(lease.startDate);
-  const endDate = new Date(lease.endDate);
-
-  if (
-    Number.isNaN(startDate.getTime()) ||
-    Number.isNaN(endDate.getTime()) ||
-    today > endDate
-  ) {
-    return "—";
-  }
-
-  const paymentDay = Math.min(startDate.getDate(), 28);
-  let nextPayment = new Date(today.getFullYear(), today.getMonth(), paymentDay);
-
-  if (nextPayment < today) {
-    nextPayment = new Date(today.getFullYear(), today.getMonth() + 1, paymentDay);
-  }
-
-  return nextPayment <= endDate ? nextPayment.toLocaleDateString() : "—";
+  if (!value) return "N/A";
+  const raw = String(value);
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(raw)
+    ? new Date(`${raw}T00:00:00`)
+    : new Date(value);
+  return Number.isNaN(dateOnly.getTime()) ? "N/A" : dateOnly.toLocaleDateString();
 };
 
 const ApplicationCard = ({
@@ -114,20 +92,21 @@ const ApplicationCard = ({
           </div>
 
           <div className="flex justify-between gap-4">
+            <span className="text-gray-500">Desired Check-in:</span>
+            <span>{formatDate(application.desiredMoveInDate)}</span>
+          </div>
+          <div className="flex justify-between gap-4">
             <span className="text-gray-500">Start Date:</span>
-            <span>{formatDate(application.lease?.startDate)}</span>
+            <span className="flex items-center gap-1">
+              {formatDate(application.lease?.startDate)}
+              {userType === "manager" && application.status !== "Denied" && (
+                <LeaseDateEditor application={application} iconOnly />
+              )}
+            </span>
           </div>
           <div className="flex justify-between gap-4">
             <span className="text-gray-500">End Date:</span>
             <span>{formatDate(application.lease?.endDate)}</span>
-          </div>
-          <div className="flex justify-between gap-4">
-            <span className="text-gray-500">Next Payment:</span>
-            <span>
-              {application.status === "Approved"
-                ? getNextPaymentDate(application.lease)
-                : "—"}
-            </span>
           </div>
         </div>
 

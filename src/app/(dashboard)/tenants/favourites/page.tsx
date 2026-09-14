@@ -25,10 +25,15 @@ const Favorites = () => {
 
   return (
     <div className="dashboard-container">
-      <Header
-        title="Favourite Properties"
-        subtitle="Browse and manage your saved property listings"
-      />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <Header
+          title="Favourite Properties"
+          subtitle="Browse and manage your saved property listings"
+        />
+        <Button asChild className="shrink-0 bg-primary-700 text-white hover:bg-primary-600">
+          <Link href="/search">Search properties</Link>
+        </Button>
+      </div>
       {favoriteProperties && favoriteProperties.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {favoriteProperties.map((property) => (

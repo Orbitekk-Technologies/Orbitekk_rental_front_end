@@ -13,11 +13,10 @@ const BasicInformationStep = () => {
         <CustomFormField
           name="stayType"
           label="Stay Type"
-          type="select"
-          placeholder="Select a stay type"
+          type="radio"
           options={[
-            { value: "PayingGuest", label: "Paying Guest/Private Room" },
             { value: "WholeUnit", label: "Whole Unit" },
+            { value: "PayingGuest", label: "Paying Guest/Private Room" },
           ]}
         />
         <PropertyAddressFields />

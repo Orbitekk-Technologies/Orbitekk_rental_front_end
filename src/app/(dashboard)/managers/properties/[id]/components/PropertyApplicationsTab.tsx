@@ -1,6 +1,7 @@
 "use client";
 
 import ApplicationCard from "@/components/ApplicationCard";
+import LeaseDateEditor from "@/components/LeaseDateEditor";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -216,16 +217,7 @@ const PropertyApplicationsTab = ({
 
                   {application.status === "Pending" && (
                     <>
-                      <Button
-                        type="button"
-                        className="bg-green-600 text-white hover:bg-green-500"
-                        disabled={isUpdating}
-                        onClick={() =>
-                          handleStatusChange(application.id, "Approved")
-                        }
-                      >
-                        Approve
-                      </Button>
+                      <LeaseDateEditor application={application} />
                       <Button
                         type="button"
                         variant="destructive"

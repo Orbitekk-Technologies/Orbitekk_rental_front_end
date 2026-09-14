@@ -4,19 +4,25 @@ import { AmenityEnum, PropertyTypeEnum } from "@/lib/constants";
 const browserFileSchema =
   typeof File === "undefined" ? z.any() : z.instanceof(File);
 
+const requiredNumber = (schema: z.ZodNumber) =>
+  z.preprocess(
+    (value) => value === "" || value == null ? undefined : value,
+    schema.optional().refine((value) => value !== undefined, "This field is required")
+  ).transform((value) => value as number);
+
 export const propertySchema = z
   .object({
     name: z.string().trim().min(1, "Property name is required"),
     description: z.string().trim().min(1, "Description is required").max(500, "Description cannot exceed 500 characters"),
     stayType: z.enum(["PayingGuest", "WholeUnit"]),
-    pricePerMonth: z.coerce
+    pricePerMonth: requiredNumber(z.coerce
       .number({ invalid_type_error: "Only whole numbers are allowed" })
       .positive("Monthly rent must be greater than zero")
-      .int("Monthly rent must be a whole number"),
-    securityDeposit: z.coerce
+      .int("Monthly rent must be a whole number")),
+    securityDeposit: requiredNumber(z.coerce
       .number({ invalid_type_error: "Only whole numbers are allowed" })
       .nonnegative("Security deposit cannot be negative")
-      .int("Security deposit must be a whole number"),
+      .int("Security deposit must be a whole number")),
     isPetsAllowed: z.boolean(),
     isParkingIncluded: z.boolean(),
     petCount: z.preprocess((value) => value === "" || value == null ? undefined : value,
@@ -33,20 +39,19 @@ export const propertySchema = z
       .array(z.nativeEnum(AmenityEnum))
       .min(1, "Select at least one amenity"),
     bathType: z.enum(["Private", "SharedBath"]),
-    beds: z.coerce
+    beds: requiredNumber(z.coerce
       .number({ invalid_type_error: "Only whole numbers are allowed" })
       .positive("Number of beds must be greater than zero")
       .max(10, "Number of beds cannot exceed 10")
-      .int("Number of beds must be a whole number"),
-    baths: z.coerce
-      .number({ invalid_type_error: "Only whole numbers are allowed" })
+      .int("Number of beds must be a whole number")),
+    baths: requiredNumber(z.coerce
+      .number({ invalid_type_error: "Enter a valid number" })
       .positive("Number of baths must be greater than zero")
-      .max(10, "Number of baths cannot exceed 10")
-      .int("Number of baths must be a whole number"),
-    squareFeet: z.coerce
+      .max(10, "Number of baths cannot exceed 10")),
+    squareFeet: requiredNumber(z.coerce
       .number({ invalid_type_error: "Only whole numbers are allowed" })
       .positive("Square feet must be greater than zero")
-      .int(),
+      .int("Square feet must be a whole number")),
     propertyType: z.nativeEnum(PropertyTypeEnum),
     addressLine1: z.string().trim().min(1, "Property address is required"),
     addressLine2: z.string().trim().optional(),
@@ -63,6 +68,18 @@ export const propertySchema = z
     addressConfirmed: z.boolean(),
   })
   .superRefine((data, context) => {
+    const validBathIncrement = data.stayType === "WholeUnit"
+      ? Number.isInteger(data.baths * 2)
+      : Number.isInteger(data.baths);
+    if (!validBathIncrement) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["baths"],
+        message: data.stayType === "WholeUnit"
+          ? "Bathrooms must use 0.5 increments"
+          : "Bathrooms must be a whole number",
+      });
+    }
     if (!data.addressConfirmed) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
@@ -107,6 +124,10 @@ export const applicationSchema = z.object({
   name: z.string().trim().min(1, "Name is required").regex(/^[\p{L}][\p{L}\p{M}' -]*$/u, "Name can only contain letters, spaces, apostrophes, and hyphens"),
   email: z.string().trim().email("Enter a valid email address"),
   phoneNumber: z.string().regex(/^\d{10}$/, "Phone number must contain exactly 10 digits"),
+  desiredMoveInDate: z.string().min(1, "Desired move-in date is required").refine(
+    (value) => value >= new Date().toISOString().slice(0, 10),
+    "Desired move-in date cannot be in the past"
+  ),
   message: z.string().optional(),
 });
 

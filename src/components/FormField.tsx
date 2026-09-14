@@ -39,12 +39,13 @@ registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
 
 interface FormFieldProps {
   name: string;
-  label: string;
+  label?: string;
   type?:
     | "text"
     | "email"
     | "textarea"
     | "number"
+    | "date"
     | "select"
     | "switch"
     | "checkbox"
@@ -63,7 +64,9 @@ interface FormFieldProps {
   multiple?: boolean;
   maxFiles?: number;
   maxLength?: number;
+  min?: string | number;
   numericOnly?: boolean;
+  allowDecimal?: boolean;
   isIcon?: boolean;
   singleSelection?: boolean;
   initialValue?: string | number | boolean | string[];
@@ -83,7 +86,9 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
   multiple = false,
   maxFiles,
   maxLength,
+  min,
   numericOnly = false,
+  allowDecimal = false,
   isIcon = false,
   singleSelection = false,
   initialValue,
@@ -246,10 +251,13 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
         return (
           <Input
             type="text"
-            inputMode="numeric"
+            inputMode={allowDecimal ? "decimal" : "numeric"}
             placeholder={placeholder}
             {...field}
-            onChange={(event) => field.onChange(event.target.value.replace(/\D/g, ""))}
+            onChange={(event) => {
+              const digits = event.target.value.replace(allowDecimal ? /[^\d.]/g : /\D/g, "");
+              field.onChange(allowDecimal ? digits.replace(/(\..*)\./g, "$1") : digits);
+            }}
             value={field.value ?? ""}
             className={`border-gray-200 px-3 py-2 ${inputClassName ?? ""}`}
             disabled={disabled}
@@ -284,6 +292,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             className={`border-gray-200 px-3 py-2 ${inputClassName ?? ""}`}
             disabled={disabled}
             maxLength={maxLength}
+            min={min}
           />
         );
     }
@@ -298,7 +307,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
       defaultValue={initialValue}
       render={({ field }) => (
         <FormItem className={`relative ${className ?? ""}`}>
-          {!hideOuterLabel && (
+          {!hideOuterLabel && label && (
             <div className="flex items-center justify-between">
               <FormLabel className={`text-sm font-medium ${labelClassName ?? ""}`}>
                 {label}

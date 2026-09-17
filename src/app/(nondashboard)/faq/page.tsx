@@ -1,5 +1,12 @@
 import FooterSection from "../landing/FooterSection";
 import FaqAccordion from "./FaqAccordion";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Rental Platform Frequently Asked Questions",
+  description: "Get answers about searching rental listings, creating a property listing, applications, accounts, and leases on Shagriha.",
+  alternates: { canonical: "/faq" },
+};
 
 export default function FaqPage() {
   return (

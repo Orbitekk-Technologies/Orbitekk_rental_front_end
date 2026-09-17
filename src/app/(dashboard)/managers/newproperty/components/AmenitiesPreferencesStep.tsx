@@ -5,11 +5,15 @@ import { GripVertical, ImagePlus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { CustomFormField } from "@/components/FormField";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { PROPERTY_AMENITY_OPTIONS } from "@/lib/propertyForm";
 import type { PropertyFormData } from "@/lib/schemas";
 
 const AmenitiesPreferencesStep = () => {
   const form = useFormContext<PropertyFormData>();
+  const listedBy = form.watch("listedBy");
   const existingPhotoUrls = form.watch("existingPhotoUrls") ?? [];
   const watchedUploadedPhotos = form.watch("photoUrls") as File[] | undefined;
   const uploadedPhotos = useMemo(() => watchedUploadedPhotos ?? [], [watchedUploadedPhotos]);
@@ -219,6 +223,60 @@ const AmenitiesPreferencesStep = () => {
             </button>
           ))}
         </div>
+      </section>
+
+      <div className="border-t border-gray-200" />
+
+      <section className="space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">Listed By</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Tell renters who is advertising this property.
+          </p>
+        </div>
+        <FormField
+          control={form.control}
+          name="listedBy"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <RadioGroup
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  className="flex flex-col gap-3 sm:flex-row sm:gap-8"
+                >
+                  <FormItem className="flex items-center gap-2 space-y-0">
+                    <FormControl><RadioGroupItem value="AGENT" /></FormControl>
+                    <FormLabel className="cursor-pointer font-normal">Agent / Property Manager / Sublet</FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center gap-2 space-y-0">
+                    <FormControl><RadioGroupItem value="OWNER" /></FormControl>
+                    <FormLabel className="cursor-pointer font-normal">Owner</FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="advertisingAuthorized"
+          render={({ field }) => (
+            <FormItem className="flex items-start gap-3 space-y-0 rounded-lg bg-gray-50 p-4">
+              <FormControl>
+                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+              <div className="space-y-1">
+                <FormLabel className="cursor-pointer font-normal leading-5">
+                  I confirm that I am authorized to advertise this property and that I have the right to use all submitted content.
+                  {listedBy === "AGENT" && <span className="text-red-600"> *</span>}
+                </FormLabel>
+                <FormMessage />
+              </div>
+            </FormItem>
+          )}
+        />
       </section>
     </div>
   );

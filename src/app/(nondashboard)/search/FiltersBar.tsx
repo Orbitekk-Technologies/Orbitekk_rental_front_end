@@ -5,7 +5,7 @@ import {
 } from "@/state";
 import { useAppSelector } from "@/state/redux";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { cleanParams, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,11 @@ const FiltersBar = () => {
     filters.priceRange[0] ?? 0,
     filters.priceRange[1] ?? 10000,
   ]);
+  const priceDetailsRef = useRef<HTMLDetailsElement>(null);
+  const hasLocation = Boolean(filters.location);
+  const hasPriceRange = filters.priceRange[0] != null || filters.priceRange[1] != null;
+  const hasStayType = Boolean(filters.stayType && filters.stayType !== "any");
+  const hasPropertyType = Boolean(filters.propertyType && filters.propertyType !== "any");
 
   useEffect(() => {
     setPriceDraft([filters.priceRange[0] ?? 0, filters.priceRange[1] ?? 10000]);
@@ -44,6 +49,25 @@ const FiltersBar = () => {
   useEffect(() => {
     setSearchInput(filters.location);
   }, [filters.location]);
+
+  useEffect(() => {
+    const closePriceMenu = (event: PointerEvent) => {
+      const menu = priceDetailsRef.current;
+      if (menu?.open && !menu.contains(event.target as Node)) menu.open = false;
+    };
+    const closePriceMenuWithEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && priceDetailsRef.current?.open) {
+        priceDetailsRef.current.open = false;
+        priceDetailsRef.current.querySelector("summary")?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", closePriceMenu);
+    document.addEventListener("keydown", closePriceMenuWithEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closePriceMenu);
+      document.removeEventListener("keydown", closePriceMenuWithEscape);
+    };
+  }, []);
 
   const updateURL = (newFilters: FiltersState) => {
     const cleanFilters = cleanParams(newFilters);
@@ -138,15 +162,15 @@ const FiltersBar = () => {
   };
 
   return (
-    <div className="flex justify-between items-center w-full py-5">
+    <div className="z-20 w-full shrink-0 border-b border-gray-200 bg-white px-4 py-3 shadow-sm md:border-0 md:px-0 md:py-3 md:shadow-none">
       {/* Filters */}
-      <div className="flex justify-between items-center gap-4 p-2">
+      <div className="grid grid-flow-col grid-rows-2 items-center gap-3 overflow-x-auto pb-1 md:flex md:gap-4 md:overflow-visible md:px-2 md:pb-0">
         {/* All Filters */}
         <Button
           variant="outline"
           className={cn(
-            "gap-2 rounded-xl border-primary-400 hover:bg-primary-500 hover:text-primary-100",
-            isFiltersFullOpen && "bg-primary-700 text-primary-100"
+            "h-12 shrink-0 gap-2 rounded-md px-5 [grid-row:2] hover:bg-secondary-50 md:order-1 md:[grid-row:auto]",
+            isFiltersFullOpen ? "border-secondary-600 text-secondary-700" : "border-input"
           )}
           onClick={() => dispatch(toggleFiltersFullOpen())}
         >
@@ -156,7 +180,7 @@ const FiltersBar = () => {
 
         {/* Search Location */}
         <form
-          className="flex items-center"
+          className="col-span-4 flex w-[calc(100vw-2rem)] shrink-0 items-center [grid-row:1] md:order-2 md:w-auto md:[grid-row:auto]"
           onSubmit={(event) => {
             event.preventDefault();
             void handleLocationSearch();
@@ -171,26 +195,25 @@ const FiltersBar = () => {
             }}
             onSelect={setSelectedLocation}
             dismissSignal={dismissSuggestions}
-            className="w-56 rounded-l-xl border border-r-0 border-primary-400"
+            className={cn("h-12 w-full rounded-l-md border border-r-0 px-5 md:w-72", hasLocation ? "border-secondary-600" : "border-input")}
           />
           <Button
             type="submit"
-            className={`rounded-r-xl rounded-l-none border-l-none border-primary-400 shadow-none 
-              border hover:bg-primary-700 hover:text-primary-50`}
+            className={cn("h-12 rounded-l-none rounded-r-md border border-l-0 bg-secondary-500 px-5 text-white shadow-none hover:bg-secondary-600", hasLocation ? "border-secondary-600" : "border-secondary-500")}
           >
             <Search className="w-4 h-4" />
           </Button>
         </form>
 
         {/* Price Range */}
-        <details className="group relative">
-          <summary className="flex h-10 min-w-36 cursor-pointer list-none items-center justify-between gap-2 rounded-xl border border-primary-400 bg-white px-3 text-sm [&::-webkit-details-marker]:hidden">
+        <details ref={priceDetailsRef} className="group relative shrink-0 [grid-row:2] md:order-3 md:[grid-row:auto]">
+          <summary className={cn("flex h-12 min-w-40 cursor-pointer list-none items-center justify-between gap-2 rounded-md border bg-white px-5 text-sm [&::-webkit-details-marker]:hidden", hasPriceRange ? "border-secondary-600" : "border-input")}>
             <span>
               {`$${(filters.priceRange[0] ?? 0).toLocaleString()} to $${filters.priceRange[1] == null ? "10k" : filters.priceRange[1].toLocaleString()}`}
             </span>
             <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
           </summary>
-          <div className="absolute left-0 top-12 z-50 w-72 rounded-xl border border-gray-200 bg-white p-5 shadow-xl">
+          <div className="absolute left-0 top-14 z-50 w-72 rounded-xl border border-gray-200 bg-white p-5 shadow-xl">
             <p className="mb-5 text-sm font-semibold">Monthly Price Range</p>
             <Slider
               min={0}
@@ -210,30 +233,30 @@ const FiltersBar = () => {
           </div>
         </details>
 
-        {/* Unit Type */}
+        {/* Stay Type */}
         <Select value={filters.stayType} onValueChange={(value) => handleFilterChange("stayType", value, null)}>
-          <SelectTrigger className="w-36 rounded-xl border-primary-400">
-            <SelectValue placeholder="Unit Type" />
+          <SelectTrigger className={cn("h-12 w-40 shrink-0 rounded-md px-5 [grid-row:2] md:order-4 md:[grid-row:auto]", hasStayType ? "border-secondary-600" : "border-input")}>
+            <SelectValue placeholder="Stay Type" />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            <SelectItem value="any">Any Unit Type</SelectItem>
+            <SelectItem value="any">Stay Type</SelectItem>
             <SelectItem value="WholeUnit">Whole Unit</SelectItem>
             <SelectItem value="PayingGuest">Private Room</SelectItem>
           </SelectContent>
         </Select>
 
-        {/* Property Type */}
+        {/* Unit Type */}
         <Select
           value={filters.propertyType || "any"}
           onValueChange={(value) =>
             handleFilterChange("propertyType", value, null)
           }
         >
-          <SelectTrigger className="w-32 rounded-xl border-primary-400">
-            <SelectValue placeholder="Home Type" />
+          <SelectTrigger className={cn("h-12 w-40 shrink-0 rounded-md px-5 [grid-row:2] md:order-5 md:[grid-row:auto]", hasPropertyType ? "border-secondary-600" : "border-input")}>
+            <SelectValue placeholder="Unit Type" />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            <SelectItem value="any">Any Property Type</SelectItem>
+            <SelectItem value="any">Unit Type</SelectItem>
             {Object.entries(PropertyTypeIcons).map(([type, Icon]) => (
               <SelectItem key={type} value={type}>
                 <div className="flex items-center">

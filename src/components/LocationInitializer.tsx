@@ -15,14 +15,18 @@ export default function LocationInitializer() {
   const isLocationPage = pathname === "/" || pathname === "/landing" || pathname.startsWith("/search");
   const [status, setStatus] = useState<LocationState>("idle");
   const [dismissed, setDismissed] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const resolveLocation = useCallback(() => {
+    setErrorMessage(null);
     if (!window.isSecureContext) {
       setStatus("unavailable");
+      setErrorMessage("Location requires HTTPS (or localhost during development). Search for a city manually on an insecure connection.");
       return;
     }
     if (!navigator.geolocation) {
       setStatus("unavailable");
+      setErrorMessage("This browser or device does not provide geolocation.");
       return;
     }
 
@@ -55,7 +59,16 @@ export default function LocationInitializer() {
       setStatus("resolved");
       setDismissed(false);
     }, (error) => {
-      setStatus(error.code === error.PERMISSION_DENIED ? "denied" : "unavailable");
+      if (error.code === error.PERMISSION_DENIED) {
+        setStatus("denied");
+        setErrorMessage("Chrome has blocked location for this site. Select the site-controls icon beside the address bar, set Location to Allow, then reload and try again.");
+      } else if (error.code === error.TIMEOUT) {
+        setStatus("unavailable");
+        setErrorMessage("Chrome could not determine your location in time. Check that device location services are enabled, then try again.");
+      } else {
+        setStatus("unavailable");
+        setErrorMessage("Your device could not provide a location. Check system location services and Chrome permissions, then try again.");
+      }
     }, {
       enableHighAccuracy: false,
       timeout: 10_000,
@@ -69,12 +82,18 @@ export default function LocationInitializer() {
     let permission: PermissionStatus | undefined;
     const handlePermissionChange = () => {
       if (permission?.state === "granted") resolveLocation();
-      else if (permission?.state === "denied") setStatus("denied");
+      else if (permission?.state === "denied") {
+        setStatus("denied");
+        setErrorMessage("Chrome has blocked location for this site. Select the site-controls icon beside the address bar, set Location to Allow, then reload and try again.");
+      }
     };
     void navigator.permissions.query({ name: "geolocation" }).then((result) => {
       permission = result;
       if (permission.state === "granted") resolveLocation();
-      else if (permission.state === "denied") setStatus("denied");
+      else if (permission.state === "denied") {
+        setStatus("denied");
+        setErrorMessage("Chrome has blocked location for this site. Select the site-controls icon beside the address bar, set Location to Allow, then reload and try again.");
+      }
       permission.addEventListener("change", handlePermissionChange);
     }).catch(() => undefined);
     return () => permission?.removeEventListener("change", handlePermissionChange);
@@ -91,11 +110,11 @@ export default function LocationInitializer() {
         </p>
         {status !== "requesting" && (
           <p className="mt-1 text-sm text-gray-600">
-            {status === "denied"
+            {errorMessage ?? (status === "denied"
               ? "Location is blocked. Allow it from your browser’s site controls, then try again—or search for a city manually."
               : typeof window !== "undefined" && !window.isSecureContext
                 ? "Chrome requires a secure HTTPS connection to share your location. You can still search for a city manually."
-              : "Enable location to automatically show nearby properties, or search for a city manually."}
+              : "Select Use my location to let your browser show its permission prompt. You can also search for a city manually.")}
           </p>
         )}
         {status !== "requesting" && (

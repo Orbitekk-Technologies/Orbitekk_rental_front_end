@@ -13,6 +13,7 @@ import { Heart } from "lucide-react";
 // import { MessageCircle, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/(auth)/authProvider";
+import { FAVORITE_GLOW_EVENT } from "@/lib/constants";
 
 const ContactWidget = ({ propertyId, onOpenModal }: ContactWidgetProps) => {
   const { user } = useAuth();
@@ -52,6 +53,8 @@ const ContactWidget = ({ propertyId, onOpenModal }: ContactWidgetProps) => {
       router.push("/signin");
       return;
     }
+
+    window.dispatchEvent(new Event(FAVORITE_GLOW_EVENT));
 
     const args = { userId: authUser.authInfo.userId, propertyId };
     if (isFavorite) await removeFavorite(args);
@@ -112,7 +115,7 @@ const ContactWidget = ({ propertyId, onOpenModal }: ContactWidgetProps) => {
         <Button
           type="button"
           variant="outline"
-          className="h-auto min-h-9 w-full whitespace-normal border-primary-300 px-2 py-2 text-xs leading-tight text-primary-700 hover:bg-primary-700 hover:text-white"
+          className="relative h-auto min-h-9 w-full whitespace-normal border-primary-300 px-2 py-2 text-xs leading-tight text-primary-700 hover:bg-primary-700 hover:text-white"
           onClick={handleFavoriteToggle}
           disabled={isUpdatingFavorite}
         >

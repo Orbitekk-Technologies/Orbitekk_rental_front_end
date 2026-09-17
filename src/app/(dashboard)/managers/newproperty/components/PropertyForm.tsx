@@ -72,7 +72,7 @@ const STEP_FIELDS: Record<PropertyFormStep, FieldPath<PropertyFormData>[]> = {
     "propertyType",
     "bathType",
   ],
-  amenities: ["amenities", "photoUrls"],
+  amenities: ["amenities", "photoUrls", "listedBy", "advertisingAuthorized"],
 };
 
 const STEP_COPY: Record<

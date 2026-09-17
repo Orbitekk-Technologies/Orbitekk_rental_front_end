@@ -66,6 +66,7 @@ export interface Property {
   petFee?: number;
   parkingFee?: number;
   smokingIncluded?: boolean;
+  listedBy?: "AGENT" | "OWNER";
   stayType?: "PayingGuest" | "WholeUnit";
   bathType?: "Private" | "SharedBath";
   beds: number;
@@ -162,6 +163,13 @@ export interface Lease {
   property?: Property;
   tenant: Tenant;
   payments?: Payment[];
+  status?: string;
+}
+
+export interface LeaseDocumentInfo {
+  available: boolean;
+  fileName: string | null;
+  uploadedAt: string | null;
 }
 
 export interface Payment {

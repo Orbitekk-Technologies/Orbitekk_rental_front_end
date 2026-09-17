@@ -30,6 +30,15 @@ const Map = () => {
       zoom: 9,
     });
     mapRef.current = map;
+    map.addControl(
+      new mapboxgl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true,
+        showUserHeading: true,
+        showAccuracyCircle: true,
+      }),
+      "bottom-right"
+    );
 
     let active = true;
     const resizeMap = () => {
@@ -72,7 +81,7 @@ const Map = () => {
   }, [result]);
 
   return (
-    <div className="basis-5/12 grow relative rounded-xl">
+    <div className="relative h-full w-full md:rounded-xl">
       <div
         className="map-container rounded-xl"
         ref={mapContainerRef}

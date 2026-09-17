@@ -56,7 +56,7 @@ const PropertyFormActions = ({
               : "Creating..."
             : mode === "edit"
               ? "Save Changes"
-              : "Create"}
+              : "Save Property"}
         </Button>
       )}
     </div>

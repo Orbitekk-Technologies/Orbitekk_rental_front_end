@@ -4,46 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Copy, FileUp, Upload } from "lucide-react";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useGetLeaseDocumentQuery, useUploadLeaseDocumentMutation } from "@/state/api";
+import { getAccessToken } from "@/lib/authToken";
 
-interface LeaseDocumentTabProps {
-  propertyId: number;
-  initialDocumentUrl?: string;
-  initialDocumentName?: string;
-}
-
-interface LeaseDocumentState {
-  name: string;
-  url: string;
-  isObjectUrl: boolean;
-}
+interface LeaseDocumentTabProps { propertyId: number; }
 
 const LeaseDocumentTab = ({
   propertyId,
-  initialDocumentUrl,
-  initialDocumentName = "Lease-document.pdf",
 }: LeaseDocumentTabProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [document, setDocument] = useState<LeaseDocumentState | null>(
-    initialDocumentUrl
-      ? {
-          name: initialDocumentName,
-          url: initialDocumentUrl,
-          isObjectUrl: false,
-        }
-      : null
-  );
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const { data: document } = useGetLeaseDocumentQuery(propertyId);
+  const [uploadDocument, { isLoading: isUploading }] = useUploadLeaseDocumentMutation();
 
   useEffect(() => {
     return () => {
-      if (document?.isObjectUrl) {
-        URL.revokeObjectURL(document.url);
-      }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
-  }, [document]);
+  }, [previewUrl]);
 
   const openFilePicker = () => inputRef.current?.click();
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
 
@@ -62,34 +44,33 @@ const LeaseDocumentTab = ({
       return;
     }
 
-    if (document?.isObjectUrl) {
-      URL.revokeObjectURL(document.url);
-    }
-
-    const previewUrl = URL.createObjectURL(file);
-    setDocument({ name: file.name, url: previewUrl, isObjectUrl: true });
-
-    // TODO(spring): Replace this browser-only preview with a multipart upload:
-    // POST /properties/{propertyId}/lease-document
-    // Save the returned persistent URL against the property/lease record.
-    toast.success("Lease PDF added for preview.");
+    try {
+      await uploadDocument({ propertyId, file }).unwrap();
+      setPreviewUrl((current) => {
+        if (current) URL.revokeObjectURL(current);
+        return URL.createObjectURL(file);
+      });
+    } catch { /* API mutation shows the error */ }
   };
 
   const handleCopyLink = async () => {
-    if (!document) return;
-
     try {
-      await navigator.clipboard.writeText(document.url);
-      if (document.isObjectUrl) {
-        toast.info(
-          "Preview link copied. It only works in this browser session until backend storage is connected."
-        );
-      } else {
-        toast.success("Lease document link copied.");
-      }
+      await navigator.clipboard.writeText(`${window.location.origin}/managers/properties/${propertyId}?tab=lease`);
+      toast.success("Lease page link copied.");
     } catch {
       toast.error("Unable to copy the document link.");
     }
+  };
+
+  const downloadDocument = async () => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1/"}properties/${propertyId}/lease-document/download`, {
+      headers: { Authorization: `Bearer ${getAccessToken()}` },
+    });
+    if (!response.ok) return toast.error("Unable to download the lease document.");
+    const url = URL.createObjectURL(await response.blob());
+    const anchor = window.document.createElement("a");
+    anchor.href = url; anchor.download = document?.fileName || "lease.pdf"; anchor.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -110,7 +91,7 @@ const LeaseDocumentTab = ({
           </p>
         </div>
 
-        {document && (
+        {document?.available && (
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
             <Button type="button" variant="ghost" onClick={handleCopyLink}>
               <Copy className="h-4 w-4" />
@@ -125,17 +106,19 @@ const LeaseDocumentTab = ({
               <Upload className="h-4 w-4" />
               Replace Document
             </Button>
+            <Button type="button" variant="outline" onClick={downloadDocument}>Download</Button>
           </div>
         )}
       </div>
 
-      {!document ? (
+      {!document?.available ? (
         <div className="flex min-h-[360px] items-center justify-center rounded-lg border border-dashed bg-gray-50/40">
           <Button
             type="button"
             variant="ghost"
             className="text-violet-600 hover:text-violet-700"
             onClick={openFilePicker}
+            disabled={isUploading}
           >
             <FileUp className="h-5 w-5" />
             Upload Lease Document
@@ -144,14 +127,15 @@ const LeaseDocumentTab = ({
       ) : (
         <div className="overflow-hidden rounded-lg border bg-gray-700">
           <div className="flex flex-col gap-2 bg-gray-800 px-4 py-3 text-white sm:flex-row sm:items-center sm:justify-between">
-            <span className="truncate font-medium">{document.name}</span>
-            <span className="text-xs text-gray-300">PDF preview</span>
+            <span className="truncate font-medium">{document.fileName}</span>
+            <span className="text-xs text-gray-300">Stored PDF</span>
           </div>
-          <iframe
-            src={document.url}
-            title={`${document.name} preview`}
-            className="h-[620px] w-full bg-white"
-          />
+          <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 bg-white p-8 text-center">
+            <FileUp className="h-10 w-10 text-violet-600" />
+            <p className="font-medium text-gray-900">{document.fileName}</p>
+            <p className="text-sm text-gray-500">The lease document is securely stored and ready to review.</p>
+            <Button type="button" onClick={downloadDocument}>Download PDF</Button>
+          </div>
         </div>
       )}
     </section>

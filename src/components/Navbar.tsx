@@ -1,13 +1,13 @@
 "use client";
 
-import { NAVBAR_HEIGHT } from "@/lib/constants";
+import { FAVORITE_GLOW_EVENT, NAVBAR_HEIGHT } from "@/lib/constants";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { useGetAuthUserQuery } from "@/state/api";
 import { useAuth } from "@/app/(auth)/authProvider";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, Plus } from "lucide-react";
+import { Menu } from "lucide-react";
 import { LockKeyhole, LockKeyholeOpen, X } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 // import { Bell, MessageCircle } from "lucide-react";
@@ -42,6 +42,21 @@ const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { signOut } = useAuth();
+  const [showFavoriteGlow, setShowFavoriteGlow] = useState(false);
+
+  useEffect(() => {
+    let timeout: number | undefined;
+    const showGlow = () => {
+      window.clearTimeout(timeout);
+      setShowFavoriteGlow(true);
+      timeout = window.setTimeout(() => setShowFavoriteGlow(false), 1600);
+    };
+    window.addEventListener(FAVORITE_GLOW_EVENT, showGlow);
+    return () => {
+      window.removeEventListener(FAVORITE_GLOW_EVENT, showGlow);
+      window.clearTimeout(timeout);
+    };
+  }, []);
 
   const isDashboardPage =
     pathname.includes("/managers") || pathname.includes("/tenants");
@@ -58,6 +73,18 @@ const Navbar = () => {
 
   const isActiveLink = (href: string) =>
     href === "/" ? pathname === href : pathname.startsWith(href);
+
+  const navLabel = (label: string) => (
+    <span className="relative inline-flex items-center">
+      {label}
+      {label === "Favourites" && showFavoriteGlow && (
+        <span className="absolute -right-3 -top-1 flex h-2.5 w-2.5" aria-hidden="true">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-secondary-500 opacity-75" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-secondary-600 shadow-[0_0_10px_rgba(147,51,234,0.9)]" />
+        </span>
+      )}
+    </span>
+  );
 
   if (isLandingPage) {
     return (
@@ -95,7 +122,7 @@ const Navbar = () => {
                   ].map((item) => (
                     <SheetClose key={item.href} asChild>
                       <Link href={item.href} className="rounded-md py-3 text-base hover:text-secondary-500">
-                        {item.label}
+                        {navLabel(item.label)}
                       </Link>
                     </SheetClose>
                   ))}
@@ -124,12 +151,15 @@ const Navbar = () => {
                 href={item.href}
                 className={`text-base transition-colors hover:text-secondary-500 ${isActiveLink(item.href) ? "text-secondary-500" : "text-gray-950"}`}
               >
-                {item.label}
+                {navLabel(item.label)}
               </Link>
             ))}
           </nav>
 
           <div className="flex items-center gap-7">
+            <Button asChild className="hidden h-12 bg-secondary-500 px-5 text-base text-white hover:bg-secondary-600 lg:inline-flex">
+              <Link href={addPropertyHref}>Add Listings</Link>
+            </Button>
             <Link href={authUser ? "/managers/properties" : "/signin"} className="group flex items-center gap-3 text-sm text-gray-950 transition-colors hover:text-secondary-500 sm:text-base">
               <span className="relative hidden h-5 w-5 sm:block" aria-hidden="true">
                 <LockKeyhole className="absolute inset-0 h-5 w-5 transition-opacity duration-200 group-hover:opacity-0" />
@@ -137,9 +167,6 @@ const Navbar = () => {
               </span>
               {authUser ? "Dashboard" : "Login/Sign Up"}
             </Link>
-            <Button asChild className="hidden h-12 bg-secondary-500 px-5 text-base text-white hover:bg-secondary-600 lg:inline-flex">
-              <Link href={addPropertyHref}>Add Listings</Link>
-            </Button>
           </div>
         </div>
       </header>
@@ -151,7 +178,7 @@ const Navbar = () => {
       className="fixed left-0 top-0 z-50 w-full border-b border-gray-100 bg-white"
       style={{ height: `${NAVBAR_HEIGHT}px` }}
     >
-      <div className="flex h-full w-full items-center justify-between bg-white px-6 text-gray-950 sm:px-10 lg:px-16">
+      <div className="mx-auto flex h-full w-full max-w-[1536px] items-center justify-between bg-white px-6 text-gray-950 sm:px-10 lg:px-16 xl:px-20">
         <div className="flex items-center gap-4 md:gap-6">
           {isDashboardPage && (
             <div className="md:hidden">
@@ -159,16 +186,6 @@ const Navbar = () => {
             </div>
           )}
           <BrandLogo />
-          {isDashboardPage && authUser && (
-            <Button
-              variant="secondary"
-              className="h-12 bg-secondary-500 px-5 text-white hover:bg-secondary-600 md:ml-4"
-              onClick={() => router.push("/managers/newproperty")}
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden md:block ml-2">Add New Property</span>
-            </Button>
-          )}
         </div>
         {!isDashboardPage && (
           <nav aria-label="Primary navigation" className="hidden items-center gap-10 lg:flex">
@@ -181,15 +198,20 @@ const Navbar = () => {
                   isActiveLink(item.href) ? "text-secondary-500" : "text-gray-950"
                 }`}
               >
-                {item.label}
+                {navLabel(item.label)}
               </Link>
             ))}
           </nav>
         )}
         <div className="flex items-center gap-5">
+          {isDashboardPage && (
+            <Button asChild className="hidden h-12 bg-secondary-500 px-6 text-white hover:bg-secondary-600 sm:inline-flex">
+              <Link href="/managers/newproperty">Add Listings</Link>
+            </Button>
+          )}
           {!isDashboardPage && (
             <Button
-              className="order-2 hidden h-12 bg-secondary-500 px-5 text-white hover:bg-secondary-600 lg:inline-flex"
+              className="hidden h-12 bg-secondary-500 px-5 text-white hover:bg-secondary-600 lg:inline-flex"
               onClick={() => router.push(addPropertyHref)}
             >
               Add Listings
@@ -296,7 +318,7 @@ const Navbar = () => {
                           isActiveLink(item.href) ? "text-secondary-500" : "text-gray-950"
                         }`}
                       >
-                        {item.label}
+                        {navLabel(item.label)}
                       </Link>
                     </SheetClose>
                   ))}

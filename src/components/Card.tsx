@@ -1,7 +1,8 @@
-import { Bath, Bed, Heart, House } from "lucide-react";
+import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
+import { FAVORITE_GLOW_EVENT } from "@/lib/constants";
 
 const Card = ({
   property,
@@ -13,9 +14,13 @@ const Card = ({
   const [imgSrc, setImgSrc] = useState(
     property.photoUrls?.[0] || "/placeholder.jpg"
   );
+  const toggleFavorite = () => {
+    window.dispatchEvent(new Event(FAVORITE_GLOW_EVENT));
+    onFavoriteToggle?.();
+  };
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-lg w-full mb-5">
+    <div className="mb-5 w-full overflow-hidden rounded-xl bg-white shadow-lg transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(124,58,237,0.16)]">
       <div className="relative">
         <div className="w-full h-48 relative">
           <Image
@@ -43,8 +48,8 @@ const Card = ({
         */}
         {showFavoriteButton && (
           <button
-            className="absolute bottom-4 right-4 bg-white hover:bg-white/90 rounded-full p-2 cursor-pointer"
-            onClick={onFavoriteToggle}
+            className="absolute bottom-4 right-4 cursor-pointer rounded-full bg-white p-2 hover:bg-white/90"
+            onClick={toggleFavorite}
           >
             <Heart
               className={`w-5 h-5 ${
@@ -89,19 +94,12 @@ const Card = ({
           </p>
         </div>
         <hr />
-        <div className="flex justify-between items-center gap-4 text-gray-600 mt-5">
-          <span className="flex items-center">
-            <Bed className="w-5 h-5 mr-2" />
-            {property.beds} Bed
-          </span>
-          <span className="flex items-center">
-            <Bath className="w-5 h-5 mr-2" />
-            {property.baths} Bath
-          </span>
-          <span className="flex items-center">
-            <House className="w-5 h-5 mr-2" />
-            {property.squareFeet} Sqft
-          </span>
+        <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-gray-600 sm:text-base">
+          <span>{property.beds} Bed</span>
+          <span className="h-1 w-1 rounded-full bg-gray-400" aria-hidden="true" />
+          <span>{property.baths} Bath</span>
+          <span className="h-1 w-1 rounded-full bg-gray-400" aria-hidden="true" />
+          <span>{property.squareFeet} Sqft</span>
         </div>
       </div>
     </div>

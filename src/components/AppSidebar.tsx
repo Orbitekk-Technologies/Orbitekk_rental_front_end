@@ -27,19 +27,27 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
   const pathname = usePathname();
   const { toggleSidebar, open } = useSidebar();
 
-  const navLinks =
+  const navGroups =
     userType === "manager" || userType === "user"
       ? [
+          { label: null, links: [
           { icon: Search, label: "Search Listings", href: "/search" },
           { icon: Heart, label: "Favourites", href: "/tenants/favourites" },
+          ]},
+          { label: "Tenant", links: [
           { icon: FileText, label: "My Applications", href: "/tenants/applications" },
-          { icon: Home, label: "My Residences", href: "/tenants/residences" },
-          { icon: Building, label: "Properties", href: "/managers/properties" },
+          { icon: Home, label: "My Residencies", href: "/tenants/residences" },
+          ]},
+          { label: "Manager", links: [
+          { icon: Building, label: "My Listings", href: "/managers/properties" },
           { icon: FileText, label: "Listing Applications", href: "/managers/applications" },
+          ]},
+          { label: null, links: [
           { icon: Settings, label: "Account Settings", href: "/managers/settings" },
+          ]},
         ]
       : [
-          {
+          { label: null, links: [{
             icon: Heart,
             label: "Favourites",
             href: "/tenants/favourites",
@@ -50,7 +58,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
             href: "/tenants/applications",
           },
           { icon: Home, label: "Residences", href: "/tenants/residences" },
-          { icon: Settings, label: "Settings", href: "/tenants/settings" },
+          { icon: Settings, label: "Account Settings", href: "/tenants/settings" }]},
         ];
 
   return (
@@ -98,7 +106,13 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
 
       <SidebarContent>
         <SidebarMenu>
-          {navLinks.map((link) => {
+          {navGroups.flatMap((group) => [
+            ...(group.label && open ? [
+              <li key={`group-${group.label}`} className="px-7 pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                {group.label}
+              </li>,
+            ] : []),
+            ...group.links.map((link) => {
             const isActive = pathname === link.href;
 
             return (
@@ -132,7 +146,8 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );
-          })}
+            }),
+          ])}
         </SidebarMenu>
       </SidebarContent>
     </Sidebar>

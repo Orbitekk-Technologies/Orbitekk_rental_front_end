@@ -50,7 +50,7 @@ const Properties = () => {
   return (
     <div className="dashboard-container">
       <Header
-        title="My Properties"
+        title="My Listings"
         subtitle="View and manage your property listings"
       />
 

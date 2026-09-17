@@ -6,6 +6,7 @@ export interface FiltersState {
   baths: string;
   propertyType: string;
   stayType: string;
+  listedBy: string;
   bathType: string;
   petsAllowed: string;
   parkingIncluded: string;
@@ -38,6 +39,7 @@ export const initialState: InitialStateTypes = {
     baths: "any",
     propertyType: "any",
     stayType: "any",
+    listedBy: "any",
     bathType: "any",
     petsAllowed: "any",
     parkingIncluded: "any",

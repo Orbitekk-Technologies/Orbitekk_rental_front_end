@@ -106,6 +106,7 @@ export const PropertyTypeIcons: Record<PropertyTypeEnum, LucideIcon> = {
 
 // Add this constant at the end of the file
 export const NAVBAR_HEIGHT = 80; // in pixels
+export const FAVORITE_GLOW_EVENT = "shagriha:favorite-glow";
 
 // Test users for development
 export const testUsers = {

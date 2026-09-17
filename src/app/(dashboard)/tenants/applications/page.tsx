@@ -24,7 +24,7 @@ const Applications = () => {
   return (
     <div className="dashboard-container">
       <Header
-        title="Applications"
+        title="My Applications"
         subtitle="Track and manage your property rental applications"
       />
       <div className="w-full">

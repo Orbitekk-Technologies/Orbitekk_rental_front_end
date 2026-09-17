@@ -32,6 +32,8 @@ export const propertySchema = z
     parkingFee: z.preprocess((value) => value === "" || value == null ? undefined : value,
       z.coerce.number({ invalid_type_error: "Only whole numbers are allowed" }).nonnegative("Parking price cannot be negative").int("Only whole numbers are allowed").optional()),
     smokingIncluded: z.boolean(),
+    listedBy: z.enum(["AGENT", "OWNER"]),
+    advertisingAuthorized: z.boolean(),
     photoUrls: z.array(browserFileSchema).default([]),
     existingPhotoUrls: z.array(z.string()).default([]),
     photoOrder: z.array(z.string()).default([]),
@@ -68,6 +70,13 @@ export const propertySchema = z
     addressConfirmed: z.boolean(),
   })
   .superRefine((data, context) => {
+    if (data.listedBy === "AGENT" && !data.advertisingAuthorized) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["advertisingAuthorized"],
+        message: "You must confirm that you are authorized to advertise this property",
+      });
+    }
     const validBathIncrement = data.stayType === "WholeUnit"
       ? Number.isInteger(data.baths * 2)
       : Number.isInteger(data.baths);

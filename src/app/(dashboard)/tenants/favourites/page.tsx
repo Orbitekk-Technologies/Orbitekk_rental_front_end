@@ -27,7 +27,7 @@ const Favorites = () => {
     <div className="dashboard-container">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <Header
-          title="Favourite Properties"
+          title="Favourites"
           subtitle="Browse and manage your saved property listings"
         />
         <Button asChild className="shrink-0 bg-primary-700 text-white hover:bg-primary-600">

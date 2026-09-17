@@ -7,6 +7,7 @@ import {
 import {
   Application,
   Lease,
+  LeaseDocumentInfo,
   Manager,
   Payment,
   PaymentMethod,
@@ -129,6 +130,7 @@ export const api = createApi({
           baths: filters.baths,
           propertyType: filters.propertyType,
           stayType: filters.stayType,
+          listedBy: filters.listedBy,
           bathType: filters.bathType,
           // Gender preference filtering is disabled for now.
           petsAllowed: filters.petsAllowed,
@@ -378,6 +380,23 @@ export const api = createApi({
       },
     }),
 
+    getLeaseDocument: build.query<LeaseDocumentInfo, number>({
+      query: (propertyId) => `properties/${propertyId}/lease-document`,
+      providesTags: (_result, _error, propertyId) => [{ type: "Leases", id: `document-${propertyId}` }],
+    }),
+
+    uploadLeaseDocument: build.mutation<LeaseDocumentInfo, { propertyId: number; file: File }>({
+      query: ({ propertyId, file }) => {
+        const body = new FormData();
+        body.append("file", file);
+        return { url: `properties/${propertyId}/lease-document`, method: "POST", body };
+      },
+      invalidatesTags: (_result, _error, { propertyId }) => [{ type: "Leases", id: `document-${propertyId}` }],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, { success: "Lease document uploaded.", error: "Failed to upload lease document." });
+      },
+    }),
+
     getPayments: build.query<Payment[], { leaseId: number; view?: "tenant" | "manager" }>({
       query: ({ leaseId, view }) => `leases/${leaseId}/payments${view ? `?view=${view}` : ""}`,
       providesTags: ["Payments"],
@@ -511,6 +530,8 @@ export const {
   useRemoveFavoritePropertyMutation,
   useGetLeasesQuery,
   useGetPropertyLeasesQuery,
+  useGetLeaseDocumentQuery,
+  useUploadLeaseDocumentMutation,
   useGetPaymentsQuery,
   useGetPaymentMethodQuery,
   useCreatePaymentMethodMutation,

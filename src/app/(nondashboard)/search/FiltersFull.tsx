@@ -1,4 +1,4 @@
-import { FiltersState, initialState, setFilters } from "@/state";
+import { FiltersState, initialState, setFilters, toggleFiltersFullOpen } from "@/state";
 import { useAppSelector } from "@/state/redux";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
@@ -65,6 +65,7 @@ const FiltersFull = () => {
     const nextFilters = { ...localFilters, page: 0 };
     dispatch(setFilters(nextFilters));
     updateURL(nextFilters);
+    dispatch(toggleFiltersFullOpen());
   };
 
   const handleReset = () => {
@@ -222,6 +223,15 @@ const FiltersFull = () => {
             <span>${localFilters.priceRange[1] ?? 10000}</span>
           </div>
         </div>
+
+        {/* Listed By */}
+        <PreferenceOptions
+          className="order-[2]"
+          label="Listed By"
+          value={localFilters.listedBy}
+          options={[["any", "Any"], ["AGENT", "Agent / Property Manager / Sublet"], ["OWNER", "Owner"]]}
+          onChange={(listedBy) => setLocalFilters((prev) => ({ ...prev, listedBy }))}
+        />
 
         {/* Beds and Baths */}
         <div className="order-5 flex gap-4">

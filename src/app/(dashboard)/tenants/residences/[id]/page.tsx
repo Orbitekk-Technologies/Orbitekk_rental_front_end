@@ -1,33 +1,28 @@
 "use client";
 
 import Loading from "@/components/Loading";
-import PaymentMethodSection from "./PaymentMethodSection";
-import {
+// Temporarily hidden while the payment-method and billing layouts are reworked.
+// import PaymentMethodSection from "./PaymentMethodSection";
+/* import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"; */
 import {
   useGetAuthUserQuery,
   useGetLeasesQuery,
-  useGetPaymentsQuery,
   useGetPropertyQuery,
 } from "@/state/api";
-import { Lease, Payment, Property } from "@/types/prismaTypes";
-import {
-  ArrowDownToLineIcon,
-  Check,
-  Download,
-  FileText,
-  MapPin,
-  User,
-} from "lucide-react";
+import { Lease, Property } from "@/types/prismaTypes";
+import { Download, MapPin, User } from "lucide-react";
 import { useParams } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
+import { getAccessToken } from "@/lib/authToken";
+import Image from "next/image";
 
 const ResidenceCard = ({
   property,
@@ -36,16 +31,40 @@ const ResidenceCard = ({
   property: Property;
   currentLease: Lease;
 }) => {
+  const downloadLease = async () => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1/"}leases/${currentLease.id}/document`, {
+      headers: { Authorization: `Bearer ${getAccessToken()}` },
+    });
+    if (!response.ok) return toast.error("No lease document is available.");
+    const disposition = response.headers.get("content-disposition") || "";
+    const fileName = disposition.match(/filename\*?=(?:UTF-8'')?\"?([^\";]+)/i)?.[1] || "lease.pdf";
+    const url = URL.createObjectURL(await response.blob());
+    const anchor = document.createElement("a");
+    anchor.href = url; anchor.download = decodeURIComponent(fileName); anchor.click();
+    URL.revokeObjectURL(url);
+  };
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden p-6 flex-1 flex flex-col justify-between">
+    <section className="min-h-[410px] flex-1 overflow-hidden rounded-2xl bg-white p-5 shadow-md sm:p-7">
       {/* Header */}
-      <div className="flex gap-5">
-        <div className="w-64 h-32 object-cover bg-slate-500 rounded-xl"></div>
+      <div className="flex flex-col gap-5 sm:flex-row">
+        {property.photoUrls?.[0] ? (
+          <div className="relative h-32 w-full overflow-hidden rounded-xl sm:w-60">
+            <Image
+              src={property.photoUrls[0]}
+              alt={property.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, 240px"
+            />
+          </div>
+        ) : (
+          <div className="h-32 w-full rounded-xl bg-slate-500 sm:w-60" />
+        )}
 
         <div className="flex flex-col justify-between">
           <div>
-            <div className="bg-green-500 w-fit text-white px-4 py-1 rounded-full text-sm font-semibold">
-              Active Leases
+            <div className="w-fit rounded-full bg-green-500 px-4 py-1 text-sm font-semibold text-white">
+              {currentLease.status || "Active"} Lease
             </div>
 
             <h2 className="text-2xl font-bold my-2">{property.name}</h2>
@@ -58,29 +77,27 @@ const ResidenceCard = ({
           </div>
           <div className="text-xl font-bold">
             ${currentLease.rent}{" "}
-            <span className="text-gray-500 text-sm font-normal">/ night</span>
+            <span className="text-sm font-normal text-gray-500">/ month</span>
           </div>
         </div>
       </div>
       {/* Dates */}
       <div>
         <hr className="my-4" />
-        <div className="flex justify-between items-center">
+        <div className="grid gap-4 sm:grid-cols-3 sm:divide-x sm:divide-gray-200">
           <div className="xl:flex">
             <div className="text-gray-500 mr-2">Start Date: </div>
             <div className="font-semibold">
               {new Date(currentLease.startDate).toLocaleDateString()}
             </div>
           </div>
-          <div className="border-[0.5px] border-primary-300 h-4" />
-          <div className="xl:flex">
+          <div className="xl:flex sm:justify-center">
             <div className="text-gray-500 mr-2">End Date: </div>
             <div className="font-semibold">
               {new Date(currentLease.endDate).toLocaleDateString()}
             </div>
           </div>
-          <div className="border-[0.5px] border-primary-300 h-4" />
-          <div className="xl:flex">
+          <div className="xl:flex sm:justify-end">
             <div className="text-gray-500 mr-2">Next Payment: </div>
             <div className="font-semibold">
               {new Date(currentLease.endDate).toLocaleDateString()}
@@ -90,7 +107,7 @@ const ResidenceCard = ({
         <hr className="my-4" />
       </div>
       {/* Buttons */}
-      <div className="flex justify-end gap-2 w-full">
+      <div className="flex w-full flex-col justify-end gap-2 sm:flex-row">
         <button
           onClick={() => toast.info("No document available.")}
           className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md flex items-center justify-center hover:bg-primary-700 hover:text-primary-50"
@@ -98,94 +115,16 @@ const ResidenceCard = ({
           <User className="w-5 h-5 mr-2" />
           Manager
         </button>
-        <button className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md flex items-center justify-center hover:bg-primary-700 hover:text-primary-50">
+        <button onClick={downloadLease} className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md flex items-center justify-center hover:bg-primary-700 hover:text-primary-50">
           <Download className="w-5 h-5 mr-2" />
           Download Agreement
         </button>
       </div>
-    </div>
+    </section>
   );
 };
 
-const BillingHistory = ({ payments }: { payments: Payment[] }) => {
-  return (
-    <div className="mt-8 bg-white rounded-xl shadow-md overflow-hidden p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold mb-1">Billing History</h2>
-          <p className="text-sm text-gray-500">
-            Download your previous plan receipts and usage details.
-          </p>
-        </div>
-        <div>
-          <button className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md flex items-center justify-center hover:bg-primary-700 hover:text-primary-50">
-            <Download className="w-5 h-5 mr-2" />
-            <span>Download All</span>
-          </button>
-        </div>
-      </div>
-      <hr className="mt-4 mb-1" />
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Invoice</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Billing Date</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {payments.map((payment) => (
-              <TableRow key={payment.id} className="h-16">
-                <TableCell className="font-medium">
-                  <div className="flex items-center">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Invoice #{payment.id} -{" "}
-                    {payment.paymentDate
-                      ? new Date(payment.paymentDate).toLocaleString("default", {
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : "Pending"}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold border ${
-                      payment.paymentStatus === "Paid"
-                        ? "bg-green-100 text-green-800 border-green-300"
-                        : "bg-yellow-100 text-yellow-800 border-yellow-300"
-                    }`}
-                  >
-                    {payment.paymentStatus === "Paid" ? (
-                      <Check className="w-4 h-4 inline-block mr-1" />
-                    ) : null}
-                    {payment.paymentStatus}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  {payment.paymentDate
-                    ? new Date(payment.paymentDate).toLocaleDateString()
-                    : "—"}
-                </TableCell>
-                <TableCell>${payment.amountPaid.toFixed(2)}</TableCell>
-                <TableCell>
-                  <button className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md flex items-center justify-center font-semibold hover:bg-primary-700 hover:text-primary-50">
-                    <ArrowDownToLineIcon className="w-4 h-4 mr-1" />
-                    Download
-                  </button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
-};
+// BillingHistory is temporarily removed from rendering while its layout is reworked.
 
 const Residence = () => {
   const { id } = useParams();
@@ -200,12 +139,7 @@ const Residence = () => {
     "tenant",
     { skip: !authUser?.authInfo?.userId }
   );
-  const { data: payments, isLoading: paymentsLoading } = useGetPaymentsQuery(
-    { leaseId: leases?.[0]?.id || 0, view: "tenant" },
-    { skip: !leases?.[0]?.id }
-  );
-
-  if (propertyLoading || leasesLoading || paymentsLoading) return <Loading />;
+  if (propertyLoading || leasesLoading) return <Loading />;
   if (!property || propertyError) return <div>Error loading property</div>;
 
   const currentLease = leases?.find(
@@ -213,17 +147,19 @@ const Residence = () => {
   );
 
   return (
-    <div className="dashboard-container">
-      <div className="w-full mx-auto">
-        <div className="md:flex gap-10">
+    <div className="dashboard-container pt-7">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="flex gap-10">
           {currentLease && (
             <ResidenceCard property={property} currentLease={currentLease} />
           )}
+          {/* Temporarily hidden while this section is redesigned.
           {authUser?.authInfo.userId && (
             <PaymentMethodSection userId={authUser.authInfo.userId} />
-          )}
+          )} */}
         </div>
-        <BillingHistory payments={payments || []} />
+        {/* Temporarily hidden while this section is redesigned.
+        <BillingHistory payments={payments || []} /> */}
       </div>
     </div>
   );

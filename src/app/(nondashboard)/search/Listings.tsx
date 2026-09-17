@@ -11,9 +11,11 @@ import React from "react";
 import CardCompact from "@/components/CardCompact";
 import { useAuth } from "@/app/(auth)/authProvider";
 import EmptyState from "@/components/EmptyState";
+import { useRouter } from "next/navigation";
 
 const Listings = () => {
   const { user } = useAuth();
+  const router = useRouter();
   const { data: authUser } = useGetAuthUserQuery(undefined, { skip: !user });
   const { data: tenant } = useGetTenantQuery(
     authUser?.authInfo?.userId || "",
@@ -32,7 +34,10 @@ const Listings = () => {
   } = useSearchPropertiesQuery(filters);
 
   const handleFavoriteToggle = async (propertyId: number) => {
-    if (!authUser) return;
+    if (!authUser) {
+      router.push("/signin?returnTo=%2Fsearch");
+      return;
+    }
 
     const isFavorite = tenant?.favorites?.some(
       (fav: Property) => fav.id === propertyId
@@ -66,14 +71,19 @@ const Listings = () => {
 
   return (
     <div className="w-full">
-      <h3 className="text-sm px-4 font-bold">
-        {result.totalResults}{" "}
-        <span className="text-gray-700 font-normal">
-          {result.matchType === "ALL" ? "Published places" : matchDescription(result.matchType, filters.location, filters.city, filters.state)}
-        </span>
-      </h3>
+      <header className="px-4 pt-4 md:pt-0">
+        <p className="text-base font-medium text-secondary-500">{result.totalResults} +</p>
+        <h2 className="text-2xl font-semibold tracking-tight text-gray-950">
+          {filters.location ? `Results in ${filters.city || filters.location}` : "Rental Results"}
+        </h2>
+        {result.matchType !== "ALL" && result.matchType !== "NEARBY" && (
+          <p className="mt-1 text-sm text-gray-500">
+            {matchDescription(result.matchType, filters.location, filters.city, filters.state)}
+          </p>
+        )}
+      </header>
       <div className="flex">
-        <div className="p-4 w-full">
+        <div className="w-full p-4">
           {result.properties.map((property) => (
             <CardCompact
                 key={property.id}
@@ -84,7 +94,7 @@ const Listings = () => {
                   ) || false
                 }
                 onFavoriteToggle={() => handleFavoriteToggle(property.id)}
-                showFavoriteButton={!!authUser}
+                showFavoriteButton
                 propertyLink={`/search/${property.id}`}
             />
           ))}

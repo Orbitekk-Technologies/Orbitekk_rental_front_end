@@ -1,7 +1,8 @@
-import { Bath, Bed, Heart, House } from "lucide-react";
+import { Heart } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { FAVORITE_GLOW_EVENT } from "@/lib/constants";
 
 const CardCompact = ({
   property,
@@ -19,9 +20,14 @@ const CardCompact = ({
     if (propertyLink) router.push(propertyLink, { scroll: false });
   };
 
+  const toggleFavorite = () => {
+    window.dispatchEvent(new Event(FAVORITE_GLOW_EVENT));
+    onFavoriteToggle?.();
+  };
+
   return (
     <article
-      className={`bg-white rounded-xl overflow-hidden shadow-sm w-full flex h-40 mb-5 transition-all duration-200 ${propertyLink ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-8px_rgba(151,71,255,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500" : ""}`}
+      className={`mb-4 flex h-36 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-[transform,box-shadow] duration-300 sm:mb-5 sm:h-40 ${propertyLink ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(124,58,237,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500" : ""}`}
       onClick={openProperty}
       onKeyDown={(event) => {
         if (propertyLink && (event.key === "Enter" || event.key === " ")) {
@@ -56,18 +62,18 @@ const CardCompact = ({
         </div>
         */}
       </div>
-      <div className="w-2/3 p-4 flex flex-col justify-between">
+      <div className="flex min-w-0 w-2/3 flex-col justify-between p-3 sm:p-4">
         <div>
           <div className="flex justify-between items-start">
-            <h2 className="text-xl font-bold mb-1">
+            <h2 className="mb-1 truncate text-base font-bold sm:text-xl">
               {property.name}
             </h2>
             {showFavoriteButton && (
               <button
-                className="bg-white rounded-full p-1"
+                className="relative rounded-full bg-white p-1"
                 onClick={(event) => {
                   event.stopPropagation();
-                  onFavoriteToggle?.();
+                  toggleFavorite();
                 }}
                 aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
               >
@@ -79,7 +85,7 @@ const CardCompact = ({
               </button>
             )}
           </div>
-          <p className="text-gray-600 mb-1 text-sm">
+          <p className="mb-1 truncate text-sm text-gray-500">
             {property?.location?.address}, {property?.location?.city}
           </p>
           {/* Reviews and ratings are hidden until that feature is reintroduced.
@@ -94,25 +100,17 @@ const CardCompact = ({
           </div>
           */}
         </div>
-        <div className="flex justify-between items-center text-sm">
-          <div className="flex gap-2 text-gray-600">
-            <span className="flex items-center">
-              <Bed className="w-4 h-4 mr-1" />
-              {property.beds}
-            </span>
-            <span className="flex items-center">
-              <Bath className="w-4 h-4 mr-1" />
-              {property.baths}
-            </span>
-            <span className="flex items-center">
-              <House className="w-4 h-4 mr-1" />
-              {property.squareFeet} Sqft
-            </span>
+        <div className="text-sm">
+          <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap text-gray-500 sm:gap-2">
+            <span>{property.beds} Bed</span>
+            <span className="h-1 w-1 shrink-0 rounded-full bg-gray-400" aria-hidden="true" />
+            <span>{property.baths} Bath</span>
+            <span className="h-1 w-1 shrink-0 rounded-full bg-gray-400" aria-hidden="true" />
+            <span>{property.squareFeet} Sqft</span>
           </div>
-
-          <p className="text-base font-bold">
+          <p className="mt-1 text-base font-medium text-secondary-500">
             ${property.pricePerMonth.toFixed(0)}
-            <span className="text-gray-600 text-xs font-normal"> /mo</span>
+            <span className="text-sm font-normal">/monthly</span>
           </p>
         </div>
       </div>

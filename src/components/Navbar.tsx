@@ -176,8 +176,7 @@ const Navbar = () => {
   return (
     <div
       className="fixed left-0 top-0 z-50 w-full border-b border-gray-100 bg-white"
-      style={{ height: `${NAVBAR_HE
-        IGHT}px` }}
+      style={{ height: `${NAVBAR_HEIGHT}px` }}
     >
       <div className="mx-auto flex h-full w-full max-w-[1536px] items-center justify-between bg-white px-6 text-gray-950 sm:px-10 lg:px-16 xl:px-20">
         <div className="flex items-center gap-4 md:gap-6">

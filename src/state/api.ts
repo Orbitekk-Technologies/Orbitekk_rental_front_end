@@ -75,6 +75,10 @@ export const api = createApi({
       query: (body) => ({ url: "auth/login", method: "POST", body }),
     }),
 
+    refreshSession: build.mutation<AuthResponse, void>({
+      query: () => ({ url: "auth/refresh", method: "POST" }),
+    }),
+
     signup: build.mutation<AuthResponse, SignupRequest>({
       query: (body) => ({ url: "auth/signup", method: "POST", body }),
     }),
@@ -147,6 +151,7 @@ export const api = createApi({
           longitude: filters.coordinates?.[0],
           city: filters.city,
           state: filters.state,
+          postalCode: filters.postalCode,
           page: filters.page,
           size: filters.size,
           sort: filters.sort,
@@ -359,6 +364,33 @@ export const api = createApi({
       },
     }),
 
+    archiveProperty: build.mutation<Property, number>({
+      query: (id) => ({ url: `properties/${id}/archive`, method: "PATCH" }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Properties", id: "LIST" },
+        { type: "Properties", id },
+        { type: "PropertyDetails", id },
+      ],
+    }),
+
+    unarchiveProperty: build.mutation<Property, number>({
+      query: (id) => ({ url: `properties/${id}/unarchive`, method: "PATCH" }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Properties", id: "LIST" },
+        { type: "Properties", id },
+        { type: "PropertyDetails", id },
+      ],
+    }),
+
+    deleteProperty: build.mutation<void, number>({
+      query: (id) => ({ url: `properties/${id}`, method: "DELETE" }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Properties", id: "LIST" },
+        { type: "Properties", id },
+        { type: "PropertyDetails", id },
+      ],
+    }),
+
     // lease related enpoints
     getLeases: build.query<Lease[], "tenant" | "manager" | void>({
       query: (view) => view ? `leases?view=${view}` : "leases",
@@ -509,6 +541,7 @@ export const api = createApi({
 
 export const {
   useLoginMutation,
+  useRefreshSessionMutation,
   useSignupMutation,
   useResetPasswordMutation,
   useChangePasswordMutation,
@@ -525,6 +558,9 @@ export const {
   useGetManagerPropertiesQuery,
   useCreatePropertyMutation,
   useUpdatePropertyMutation,
+  useArchivePropertyMutation,
+  useUnarchivePropertyMutation,
+  useDeletePropertyMutation,
   useGetTenantQuery,
   useAddFavoritePropertyMutation,
   useRemoveFavoritePropertyMutation,

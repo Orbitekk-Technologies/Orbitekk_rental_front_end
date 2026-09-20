@@ -222,7 +222,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
               >
                 <RadioGroupItem
                   value={option.value}
-                  className="border-gray-400 text-secondary-500 data-[state=checked]:border-secondary-500 [&_svg]:fill-secondary-500 [&_svg]:text-secondary-500"
+                  className="data-[state=checked]:border-secondary-500 data-[state=checked]:bg-secondary-500"
                 />
                 <span>{option.label}</span>
               </label>

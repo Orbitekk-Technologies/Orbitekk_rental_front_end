@@ -4,6 +4,7 @@ import { Mail, MapPin, PhoneCall } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import LeaseDateEditor from "@/components/LeaseDateEditor";
+import StatusBadge, { type StatusTone } from "@/components/StatusBadge";
 
 const formatDate = (value?: string | Date | null) => {
   if (!value) return "N/A";
@@ -23,12 +24,8 @@ const ApplicationCard = ({
     application.property.photoUrls?.[0] || "/placeholder.jpg"
   );
 
-  const statusColor =
-    application.status === "Approved"
-      ? "bg-green-500"
-      : application.status === "Denied"
-      ? "bg-red-500"
-      : "bg-yellow-500";
+  const statusTone: StatusTone =
+    application.status === "Approved" ? "approved" : application.status === "Denied" ? "denied" : "pending";
 
   const contactPerson =
     userType === "manager"
@@ -82,11 +79,7 @@ const ApplicationCard = ({
           <div>
             <div className="flex items-center justify-between gap-3">
               <span className="text-gray-500">Status:</span>
-              <span
-                className={`rounded-full px-2.5 py-1 text-sm text-white ${statusColor}`}
-              >
-                {application.status}
-              </span>
+              <StatusBadge tone={statusTone}>{application.status}</StatusBadge>
             </div>
             <hr className="mt-3" />
           </div>
@@ -98,10 +91,10 @@ const ApplicationCard = ({
           <div className="flex justify-between gap-4">
             <span className="text-gray-500">Start Date:</span>
             <span className="flex items-center gap-1">
-              {formatDate(application.lease?.startDate)}
               {userType === "manager" && application.status !== "Denied" && (
                 <LeaseDateEditor application={application} iconOnly />
               )}
+              {formatDate(application.lease?.startDate)}
             </span>
           </div>
           <div className="flex justify-between gap-4">

@@ -23,6 +23,7 @@ import React from "react";
 import { toast } from "sonner";
 import { getAccessToken } from "@/lib/authToken";
 import Image from "next/image";
+import BackLink from "@/components/BackLink";
 
 const ResidenceCard = ({
   property,
@@ -149,6 +150,7 @@ const Residence = () => {
   return (
     <div className="dashboard-container pt-7">
       <div className="mx-auto w-full max-w-7xl">
+        <BackLink href="/tenants/residences" className="mb-5">Back to My Residencies</BackLink>
         <div className="flex gap-10">
           {currentLease && (
             <ResidenceCard property={property} currentLease={currentLease} />

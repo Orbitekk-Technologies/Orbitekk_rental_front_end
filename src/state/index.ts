@@ -21,6 +21,7 @@ export interface FiltersState {
   coordinates: [number, number];
   city?: string;
   state?: string;
+  postalCode?: string;
   page?: number;
   size?: number;
   sort?: "newest" | "price_asc" | "price_desc";

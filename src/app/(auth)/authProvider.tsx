@@ -7,12 +7,14 @@ import { Label } from "@/components/ui/label";
 import { api } from "@/state/api";
 import {
   useLoginMutation,
+  useRefreshSessionMutation,
   useResetPasswordMutation,
   useSignupMutation,
 } from "@/state/api";
 import { useAppDispatch } from "@/state/redux";
 import {
   getStoredAuthIdentity,
+  getAccessTokenExpiration,
   setAccessToken,
   setStoredAuthIdentity,
 } from "@/lib/authToken";
@@ -31,6 +33,15 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { CircleAlert } from "lucide-react";
+import { Clock3 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import BrandLogo from "@/components/BrandLogo";
 import AuthVisualCarousel from "@/components/AuthVisualCarousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -375,9 +386,13 @@ function AuthForm({ mode }: { mode: "signin" | "signup" | "forgot-password" }) {
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const dispatch = useAppDispatch();
+  const [refreshSession, { isLoading: isRefreshingSession }] = useRefreshSessionMutation();
   const [user, setUserState] = useState<AuthIdentity | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isSessionWarningOpen, setIsSessionWarningOpen] = useState(false);
+  const [sessionRevision, setSessionRevision] = useState(0);
 
   useEffect(() => {
     setUserState(getStoredAuthIdentity());
@@ -395,6 +410,46 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const signOut = useCallback(() => setUser(null), [setUser]);
+
+  useEffect(() => {
+    if (!user) {
+      setIsSessionWarningOpen(false);
+      return;
+    }
+    const expiresAt = getAccessTokenExpiration();
+    if (!expiresAt) return;
+
+    const warningDelay = Math.max(0, expiresAt - Date.now() - 5 * 60 * 1000);
+    const expirationDelay = Math.max(0, expiresAt - Date.now());
+    const warningTimer = window.setTimeout(() => setIsSessionWarningOpen(true), warningDelay);
+    const expirationTimer = window.setTimeout(() => {
+      setIsSessionWarningOpen(false);
+      signOut();
+      toast.error("Your session expired. Sign in again to continue.");
+      const returnTo = pathname.startsWith("/") ? pathname : "/";
+      router.replace(`/signin?returnTo=${encodeURIComponent(returnTo)}`);
+    }, expirationDelay);
+
+    return () => {
+      window.clearTimeout(warningTimer);
+      window.clearTimeout(expirationTimer);
+    };
+  }, [pathname, router, sessionRevision, signOut, user]);
+
+  const handleStaySignedIn = async () => {
+    try {
+      const response = await refreshSession().unwrap();
+      setAccessToken(response.token.accessToken);
+      setSessionRevision((revision) => revision + 1);
+      setIsSessionWarningOpen(false);
+      toast.success("Your session has been extended.");
+    } catch {
+      setIsSessionWarningOpen(false);
+      signOut();
+      toast.error("We couldn't extend your session. Please sign in again.");
+      router.replace(`/signin?returnTo=${encodeURIComponent(pathname)}`);
+    }
+  };
   const value = useMemo(
     () => ({ user, isAuthReady, setUser, signOut }),
     [user, isAuthReady, setUser, signOut]
@@ -415,6 +470,27 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       ) : (
         children
       )}
+      <Dialog open={isSessionWarningOpen} onOpenChange={setIsSessionWarningOpen}>
+        <DialogContent className="bg-white sm:max-w-md">
+          <DialogHeader className="items-center text-center sm:text-center">
+            <span className="mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-secondary-100 text-secondary-600">
+              <Clock3 className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <DialogTitle>Your session is about to expire</DialogTitle>
+            <DialogDescription>
+              For your security, you will be signed out in about five minutes. Stay signed in to continue without losing your place.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-3 gap-2 sm:justify-center sm:space-x-0">
+            <Button type="button" variant="outline" onClick={() => { setIsSessionWarningOpen(false); signOut(); router.replace("/signin"); }}>
+              Sign out
+            </Button>
+            <Button type="button" className="bg-secondary-500 text-white hover:bg-secondary-600" disabled={isRefreshingSession} onClick={() => void handleStaySignedIn()}>
+              {isRefreshingSession ? "Extending..." : "Stay signed in"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AuthContext.Provider>
   );
 };

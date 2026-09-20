@@ -7,10 +7,11 @@ import {
   useGetPropertyLeasesQuery,
   useGetPropertyQuery,
 } from "@/state/api";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import PropertyTabs from "./components/PropertyTabs";
+import BackLink from "@/components/BackLink";
 
 const ManagerPropertyPage = () => {
   const params = useParams<{ id: string }>();
@@ -76,14 +77,7 @@ const ManagerPropertyPage = () => {
   return (
     <div className="dashboard-container min-w-0">
       <div className="mx-auto w-full max-w-6xl">
-        <Link
-          href="/managers/properties"
-          className="mb-5 inline-flex items-center gap-2 text-sm text-gray-700 transition-colors hover:text-primary-700"
-          scroll={false}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Properties
-        </Link>
+        <BackLink href="/managers/properties" className="mb-5">Back to Listings</BackLink>
 
         <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">

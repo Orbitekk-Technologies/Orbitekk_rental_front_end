@@ -23,15 +23,21 @@ export const getAccessToken = () => {
 };
 
 function isExpired(token: string) {
+  const expiresAt = getAccessTokenExpiration(token);
+  return expiresAt === null || expiresAt <= Date.now();
+}
+
+export function getAccessTokenExpiration(token = getAccessToken()) {
+  if (!token) return null;
   try {
     const payload = token.split(".")[1];
-    if (!payload) return true;
+    if (!payload) return null;
     const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
     const normalized = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
     const claims = JSON.parse(atob(normalized)) as { exp?: number };
-    return typeof claims.exp !== "number" || claims.exp * 1000 <= Date.now();
+    return typeof claims.exp === "number" ? claims.exp * 1000 : null;
   } catch {
-    return true;
+    return null;
   }
 }
 export const setAccessToken = (token: string | null) => {

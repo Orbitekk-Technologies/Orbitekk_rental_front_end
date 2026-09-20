@@ -125,6 +125,7 @@ const FiltersBar = () => {
           coordinates: selectedLocation.coordinates,
           city: selectedLocation.city,
           state: selectedLocation.state,
+          postalCode: selectedLocation.postalCode,
           page: 0,
         };
         dispatch(setFilters(newFilters));
@@ -145,12 +146,14 @@ const FiltersBar = () => {
         const contexts = [data.features[0], ...(data.features[0].context ?? [])];
         const cityFeature = contexts.find((item: { id?: string }) => item.id?.startsWith("place."));
         const stateFeature = contexts.find((item: { id?: string }) => item.id?.startsWith("region."));
+        const postalCodeFeature = contexts.find((item: { id?: string }) => item.id?.startsWith("postcode."));
         const newFilters = {
           ...filters,
           location: searchInput.trim(),
           coordinates: [lng, lat] as [number, number],
           city: cityFeature?.text,
           state: stateFeature?.short_code?.replace(/^US-/i, "") ?? stateFeature?.text,
+          postalCode: postalCodeFeature?.text,
           page: 0,
         };
         dispatch(setFilters(newFilters));
@@ -239,7 +242,7 @@ const FiltersBar = () => {
             <SelectValue placeholder="Stay Type" />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            <SelectItem value="any">Stay Type</SelectItem>
+            <SelectItem value="any">Any</SelectItem>
             <SelectItem value="WholeUnit">Whole Unit</SelectItem>
             <SelectItem value="PayingGuest">Private Room</SelectItem>
           </SelectContent>
@@ -256,7 +259,7 @@ const FiltersBar = () => {
             <SelectValue placeholder="Unit Type" />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            <SelectItem value="any">Unit Type</SelectItem>
+            <SelectItem value="any">Any</SelectItem>
             {Object.entries(PropertyTypeIcons).map(([type, Icon]) => (
               <SelectItem key={type} value={type}>
                 <div className="flex items-center">

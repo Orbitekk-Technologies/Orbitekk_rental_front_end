@@ -35,15 +35,15 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
           { icon: Heart, label: "Favourites", href: "/tenants/favourites" },
           ]},
           { label: "Tenant", links: [
-          { icon: FileText, label: "My Applications", href: "/tenants/applications" },
-          { icon: Home, label: "My Residencies", href: "/tenants/residences" },
+          { icon: FileText, label: "Applicants", href: "/tenants/applications" },
+          { icon: Home, label: "Residencies", href: "/tenants/residences" },
           ]},
           { label: "Manager", links: [
-          { icon: Building, label: "My Listings", href: "/managers/properties" },
-          { icon: FileText, label: "Listing Applications", href: "/managers/applications" },
+          { icon: Building, label: "Listings", href: "/managers/properties" },
+          { icon: FileText, label: "Applications", href: "/managers/applications" },
           ]},
           { label: null, links: [
-          { icon: Settings, label: "Account Settings", href: "/managers/settings" },
+          { icon: Settings, label: "Settings", href: "/managers/settings" },
           ]},
         ]
       : [
@@ -58,13 +58,13 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
             href: "/tenants/applications",
           },
           { icon: Home, label: "Residences", href: "/tenants/residences" },
-          { icon: Settings, label: "Account Settings", href: "/tenants/settings" }]},
+          { icon: Settings, label: "Settings", href: "/tenants/settings" }]},
         ];
 
   return (
     <Sidebar
       collapsible="icon"
-      className="fixed left-0 bg-white shadow-lg"
+      className="fixed left-0 border-r border-gray-200 bg-white shadow-none"
       style={{
         top: `${NAVBAR_HEIGHT}px`,
         height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
@@ -76,7 +76,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
             <div
               className={cn(
                 "flex min-h-[56px] w-full items-center pt-3 mb-3",
-                open ? "justify-between px-6" : "justify-center"
+                open ? "justify-between pl-6 pr-4 lg:pl-16 xl:pl-20" : "justify-center"
               )}
             >
               {open ? (
@@ -108,7 +108,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
         <SidebarMenu>
           {navGroups.flatMap((group) => [
             ...(group.label && open ? [
-              <li key={`group-${group.label}`} className="px-7 pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <li key={`group-${group.label}`} className="pb-1 pt-4 pl-6 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-400 lg:pl-16 xl:pl-20">
                 {group.label}
               </li>,
             ] : []),
@@ -120,23 +120,24 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
                 <SidebarMenuButton
                   asChild
                   className={cn(
-                    "flex items-center px-7 py-7",
+                    "flex items-center py-7",
+                    open ? "pl-6 pr-4 lg:pl-16 xl:pl-20" : "justify-center px-0",
                     isActive
-                      ? "bg-gray-100"
+                      ? "bg-white text-secondary-500 hover:bg-secondary-50 hover:text-secondary-600"
                       : "text-gray-600 hover:bg-gray-100",
-                    open ? "text-blue-600" : "ml-[5px]"
+                    !open && "ml-[5px]"
                   )}
                 >
                   <Link href={link.href} className="w-full" scroll={false}>
                     <div className="flex items-center gap-3">
                       <link.icon
                         className={`h-5 w-5 ${
-                          isActive ? "text-blue-600" : "text-gray-600"
+                          isActive ? "text-secondary-500" : "text-gray-600"
                         }`}
                       />
                       <span
                         className={`font-medium ${
-                          isActive ? "text-blue-600" : "text-gray-600"
+                          isActive ? "text-secondary-500" : "text-gray-600"
                         }`}
                       >
                         {link.label}

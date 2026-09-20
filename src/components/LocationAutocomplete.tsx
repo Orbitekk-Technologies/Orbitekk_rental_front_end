@@ -11,6 +11,7 @@ export type SelectedLocation = {
   coordinates: [number, number];
   city?: string;
   state?: string;
+  postalCode?: string;
 };
 
 type LocationAutocompleteProps = {
@@ -125,11 +126,16 @@ export default function LocationAutocomplete({
       const label = suggestionLabel(suggestion);
       const { longitude, latitude } = feature.properties.coordinates;
       const context = feature.properties.context;
-      const city = context?.place?.name ?? context?.locality?.name;
+      const city = suggestion.feature_type === "place" || suggestion.feature_type === "locality"
+        ? suggestion.name
+        : context?.place?.name ?? context?.locality?.name;
       const state = context?.region?.region_code ?? context?.region?.name;
+      const postalCode = suggestion.feature_type === "postcode"
+        ? suggestion.name
+        : context?.postcode?.name;
       selectedLabel.current = label;
       onChange(label);
-      onSelect({ label, coordinates: [longitude, latitude], city, state });
+      onSelect({ label, coordinates: [longitude, latitude], city, state, postalCode });
       setSuggestions([]);
       setIsOpen(false);
       sessionToken.current = new SessionToken();

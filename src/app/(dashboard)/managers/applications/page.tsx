@@ -50,9 +50,9 @@ const Applications = () => {
 
   return (
     <div className="dashboard-container min-w-0">
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="w-full">
         <Header
-          title="Listing Applications"
+          title="Applications"
           subtitle="View and manage applications for your properties"
         />
         <Tabs

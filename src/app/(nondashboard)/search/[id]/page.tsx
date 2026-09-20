@@ -12,6 +12,7 @@ import ApplicationModal from "./ApplicationModal";
 import { useAuth } from "@/app/(auth)/authProvider";
 import NearbyPlaces from "./NearbyPlaces";
 import FooterSection from "../../landing/FooterSection";
+import BackLink from "@/components/BackLink";
 
 const SingleListing = () => {
   const { id } = useParams();
@@ -25,7 +26,10 @@ const SingleListing = () => {
 
   return (
     <div>
-      <ImagePreviews images={property?.photoUrls?.length ? property.photoUrls.slice(0, 5) : ["/placeholder.jpg"]} />
+      <div className="mx-auto w-full max-w-[1536px] px-6 pt-5 sm:px-10 lg:px-16 xl:px-20">
+        <BackLink href="/search">Back to Listings</BackLink>
+      </div>
+      <ImagePreviews images={property?.photoUrls?.length ? property.photoUrls : ["/placeholder.jpg"]} />
       <div className="flex flex-col md:flex-row justify-center gap-10 mx-10 md:w-2/3 md:mx-auto mt-16 mb-8">
         <div className="order-2 md:order-1">
           <PropertyOverview propertyId={propertyId} />

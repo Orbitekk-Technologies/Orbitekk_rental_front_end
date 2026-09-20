@@ -73,6 +73,8 @@ export interface Property {
   baths: number;
   squareFeet: number;
   propertyType: PropertyType;
+  status?: "PUBLISHED" | "ARCHIVED";
+  previousStatus?: "PUBLISHED" | null;
   postedDate: string | Date;
   averageRating: number;
   numberOfReviews: number;

@@ -12,6 +12,8 @@ import CardCompact from "@/components/CardCompact";
 import { useAuth } from "@/app/(auth)/authProvider";
 import EmptyState from "@/components/EmptyState";
 import { useRouter } from "next/navigation";
+import { Building2 } from "lucide-react";
+import Link from "next/link";
 
 const Listings = () => {
   const { user } = useAuth();
@@ -58,14 +60,44 @@ const Listings = () => {
 
   if (isLoading) return <>Loading...</>;
 
-  if (isError || !result || result.properties.length === 0) {
+  if (isError || !result) {
     return (
       <EmptyState
-        message={filters.location
-          ? `No published properties are currently available near ${filters.location}. Try another location or check back soon.`
-          : "No published properties are currently available. Check back soon."}
+        message="We couldn't load listings right now. Please try again."
         className="min-h-full"
       />
+    );
+  }
+
+  if (result.properties.length === 0) {
+    const searchedPlace = filters.city || filters.location || "this area";
+    const addPropertyHref = user
+      ? "/managers/newproperty"
+      : "/signin?returnTo=%2Fmanagers%2Fnewproperty";
+
+    return (
+      <section className="flex min-h-full flex-col px-6 py-8 text-center">
+        <header className="text-left">
+          <p className="text-sm font-medium text-gray-500">0 results</p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
+            Listings in {searchedPlace}
+          </h2>
+        </header>
+        <div className="flex flex-1 flex-col items-center justify-center pb-20">
+          <span className="flex h-24 w-24 items-center justify-center rounded-full bg-secondary-100 text-secondary-500">
+            <Building2 className="h-11 w-11" aria-hidden="true" />
+          </span>
+          <h3 className="mt-8 text-2xl font-semibold text-gray-800">
+            Be the first to list in {searchedPlace}
+          </h3>
+          <p className="mt-2 max-w-md text-base leading-6 text-gray-600">
+            Renters are searching this area. Add your property and help them find their next home.
+          </p>
+          <Link href={addPropertyHref} className="mt-7 text-base font-medium text-secondary-500 hover:text-secondary-600 hover:underline">
+            Add Your Listing
+          </Link>
+        </div>
+      </section>
     );
   }
 

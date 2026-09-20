@@ -13,6 +13,7 @@ export interface PropertyDraft {
   lastCompletedStep: PropertyFormStep;
   updatedAt: string;
   values: Partial<StoredPropertyFormValues>;
+  isArchived?: boolean;
 }
 
 const DRAFTS_KEY_PREFIX = "shagriha-property-drafts-v2";
@@ -75,6 +76,7 @@ export function savePropertyDraft(input: {
     lastCompletedStep: input.lastCompletedStep,
     updatedAt: new Date().toISOString(),
     values: input.values,
+    isArchived: drafts.find((item) => item.id === input.id)?.isArchived ?? false,
   };
 
   const nextDrafts = [draft, ...drafts.filter((item) => item.id !== draft.id)];
@@ -87,6 +89,17 @@ export function deletePropertyDraft(userId: string, id?: string | null) {
   writeJson(
     draftsKey(userId),
     getPropertyDrafts(userId).filter((draft) => draft.id !== id)
+  );
+}
+
+export function setPropertyDraftArchived(userId: string, id: string, isArchived: boolean) {
+  writeJson(
+    draftsKey(userId),
+    getPropertyDrafts(userId).map((draft) =>
+      draft.id === id
+        ? { ...draft, isArchived, updatedAt: new Date().toISOString() }
+        : draft
+    )
   );
 }
 

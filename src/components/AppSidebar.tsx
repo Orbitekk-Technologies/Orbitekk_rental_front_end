@@ -15,6 +15,7 @@ import {
   Heart,
   Home,
   Menu,
+  MessageCircle,
   Search,
   Settings,
   X,
@@ -43,6 +44,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
           { icon: FileText, label: "Applications", href: "/managers/applications" },
           ]},
           { label: null, links: [
+          { icon: MessageCircle, label: "Messages", href: "/messages" },
           { icon: Settings, label: "Settings", href: "/managers/settings" },
           ]},
         ]
@@ -58,6 +60,7 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
             href: "/tenants/applications",
           },
           { icon: Home, label: "Residences", href: "/tenants/residences" },
+          { icon: MessageCircle, label: "Messages", href: "/messages" },
           { icon: Settings, label: "Settings", href: "/tenants/settings" }]},
         ];
 

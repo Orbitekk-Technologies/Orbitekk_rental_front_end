@@ -4,13 +4,16 @@ import { FAVORITE_GLOW_EVENT, NAVBAR_HEIGHT } from "@/lib/constants";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { useGetAuthUserQuery } from "@/state/api";
+import {
+  useGetAuthUserQuery,
+  useGetConversationsQuery,
+  useGetUnreadConversationCountQuery,
+} from "@/state/api";
 import { useAuth } from "@/app/(auth)/authProvider";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Bell, Menu, MessageCircle } from "lucide-react";
 import { LockKeyhole, LockKeyholeOpen, X } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
-// import { Bell, MessageCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +23,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { SidebarTrigger } from "./ui/sidebar";
+import { useMessageEvents } from "@/hooks/use-message-events";
 import {
   Sheet,
   SheetClose,
@@ -43,6 +47,19 @@ const Navbar = () => {
   const pathname = usePathname();
   const { signOut } = useAuth();
   const [showFavoriteGlow, setShowFavoriteGlow] = useState(false);
+  const { data: unreadData } = useGetUnreadConversationCountQuery(undefined, {
+    skip: !authUser,
+    pollingInterval: 5000,
+    refetchOnFocus: true,
+  });
+  const { data: conversations = [] } = useGetConversationsQuery(undefined, {
+    skip: !authUser,
+    pollingInterval: 5000,
+    refetchOnFocus: true,
+  });
+  const unreadCount = unreadData?.count ?? 0;
+  const unreadConversations = conversations.filter((conversation) => conversation.unread);
+  useMessageEvents(Boolean(authUser));
 
   useEffect(() => {
     let timeout: number | undefined;
@@ -59,7 +76,7 @@ const Navbar = () => {
   }, []);
 
   const isDashboardPage =
-    pathname.includes("/managers") || pathname.includes("/tenants");
+    pathname.includes("/managers") || pathname.includes("/tenants") || pathname.startsWith("/messages");
   const isLandingPage = pathname === "/" || pathname === "/landing";
 
   const handleSignOut = () => {
@@ -219,16 +236,51 @@ const Navbar = () => {
           )}
           {authUser ? (
             <>
-              {/* Uncomment after chat & notification implementation.
-              <div className="relative hidden md:block">
-                <MessageCircle className="w-6 h-6 cursor-pointer text-primary-200 hover:text-primary-400" />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-secondary-700 rounded-full"></span>
-              </div>
-              <div className="relative hidden md:block">
-                <Bell className="w-6 h-6 cursor-pointer text-primary-200 hover:text-primary-400" />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-secondary-700 rounded-full"></span>
-              </div>
-              */}
+              <Link
+                href="/messages"
+                className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-secondary-100 hover:text-secondary-500"
+                aria-label={unreadCount ? `Messages, ${unreadCount} unread` : "Messages"}
+              >
+                <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-secondary-500 px-1 text-[10px] font-bold text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-secondary-100 hover:text-secondary-500 focus:outline-none"
+                  aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"}
+                >
+                  <Bell className="h-5 w-5 sm:h-6 sm:w-6" />
+                  {unreadCount > 0 && <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-secondary-500" />}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 bg-white p-2 text-gray-950">
+                  <div className="px-2 py-2">
+                    <p className="font-semibold">Notifications</p>
+                    <p className="text-xs text-gray-500">{unreadCount ? `${unreadCount} unread conversation${unreadCount === 1 ? "" : "s"}` : "You’re all caught up"}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  {unreadConversations.length === 0 ? (
+                    <p className="px-2 py-5 text-center text-sm text-gray-500">No new notifications</p>
+                  ) : (
+                    unreadConversations.slice(0, 5).map((conversation) => (
+                      <DropdownMenuItem key={conversation.id} asChild className="cursor-pointer p-0 focus:bg-secondary-100">
+                        <Link href="/messages" className="block w-full px-3 py-2.5">
+                          <span className="block truncate text-sm font-semibold">New message from {conversation.otherUserName}</span>
+                          <span className="block truncate text-xs text-gray-500">{conversation.lastMessage || conversation.propertyName}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild className="cursor-pointer justify-center font-medium text-secondary-500 focus:bg-secondary-100 focus:text-secondary-500">
+                    <Link href="/messages">View all messages</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-2 focus:outline-none">

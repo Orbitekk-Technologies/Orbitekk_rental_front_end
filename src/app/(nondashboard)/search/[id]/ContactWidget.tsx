@@ -4,13 +4,11 @@ import { Button } from "@/components/ui/button";
 import {
   useAddFavoritePropertyMutation,
   useGetAuthUserQuery,
-  // useGetPropertyQuery, // Restore with the owner-contact CTA blocks.
   useGetTenantQuery,
   useRemoveFavoritePropertyMutation,
+  useStartConversationMutation,
 } from "@/state/api";
-import { Heart } from "lucide-react";
-// Temporarily hidden owner-contact imports. Restore with the commented CTA blocks.
-// import { MessageCircle, Phone } from "lucide-react";
+import { Heart, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/(auth)/authProvider";
 import { FAVORITE_GLOW_EVENT } from "@/lib/constants";
@@ -27,6 +25,8 @@ const ContactWidget = ({ propertyId, onOpenModal }: ContactWidgetProps) => {
     useAddFavoritePropertyMutation();
   const [removeFavorite, { isLoading: isRemovingFavorite }] =
     useRemoveFavoritePropertyMutation();
+  const [startConversation, { isLoading: isStartingConversation }] =
+    useStartConversationMutation();
   const router = useRouter();
   const isFavorite =
     tenant?.favorites?.some((favorite) => favorite.id === propertyId) || false;
@@ -37,16 +37,18 @@ const ContactWidget = ({ propertyId, onOpenModal }: ContactWidgetProps) => {
     else router.push("/signin");
   };
 
-  // Temporarily hidden for this release. Restore with the Send Message CTA.
-  // const handleSendMessage = () => {
-  //   if (!authUser) {
-  //     router.push("/signin");
-  //     return;
-  //   }
-  //   const recipient = property?.manager?.email || "";
-  //   const subject = encodeURIComponent(`Inquiry about ${property?.name || "property"}`);
-  //   window.location.href = `mailto:${recipient}?subject=${subject}`;
-  // };
+  const handleSendMessage = async () => {
+    if (!authUser) {
+      router.push(`/signin?returnTo=${encodeURIComponent(`/search/${propertyId}`)}`);
+      return;
+    }
+    try {
+      await startConversation({ propertyId }).unwrap();
+      router.push("/messages");
+    } catch {
+      // The API error toast is intentionally kept local to avoid hiding the CTA.
+    }
+  };
 
   const handleFavoriteToggle = async () => {
     if (!authUser) {
@@ -100,18 +102,16 @@ const ContactWidget = ({ propertyId, onOpenModal }: ContactWidgetProps) => {
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-3">
-        {/* Temporarily hidden for this release. Restore when direct owner
-            messaging is enabled again.
         <Button
           type="button"
           variant="outline"
-          className="h-auto min-h-9 w-full whitespace-normal border-primary-300 px-2 py-2 text-xs leading-tight text-primary-700 hover:bg-secondary-500 hover:text-white"
+          className="h-auto min-h-10 w-full whitespace-normal border-secondary-500 px-2 py-2 text-xs leading-tight text-secondary-500 hover:bg-secondary-500 hover:text-white"
           onClick={handleSendMessage}
+          disabled={isStartingConversation}
         >
           <MessageCircle className="mr-2 h-4 w-4" />
-          Send Message
+          {isStartingConversation ? "Opening…" : "Message Property Manager"}
         </Button>
-        */}
         <Button
           type="button"
           variant="outline"

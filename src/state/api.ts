@@ -16,6 +16,8 @@ import {
   PropertySearchResult,
   SavePaymentMethodRequest,
   Tenant,
+  Conversation,
+  ChatMessage,
 } from "@/types/prismaTypes";
 import {
   type BaseQueryFn,
@@ -49,7 +51,8 @@ const baseQuery: BaseQueryFn<
       data: getDemoApiData(
         request.url,
         request.method?.toUpperCase(),
-        request.body
+        request.body,
+        request.params as Record<string, unknown> | undefined
       ),
     };
   }
@@ -69,6 +72,8 @@ export const api = createApi({
     "Payments",
     "PaymentMethods",
     "Applications",
+    "Conversations",
+    "Messages",
   ],
   endpoints: (build) => ({
     login: build.mutation<AuthResponse, LoginRequest>({
@@ -149,6 +154,9 @@ export const api = createApi({
           availableFrom: filters.availableFrom,
           latitude: filters.coordinates?.[1],
           longitude: filters.coordinates?.[0],
+          boundary: filters.boundary
+            ?.map(([longitude, latitude]) => `${longitude},${latitude}`)
+            .join(";"),
           city: filters.city,
           state: filters.state,
           postalCode: filters.postalCode,
@@ -536,6 +544,46 @@ export const api = createApi({
       }),
       invalidatesTags: ["Applications"],
     }),
+
+    getConversations: build.query<Conversation[], void>({
+      query: () => "conversations",
+      providesTags: ["Conversations"],
+    }),
+
+    startConversation: build.mutation<Conversation, { propertyId: number }>({
+      query: (body) => ({ url: "conversations", method: "POST", body }),
+      invalidatesTags: ["Conversations"],
+    }),
+
+    getConversationMessages: build.query<ChatMessage[], number>({
+      query: (conversationId) => `conversations/${conversationId}/messages`,
+      providesTags: (_result, _error, id) => [{ type: "Messages", id }],
+    }),
+
+    sendMessage: build.mutation<ChatMessage, { conversationId: number; body: string }>({
+      query: ({ conversationId, body }) => ({
+        url: `conversations/${conversationId}/messages`,
+        method: "POST",
+        body: { body },
+      }),
+      invalidatesTags: (_result, _error, { conversationId }) => [
+        "Conversations",
+        { type: "Messages", id: conversationId },
+      ],
+    }),
+
+    markConversationRead: build.mutation<void, number>({
+      query: (conversationId) => ({
+        url: `conversations/${conversationId}/read`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Conversations"],
+    }),
+
+    getUnreadConversationCount: build.query<{ count: number }, void>({
+      query: () => "conversations/unread-count",
+      providesTags: ["Conversations"],
+    }),
   }),
 });
 
@@ -576,4 +624,10 @@ export const {
   useGetApplicationsQuery,
   useUpdateApplicationStatusMutation,
   useCreateApplicationMutation,
+  useGetConversationsQuery,
+  useStartConversationMutation,
+  useGetConversationMessagesQuery,
+  useSendMessageMutation,
+  useMarkConversationReadMutation,
+  useGetUnreadConversationCountQuery,
 } = api;

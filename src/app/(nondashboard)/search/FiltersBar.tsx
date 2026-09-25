@@ -167,23 +167,10 @@ const FiltersBar = () => {
   return (
     <div className="z-20 w-full shrink-0 border-b border-gray-200 bg-white px-4 py-3 shadow-sm md:border-0 md:px-0 md:py-3 md:shadow-none">
       {/* Filters */}
-      <div className="grid grid-flow-col grid-rows-2 items-center gap-3 overflow-x-auto pb-1 md:flex md:gap-4 md:overflow-visible md:px-2 md:pb-0">
-        {/* All Filters */}
-        <Button
-          variant="outline"
-          className={cn(
-            "h-12 shrink-0 gap-2 rounded-md px-5 [grid-row:2] hover:bg-secondary-50 md:order-1 md:[grid-row:auto]",
-            isFiltersFullOpen ? "border-secondary-600 text-secondary-700" : "border-input"
-          )}
-          onClick={() => dispatch(toggleFiltersFullOpen())}
-        >
-          <Filter className="w-4 h-4" />
-          <span>All Filters</span>
-        </Button>
-
-        {/* Search Location */}
+      <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-4 md:px-2">
+        {/* Search Location stays constrained to the mobile viewport. */}
         <form
-          className="col-span-4 flex w-[calc(100vw-2rem)] shrink-0 items-center [grid-row:1] md:order-2 md:w-auto md:[grid-row:auto]"
+          className="order-1 flex w-full min-w-0 items-center md:order-2 md:w-auto md:shrink-0"
           onSubmit={(event) => {
             event.preventDefault();
             void handleLocationSearch();
@@ -198,18 +185,33 @@ const FiltersBar = () => {
             }}
             onSelect={setSelectedLocation}
             dismissSignal={dismissSuggestions}
-            className={cn("h-12 w-full rounded-l-md border border-r-0 px-5 md:w-72", hasLocation ? "border-secondary-600" : "border-input")}
+            className={cn("h-12 w-full min-w-0 rounded-l-md border border-r-0 px-5 md:w-72", hasLocation ? "border-secondary-600" : "border-input")}
           />
           <Button
             type="submit"
-            className={cn("h-12 rounded-l-none rounded-r-md border border-l-0 bg-secondary-500 px-5 text-white shadow-none hover:bg-secondary-600", hasLocation ? "border-secondary-600" : "border-secondary-500")}
+            className={cn("h-12 shrink-0 rounded-l-none rounded-r-md border border-l-0 bg-secondary-500 px-5 text-white shadow-none hover:bg-secondary-600", hasLocation ? "border-secondary-600" : "border-secondary-500")}
           >
-            <Search className="w-4 h-4" />
+            <Search className="h-4 w-4" />
           </Button>
         </form>
 
+        {/* Only the filter controls scroll horizontally on mobile. */}
+        <div className="order-2 flex w-full min-w-0 gap-3 overflow-x-auto pb-1 md:contents">
+        {/* All Filters */}
+        <Button
+          variant="outline"
+          className={cn(
+            "h-12 shrink-0 gap-2 rounded-md px-5 hover:bg-secondary-50 md:order-1",
+            isFiltersFullOpen ? "border-secondary-600 text-secondary-700" : "border-input"
+          )}
+          onClick={() => dispatch(toggleFiltersFullOpen())}
+        >
+          <Filter className="w-4 h-4" />
+          <span>All Filters</span>
+        </Button>
+
         {/* Price Range */}
-        <details ref={priceDetailsRef} className="group relative shrink-0 [grid-row:2] md:order-3 md:[grid-row:auto]">
+        <details ref={priceDetailsRef} className="group relative shrink-0 md:order-3">
           <summary className={cn("flex h-12 min-w-40 cursor-pointer list-none items-center justify-between gap-2 rounded-md border bg-white px-5 text-sm [&::-webkit-details-marker]:hidden", hasPriceRange ? "border-secondary-600" : "border-input")}>
             <span>
               {`$${(filters.priceRange[0] ?? 0).toLocaleString()} to $${filters.priceRange[1] == null ? "10k" : filters.priceRange[1].toLocaleString()}`}
@@ -238,7 +240,7 @@ const FiltersBar = () => {
 
         {/* Stay Type */}
         <Select value={filters.stayType} onValueChange={(value) => handleFilterChange("stayType", value, null)}>
-          <SelectTrigger className={cn("h-12 w-40 shrink-0 rounded-md px-5 [grid-row:2] md:order-4 md:[grid-row:auto]", hasStayType ? "border-secondary-600" : "border-input")}>
+          <SelectTrigger className={cn("h-12 w-40 shrink-0 rounded-md px-5 md:order-4", hasStayType ? "border-secondary-600" : "border-input")}>
             <SelectValue placeholder="Stay Type" />
           </SelectTrigger>
           <SelectContent className="bg-white">
@@ -255,7 +257,7 @@ const FiltersBar = () => {
             handleFilterChange("propertyType", value, null)
           }
         >
-          <SelectTrigger className={cn("h-12 w-40 shrink-0 rounded-md px-5 [grid-row:2] md:order-5 md:[grid-row:auto]", hasPropertyType ? "border-secondary-600" : "border-input")}>
+          <SelectTrigger className={cn("h-12 w-40 shrink-0 rounded-md px-5 md:order-5", hasPropertyType ? "border-secondary-600" : "border-input")}>
             <SelectValue placeholder="Unit Type" />
           </SelectTrigger>
           <SelectContent className="bg-white">
@@ -270,6 +272,7 @@ const FiltersBar = () => {
             ))}
           </SelectContent>
         </Select>
+        </div>
       </div>
 
     </div>

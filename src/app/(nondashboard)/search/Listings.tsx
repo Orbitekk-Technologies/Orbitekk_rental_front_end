@@ -70,7 +70,9 @@ const Listings = () => {
   }
 
   if (result.properties.length === 0) {
-    const searchedPlace = filters.city || filters.location || "this area";
+    const searchedPlace = filters.boundary
+      ? "your custom area"
+      : filters.city || filters.location || "this area";
     const addPropertyHref = user
       ? "/managers/newproperty"
       : "/signin?returnTo=%2Fmanagers%2Fnewproperty";
@@ -106,7 +108,11 @@ const Listings = () => {
       <header className="px-4 pt-4 md:pt-0">
         <p className="text-base font-medium text-secondary-500">{result.totalResults} +</p>
         <h2 className="text-2xl font-semibold tracking-tight text-gray-950">
-          {filters.location ? `Results in ${filters.city || filters.location}` : "Rental Results"}
+          {filters.boundary
+            ? "Results in your custom area"
+            : filters.location
+              ? `Results in ${filters.city || filters.location}`
+              : "Rental Results"}
         </h2>
         {result.matchType !== "ALL" && result.matchType !== "NEARBY" && (
           <p className="mt-1 text-sm text-gray-500">
@@ -137,6 +143,7 @@ const Listings = () => {
 };
 
 const matchDescription = (matchType: string, location: string, city?: string, state?: string) => {
+  if (matchType === "BOUNDARY") return "Only properties inside your drawn boundary are shown";
   if (matchType === "CITY") return `Places in ${city || location}`;
   if (matchType === "STATE") return `No nearby matches — showing places in ${state || location}`;
   if (matchType === "RADIUS_EXPANDED") return `Places in the wider ${location} area`;

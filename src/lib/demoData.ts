@@ -187,10 +187,29 @@ const getCardBrand = (cardNumber: string) => {
   return "Card";
 };
 
+const pointInPolygon = (
+  [longitude, latitude]: [number, number],
+  polygon: [number, number][]
+) => {
+  let inside = false;
+  for (let current = 0, previous = polygon.length - 1; current < polygon.length; previous = current++) {
+    const [currentLongitude, currentLatitude] = polygon[current];
+    const [previousLongitude, previousLatitude] = polygon[previous];
+    const crossesLatitude = currentLatitude > latitude !== previousLatitude > latitude;
+    const intersectionLongitude =
+      ((previousLongitude - currentLongitude) * (latitude - currentLatitude)) /
+        (previousLatitude - currentLatitude) +
+      currentLongitude;
+    if (crossesLatitude && longitude < intersectionLongitude) inside = !inside;
+  }
+  return inside;
+};
+
 export function getDemoApiData(
   url: string,
   method = "GET",
-  body?: unknown
+  body?: unknown,
+  params?: Record<string, unknown>
 ) {
   if (url === "auth/me") return demoAuthUser;
   if (url === "auth/enable-manager" && method === "POST") {
@@ -205,10 +224,18 @@ export function getDemoApiData(
   if (url === "properties" && method === "POST") return demoProperty;
   if (url === "properties") return getMergedDemoProperties();
   if (url === "properties/search") {
-    const properties = getMergedDemoProperties();
+    const boundary = typeof params?.boundary === "string"
+      ? params.boundary.split(";").map((point) => point.split(",").map(Number) as [number, number])
+      : undefined;
+    const properties = getMergedDemoProperties().filter((property) =>
+      !boundary || pointInPolygon(
+        [property.location.coordinates.longitude, property.location.coordinates.latitude],
+        boundary
+      )
+    );
     return {
       properties,
-      matchType: "ALL",
+      matchType: boundary ? "BOUNDARY" : "ALL",
       totalResults: properties.length,
       page: 0,
       size: 20,

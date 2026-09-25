@@ -24,6 +24,26 @@ export type PropertyType =
 export type ApplicationStatus = "Pending" | "Denied" | "Approved";
 export type PaymentStatus = "Pending" | "Paid" | "PartiallyPaid" | "Overdue";
 
+export interface Conversation {
+  id: number;
+  propertyId: number;
+  propertyName: string;
+  otherUserId: string;
+  otherUserName: string;
+  otherUserImage?: string | null;
+  lastMessage?: string | null;
+  lastMessageAt?: string | null;
+  unread: boolean;
+}
+
+export interface ChatMessage {
+  id: number;
+  conversationId: number;
+  senderUserId: string;
+  body: string;
+  createdAt: string;
+}
+
 export interface Coordinates {
   longitude: number;
   latitude: number;
@@ -85,7 +105,7 @@ export interface Property {
 }
 
 export type PropertyMatchType =
-  | "ALL" | "NEARBY" | "CITY" | "RADIUS_EXPANDED" | "STATE" | "NONE";
+  | "ALL" | "NEARBY" | "CITY" | "RADIUS_EXPANDED" | "STATE" | "BOUNDARY" | "NONE";
 
 export interface PropertySearchResult {
   properties: Property[];
